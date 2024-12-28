@@ -8,12 +8,16 @@ use App\Http\Requests\UpdateReceiveRawMaterialRequest;
 use App\Http\Resources\ReceiveRawMaterialResource;
 use App\Models\RawMaterial;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 
 class ReceiveRawMaterialController extends Controller
 {
     public function index(Request $request)
     {
+        // Gate
+        Gate::authorize('viewAny', ReceiveRawMaterial::class);
+
         $query = ReceiveRawMaterial::with(
             'user.roles',
             'rawMaterial.amountType',
@@ -34,6 +38,8 @@ class ReceiveRawMaterialController extends Controller
 
     public function store(StoreReceiveRawMaterialRequest $request)
     {
+        // Gate
+        Gate::authorize('create', ReceiveRawMaterial::class);
 
         $rawMaterial = RawMaterial::findOrFail($request->validated('raw_material_id'));
 
@@ -67,6 +73,9 @@ class ReceiveRawMaterialController extends Controller
 
     public function show(ReceiveRawMaterial $receiveRawMaterial)
     {
+        // Gate
+        Gate::authorize('view', ReceiveRawMaterial::class);
+
         $query = ReceiveRawMaterial::with(
             'user.roles',
             'rawMaterial.amountType',
