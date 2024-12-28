@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'auth', ['middleware' => 'auth:sanctum']], function () {
+Route::middleware('auth:sanctum')->group(function () {
   Route::post('/login', [AuthController::class, 'login'])->name('login');
+  Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
