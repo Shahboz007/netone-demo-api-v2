@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('raw_materials', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount'); // 999 000.00
             $table->timestamps();

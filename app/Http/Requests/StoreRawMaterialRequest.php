@@ -22,9 +22,16 @@ class StoreRawMaterialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:3|max:255',
+            'name' => 'required|string|min:3|max:255|unique:raw_materials,name',
             'amount_type_id' => 'required|numeric|exists:amount_types,id',
             'amount' => 'required|numeric|min:0'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            "name.unique" => "Bu mahsulot allaqachon mavjud!",
         ];
     }
 }
