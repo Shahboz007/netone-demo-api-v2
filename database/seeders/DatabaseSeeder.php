@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AmountTypeSeeder::class,
 
             // Optional
+            RawMaterialSeeder::class,
         ]);
     }
 }
