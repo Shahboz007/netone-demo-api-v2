@@ -21,7 +21,11 @@ class RawMaterialController extends Controller
 
     public function store(StoreRawMaterialRequest $request)
     {
-        //
+        $newData = RawMaterial::create($request->validated());
+
+        return response()->json([
+            'data' => RawMaterialResource::make($newData)
+        ], 201);
     }
 
 
