@@ -6,11 +6,15 @@ use App\Models\RawMaterial;
 use App\Http\Requests\StoreRawMaterialRequest;
 use App\Http\Requests\UpdateRawMaterialRequest;
 use App\Http\Resources\RawMaterialResource;
+use Illuminate\Support\Facades\Gate;
 
 class RawMaterialController extends Controller
 {
     public function index()
     {
+        // Gate
+        Gate::authorize('viewAny', RawMaterial::class);
+
         $data = RawMaterial::with('amountType')->get();
 
         return response()->json([
@@ -21,6 +25,9 @@ class RawMaterialController extends Controller
 
     public function store(StoreRawMaterialRequest $request)
     {
+        // Gate
+        Gate::authorize('create', RawMaterial::class);
+
         $newData = RawMaterial::create($request->validated());
 
         return response()->json([
@@ -32,6 +39,9 @@ class RawMaterialController extends Controller
 
     public function show($id)
     {
+        // Gate
+        Gate::authorize('view', RawMaterial::class);
+
         $data = RawMaterial::with('amountType')->findOrFail($id);
 
         return response()->json([
@@ -42,6 +52,9 @@ class RawMaterialController extends Controller
 
     public function update(UpdateRawMaterialRequest $request, RawMaterial $rawMaterial)
     {
+        // Gate
+        Gate::authorize('update', RawMaterial::class);
+
         if ($request->validated('name')) {
             // Exists
             $isExists = RawMaterial::where('name', $request->validated('name'))
@@ -61,6 +74,9 @@ class RawMaterialController extends Controller
 
     public function destroy(RawMaterial $rawMaterial)
     {
+        // Gate
+        Gate::authorize('delete', RawMaterial::class);
+
         $rawMaterial->delete();
 
         return response()->json([
