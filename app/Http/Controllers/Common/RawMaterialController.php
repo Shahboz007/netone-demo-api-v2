@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Common;
 
+use App\Http\Controllers\Controller;
 use App\Models\RawMaterial;
 use App\Http\Requests\StoreRawMaterialRequest;
 use App\Http\Requests\UpdateRawMaterialRequest;
