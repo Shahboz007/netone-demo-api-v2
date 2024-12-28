@@ -13,6 +13,7 @@ class ReceiveRawMaterial extends Model
 
     protected $fillable = [
         'user_id',
+        'date_received',
         'raw_material_id',
         'amount_type_id',
         'amount',

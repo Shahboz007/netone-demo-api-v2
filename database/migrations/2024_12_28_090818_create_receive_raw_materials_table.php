@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('raw_material_id')->constrained('raw_materials');
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
+            $table->dateTime('date_received');
             $table->timestamps();
         });
     }

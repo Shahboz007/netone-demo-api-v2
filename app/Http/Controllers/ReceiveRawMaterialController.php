@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ReceiveRawMaterial;
+use App\Http\Requests\StoreReceiveRawMaterialRequest;
+use App\Http\Requests\UpdateReceiveRawMaterialRequest;
+use App\Http\Resources\ReceiveRawMaterialResource;
+use App\Models\RawMaterial;
+use Illuminate\Support\Facades\DB;
+
+class ReceiveRawMaterialController extends Controller
+{
+    public function index()
+    {
+        //
+    }
+
+
+    public function store(StoreReceiveRawMaterialRequest $request)
+    {
+
+        $rawMaterial = RawMaterial::findOrFail($request->validated('raw_material_id'));
+
+        DB::beginTransaction();
+        try {
+            // Create
+            $newReceive = ReceiveRawMaterial::create([
+                'user_id' => auth()->id(),
+                'date_received' => $request->validated('date_received'),
+                'raw_material_id' => $request->validated('raw_material_id'),
+                'amount_type_id' => $rawMaterial->amount_type_id,
+                'amount' => $request->validated('amount')
+            ]);
+
+            // Change Stock
+            $rawMaterial->increment('amount', $request->validated('amount'));
+            $rawMaterial->save();
+
+            DB::commit();
+
+            return response()->json([
+                "message" => "Yuk muvaffaqiyatli qabul qilindi!",
+                "data" => ReceiveRawMaterialResource::make($newReceive)
+            ], 201);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            $this->serverError();
+        }
+    }
+
+
+    public function show(ReceiveRawMaterial $receiveRawMaterial)
+    {
+        //
+    }
+
+
+    public function update(UpdateReceiveRawMaterialRequest $request, ReceiveRawMaterial $receiveRawMaterial)
+    {
+        //
+    }
+
+
+    public function destroy(ReceiveRawMaterial $receiveRawMaterial)
+    {
+        //
+    }
+}

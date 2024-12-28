@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class RawMaterialResource extends JsonResource
+class ReceiveRawMaterialResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,12 +15,11 @@ class RawMaterialResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'amount_type' => $this->amountType,
-            'amount' =>  (float) $this->amount,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            "id" => $this->id,
+            "date_received" => $this->date_received,
+            "raw_material" => RawMaterialResource::make($this->rawMaterial),
+            "amount_type" => $this->amountType,
+            "amount" => (float) $this->amount
         ];
     }
 }
