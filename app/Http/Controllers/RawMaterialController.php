@@ -41,7 +41,19 @@ class RawMaterialController extends Controller
 
     public function update(UpdateRawMaterialRequest $request, RawMaterial $rawMaterial)
     {
-        //
+        if ($request->validated('name')) {
+            // Exists
+            $isExists = RawMaterial::where('name', $request->validated('name'))
+                ->where('id', '<>', $rawMaterial->id)->exists();
+
+            if ($isExists) abort(422, 'Bu mahsulot nomi allaqchon mavjud!');
+        }
+
+        $rawMaterial->update($request->validated());
+
+        return response()->json([
+            'data' => RawMaterialResource::make($rawMaterial)
+        ]);
     }
 
 
