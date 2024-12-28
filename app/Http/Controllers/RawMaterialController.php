@@ -24,6 +24,7 @@ class RawMaterialController extends Controller
         $newData = RawMaterial::create($request->validated());
 
         return response()->json([
+            'message' => "Mahsulot muvaffaqiyatli yaratildi",
             'data' => RawMaterialResource::make($newData)
         ], 201);
     }
@@ -52,6 +53,7 @@ class RawMaterialController extends Controller
         $rawMaterial->update($request->validated());
 
         return response()->json([
+            'message' => "Mahsulot muvaffaqiyatli tahrirlandi",
             'data' => RawMaterialResource::make($rawMaterial)
         ]);
     }
@@ -59,6 +61,11 @@ class RawMaterialController extends Controller
 
     public function destroy(RawMaterial $rawMaterial)
     {
-        //
+        $rawMaterial->delete();
+
+        return response()->json([
+            'message' => "Mahsulot muvaffaqiyatli o'chirildi",
+            'data' => RawMaterialResource::make($rawMaterial)
+        ]);
     }
 }
