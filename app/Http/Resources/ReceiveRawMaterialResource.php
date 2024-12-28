@@ -16,6 +16,7 @@ class ReceiveRawMaterialResource extends JsonResource
     {
         return [
             "id" => $this->id,
+            "user" => $this->user,
             "date_received" => $this->date_received,
             "raw_material" => RawMaterialResource::make($this->rawMaterial),
             "amount_type" => $this->amountType,

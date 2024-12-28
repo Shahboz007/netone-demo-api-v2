@@ -8,12 +8,27 @@ use App\Http\Requests\UpdateReceiveRawMaterialRequest;
 use App\Http\Resources\ReceiveRawMaterialResource;
 use App\Models\RawMaterial;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 
 class ReceiveRawMaterialController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = ReceiveRawMaterial::with(
+            'user.roles',
+            'rawMaterial.amountType',
+            'amountType',
+        );
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            "data" => ReceiveRawMaterialResource::collection($data),
+        ]);
     }
 
 
@@ -52,7 +67,22 @@ class ReceiveRawMaterialController extends Controller
 
     public function show(ReceiveRawMaterial $receiveRawMaterial)
     {
-        //
+        $query = ReceiveRawMaterial::with(
+            'user.roles',
+            'rawMaterial.amountType',
+            'amountType',
+        );
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query
+            ->firstOrFail();
+
+        return response()->json([
+            "data" => ReceiveRawMaterialResource::make($data),
+        ]);
     }
 
 
