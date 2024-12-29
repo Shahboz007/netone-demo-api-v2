@@ -65,4 +65,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ReceiveRawMaterial::class, 'user_id');
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
 }
