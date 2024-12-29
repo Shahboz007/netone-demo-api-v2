@@ -9,3 +9,4 @@ require __DIR__ . "/api/common/rawMaterial.php";
 require __DIR__ . "/api/common/receiveRawMaterial.php";
 require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/customer.php";
+require __DIR__ . "/api/common/productStock.php";
