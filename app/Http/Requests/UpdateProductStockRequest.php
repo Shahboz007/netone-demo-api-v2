@@ -22,8 +22,7 @@ class UpdateProductStockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string',
-            'amount' => 'nullable|numeric|min:0'
+            'name' => 'required|string|min:1|max:255',
         ];
     }
 }
