@@ -21,6 +21,7 @@ class OrderResource extends JsonResource
             "product" => ProductResource::make($this->product),
             "amount_type" => $this->amountType,
             "amount" => (float) $this->amount,
+            "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
         ];
