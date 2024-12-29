@@ -12,7 +12,7 @@ class ProductStockController extends Controller
 {
     public function index()
     {
-        $data = ProductStock::with('product', 'amountType')->all();
+        $data = ProductStock::with('product', 'amountType')->get();
 
         return response()->json([
             "data" => ProductStockResource::collection($data),
