@@ -37,12 +37,16 @@ class OrderController extends Controller
     {
         $productStock = ProductStock::where('product_id', $request->validated('product_id'))->firstOr();
 
+        // New Order status
+        // $newOrderStatus = 
+        
         $newOrder = Order::create([
             "user_id" => auth()->id(),
             "customer_id" => $request->validated('customer_id'),
             "product_id" => $request->validated('product_id'),
             "amount_type_id" => $productStock->amount_type_id,
-            "amount" => $request->validated('amount')
+            // "status_id" => 
+            "amount" => $request->validated('amount'),
         ]);
 
         return response()->json([

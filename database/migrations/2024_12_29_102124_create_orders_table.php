@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers');
             $table->foreignId('product_id')->constrained('products');
             $table->foreignId('amount_type_id')->constrained('amount_types');
+            $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('amount');
             $table->timestamps();
         });
