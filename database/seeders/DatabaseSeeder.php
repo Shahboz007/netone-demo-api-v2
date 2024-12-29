@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             AmountTypeSeeder::class,
+            StatusSeeder::class,
 
             // Optional
             RawMaterialSeeder::class,
