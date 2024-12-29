@@ -39,7 +39,7 @@ class OrderController extends Controller
 
         // New Order status
         $newOrderStatus = Status::where('code', 'orderNew')->firstOrFail();
-        
+
         $newOrder = Order::create([
             "user_id" => auth()->id(),
             "customer_id" => $request->validated('customer_id'),
@@ -80,12 +80,15 @@ class OrderController extends Controller
 
     public function update(UpdateOrderRequest $request, Order $order)
     {
-        //
-    }
+        // Check Order Status for New Order
+        $isNew = Status::where('code', 'orderNew')->where('id', $order->status_id)->exists();
+        if (!$isNew) abort(422, "Buyurtmani o'zgartirish mumkin emas! Allaqachon buyurtma ishlab chiqarish jarayonida");
 
+        $order->update($request->validated());
 
-    public function destroy(Order $order)
-    {
-        //
+        return response()->json([
+            "message" => "Buyurtma muvaffaqiyatli tahrirlandi!",
+            "data" => OrderResource::make($order),
+        ]);
     }
 }
