@@ -6,11 +6,15 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
+use Illuminate\Support\Facades\Gate;
 
 class CustomerController extends Controller
 {
     public function index()
     {
+        // Gate
+        Gate::authorize('viewAny', Customer::class);
+
         $data = Customer::all();
 
         return response()->json([
@@ -21,6 +25,9 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
+        // Gate
+        Gate::authorize('create', Customer::class);
+
         $newCustomer = Customer::create($request->validated());
 
         return response()->json([
@@ -32,6 +39,9 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
+        // Gate
+        Gate::authorize('view', Customer::class);
+
         return response()->json([
             "data" => CustomerResource::make($customer),
         ]);
@@ -40,6 +50,9 @@ class CustomerController extends Controller
 
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
+        // Gate
+        Gate::authorize('update', Customer::class);
+
         // Check if Phone and Telegram already exist
         if ($request->validated('phone')) {
             $phoneExists = Customer::where('phone', $request->validated('phone'))->where('id', '<>', $customer->id)->exists();
@@ -61,6 +74,9 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
+        // Gate
+        Gate::authorize('delete', Customer::class);
+        
         $customer->delete();
 
         return response()->json([
