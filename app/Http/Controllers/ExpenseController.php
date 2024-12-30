@@ -40,14 +40,43 @@ class ExpenseController extends Controller
     }
 
 
-    public function update(UpdateExpenseRequest $request, Expense $expense)
+    public function update(UpdateExpenseRequest $request, string $id)
     {
-        //
+        $expense = Expense::with('children')->find($id);
+        if (!$expense) abort(422, 'Bu xarajat turi topilmadi!');
+
+        // validate exist
+        if ($request->validated('name')) {
+            $isExist = Expense::where('name', $request->validated('name'))
+                ->where('id', "<>", $expense->id)->exists();
+            if ($isExist) abort(422, 'Bu xarajat turi mavjud!');
+        }
+
+        // Check Parent And Children
+        if ($request->validated('parent_id')) {
+            $pluckChildren = $expense->children->pluck('name', 'id');
+
+            if ($expense->id === $request->validated('parent_id') || !empty($pluckChildren[$request->validated('parent_id')])) {
+                abort(422, "Ma'lumotni noto'g'ri kiritdingiz!");
+            }
+        }
+
+        $expense->update($request->validated());
+
+        return response()->json([
+            "message" => "Xarajat turi muvaffaqiyatli yangilandi",
+            "data" => ExpenseResource::make($expense),
+        ]);
     }
 
 
     public function destroy(Expense $expense)
     {
-        //
+        $expense->delete();
+
+        return response()->json([
+            "message" => "Xarajat turi o'chirildi",
+            "data" => ExpenseResource::make($expense),
+        ]);
     }
 }
