@@ -15,6 +15,7 @@ class Expense extends Model
         'parent_id',
         'name',
         'amount',
+        'comment'
     ];
 
     public function children(): HasMany

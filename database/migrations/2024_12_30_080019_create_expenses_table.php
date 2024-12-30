@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('parent_id');
-            $table->foreign('parent_id', 'categories')->references('id')->on('categories')->nullOnDelete();
             $table->string('name');
             $table->decimal('amount', 12, 2);
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id', 'expenses')->references('id')->on('expenses')->nullOnDelete();
+            $table->string('comment')->nullable();
             $table->timestamps();
         });
     }
