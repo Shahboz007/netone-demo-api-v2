@@ -11,3 +11,4 @@ require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/customer.php";
 require __DIR__ . "/api/common/productStock.php";
 require __DIR__ . "/api/common/order.php";
+require __DIR__ . "/api/common/orderCancel.php";
