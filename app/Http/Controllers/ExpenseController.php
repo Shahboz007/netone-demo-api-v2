@@ -6,11 +6,15 @@ use App\Models\Expense;
 use App\Http\Requests\StoreExpenseRequest;
 use App\Http\Requests\UpdateExpenseRequest;
 use App\Http\Resources\ExpenseResource;
+use Illuminate\Support\Facades\Gate;
 
 class ExpenseController extends Controller
 {
     public function index()
     {
+        // Gate
+        Gate::authorize('viewAny', Expense::class);
+
         $data = Expense::with('children')->get();
 
         return response()->json([
@@ -21,6 +25,9 @@ class ExpenseController extends Controller
 
     public function store(StoreExpenseRequest $request)
     {
+        // Gate
+        Gate::authorize('create', Expense::class);
+
         $newExpense = Expense::create($request->validated());
 
         return response()->json([
@@ -32,6 +39,9 @@ class ExpenseController extends Controller
 
     public function show(string $id)
     {
+        // Gate
+        Gate::authorize('view', Expense::class);
+
         $data = Expense::with('children')->findOrFail($id);
 
         return response()->json([
@@ -42,6 +52,9 @@ class ExpenseController extends Controller
 
     public function update(UpdateExpenseRequest $request, string $id)
     {
+        // Gate
+        Gate::authorize('update', Expense::class);
+
         $expense = Expense::with('children')->find($id);
         if (!$expense) abort(422, 'Bu xarajat turi topilmadi!');
 
@@ -72,6 +85,9 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
+        // Gate
+        Gate::authorize('delete', Expense::class);
+
         $expense->delete();
 
         return response()->json([
