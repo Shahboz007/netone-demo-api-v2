@@ -10,11 +10,15 @@ use App\Models\Order;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class OrderCancelController extends Controller
 {
     public function index(Request $request)
     {
+        // Gate
+        Gate::authorize('viewAny', OrderCancel::class);
+
         $query = OrderCancel::with(
             'user.roles',
             'order.customer',
@@ -36,6 +40,9 @@ class OrderCancelController extends Controller
 
     public function store(StoreOrderCancelRequest $request)
     {
+        // Gate
+        Gate::authorize('create', OrderCancel::class);
+
         $query = Order::where('id', $request->validated('order_id'));
 
         if (!$request->user()->isAdmin()) {
@@ -79,6 +86,9 @@ class OrderCancelController extends Controller
 
     public function show(Request $request, string $id)
     {
+        // Gate
+        Gate::authorize('view', OrderCancel::class);
+
         $query = OrderCancel::with(
             'user.roles',
             'order.user',
