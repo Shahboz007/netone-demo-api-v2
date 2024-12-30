@@ -4,14 +4,13 @@ namespace App\Policies;
 
 use App\Models\Expense;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ExpensePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(): bool
     {
         return true;
     }
@@ -19,7 +18,7 @@ class ExpensePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Expense $expense): bool
+    public function view(): bool
     {
         return true;
     }
