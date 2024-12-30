@@ -87,10 +87,24 @@ class OrderController extends Controller
     }
 
 
-    public function update(UpdateOrderRequest $request, Order $order)
+    public function update(UpdateOrderRequest $request, string $id)
     {
         // Gate
         Gate::authorize('update', Order::class);
+
+        // Get Order
+        $query = Order::with(
+            'user.roles',
+            'customer',
+            'product',
+            'amountType'
+        );
+
+        if (!$request->user()->isAdmin()) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $order = $query->where('id', $id)->firstOrFail();
 
         // Check Order Status for New Order
         $isNew = Status::where('code', 'orderNew')->where('id', $order->status_id)->exists();
