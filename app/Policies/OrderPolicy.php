@@ -20,7 +20,7 @@ class OrderPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Order $order): bool
+    public function view(User $user): bool
     {
         $accessRoles = $user->roles()->whereIn('id', [1, 3, 4])->get();
         return !$accessRoles->isEmpty();
@@ -38,7 +38,7 @@ class OrderPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Order $order): bool
+    public function update(User $user): bool
     {
         $accessRoles = $user->roles()->whereIn('id', [4])->get();
         return !$accessRoles->isEmpty();
@@ -47,7 +47,7 @@ class OrderPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Order $order): bool
+    public function delete(User $user): bool
     {
         return false;
     }
@@ -55,7 +55,7 @@ class OrderPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Order $order): bool
+    public function restore(User $user): bool
     {
         return false;
     }
@@ -63,7 +63,7 @@ class OrderPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Order $order): bool
+    public function forceDelete(User $user): bool
     {
         return false;
     }
