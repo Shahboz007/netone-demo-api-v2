@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\OrderCancel;
 use App\Http\Requests\StoreOrderCancelRequest;
 use App\Http\Resources\OrderCancelResource;
+use App\Http\Resources\OrderCancelShowResource;
 use App\Models\Order;
 use App\Models\Status;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class OrderCancelController extends Controller
     {
         $query = OrderCancel::with(
             'user.roles',
-            'order.product',
+            'order.customer',
             'order.amountType',
             'order.status'
         );
@@ -35,7 +36,13 @@ class OrderCancelController extends Controller
 
     public function store(StoreOrderCancelRequest $request)
     {
-        $order = Order::findOrFail($request->validated('order_id'));
+        $query = Order::where('id', $request->validated('order_id'));
+
+        if (!$request->user()->isAdmin()) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $order = $query->firstOrFail();
 
         // Check status
         $orderStatus = Status::findOrFail($order->status_id);
@@ -70,9 +77,26 @@ class OrderCancelController extends Controller
     }
 
 
-    public function show(OrderCancel $orderCancel)
+    public function show(Request $request, string $id)
     {
-        //
+        $query = OrderCancel::with(
+            'user.roles',
+            'order.user',
+            'order.customer',
+            'order.product',
+            'order.amountType',
+            'order.status'
+        );
+
+        if (!$request->user()->isAdmin()) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $data = $query->where('id', $id)->firstOrFail();
+
+        return response()->json([
+            'data' => OrderCancelShowResource::make($data)
+        ]);
     }
 
     private function checkOrderStatus(string $code)

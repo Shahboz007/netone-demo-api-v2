@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OrderCancelResource extends JsonResource
+class OrderCancelShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,6 +23,7 @@ class OrderCancelResource extends JsonResource
             "order" => [
                 "id" => $this->order->id,
                 "customer" => CustomerResource::make($this->order->customer),
+                "product" => ProductResource::make($this->order->product),
                 "amount_type" => $this->order->amountType,
                 "amount" => (float) $this->order->amount,
                 "status" => $this->order->status,
