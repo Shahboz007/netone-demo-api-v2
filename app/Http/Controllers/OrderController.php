@@ -9,11 +9,15 @@ use App\Http\Resources\OrderResource;
 use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        // Gate
+        Gate::authorize('viewAny', Order::class);
+
         $query = Order::with(
             'user.roles',
             'customer',
@@ -35,6 +39,9 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request)
     {
+        // Gate
+        Gate::authorize('create', Order::class);
+
         $productStock = ProductStock::where('product_id', $request->validated('product_id'))->firstOr();
 
         // New Order status
@@ -58,6 +65,8 @@ class OrderController extends Controller
 
     public function show(Request $request, string $id)
     {
+        // Gate
+        Gate::authorize('view', Order::class);
 
         $query = Order::with(
             'user.roles',
@@ -80,6 +89,9 @@ class OrderController extends Controller
 
     public function update(UpdateOrderRequest $request, Order $order)
     {
+        // Gate
+        Gate::authorize('update', Order::class);
+
         // Check Order Status for New Order
         $isNew = Status::where('code', 'orderNew')->where('id', $order->status_id)->exists();
         if (!$isNew) abort(422, "Buyurtmani o'zgartirish mumkin emas! Allaqachon buyurtma ishlab chiqarish jarayonida");
