@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function login(AuthLoginRequest $request): JsonResponse
     {
         // User
-        $user = User::where('login', $request->validated('login'))->where('is_active', true)->first();
+        $user = User::with('roles')->where('login', $request->validated('login'))->where('is_active', true)->first();
 
         // Check Is Active
         if (!$user) return response()->json('Login yoki parol xato!', 401);
@@ -25,7 +25,6 @@ class AuthController extends Controller
             return response()->json('Login yoki parol xato!', 401);
         }
         // Delete all old access token for the user
-        $user = Auth::user();
         DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
 
         // Create new Token
@@ -35,6 +34,7 @@ class AuthController extends Controller
         return response()->json([
             "message" => "Xush kelibsiz!",
             "token" => $token,
+            "date" => $user
         ], 200, ['token' => $token]);
     }
 
