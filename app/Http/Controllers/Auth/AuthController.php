@@ -18,11 +18,11 @@ class AuthController extends Controller
         $user = User::with('roles')->where('login', $request->validated('login'))->where('is_active', true)->first();
 
         // Check Is Active
-        if (!$user) return response()->json('Login yoki parol xato!', 401);
+        if (!$user)  abort(401, 'Login yoki parol xato!');
 
         // Check User and Password
         if (!Auth::attempt($request->validated())) {
-            return response()->json('Login yoki parol xato!', 401);
+            abort(401, 'Login yoki parol xato!');
         }
         // Delete all old access token for the user
         DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
