@@ -44,7 +44,7 @@ class ProductStockController extends Controller
         Gate::authorize('view', ProductStock::class);
 
         return response()->json([
-            "data" => ProductStockResource::collection($productStock),
+            "data" => ProductStockResource::make($productStock),
         ]);
     }
 
