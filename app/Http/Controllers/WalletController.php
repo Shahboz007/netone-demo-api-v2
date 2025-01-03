@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Wallet;
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
+use App\Http\Resources\WalletResource;
 use Illuminate\Support\Facades\Gate;
 
 class WalletController extends Controller
@@ -17,7 +18,7 @@ class WalletController extends Controller
         $data = Wallet::all();
 
         return response()->json([
-            "data" => $data,
+            "data" => WalletResource::collection($data),
         ]);
     }
 
@@ -31,7 +32,7 @@ class WalletController extends Controller
 
         return response()->json([
             "message" => "Yangi hisob muvaffaqiyatli qo'shildi",
-            "data" => $newWallet,
+            "data" => WalletResource::make($newWallet),
         ], 201);
     }
 
@@ -42,7 +43,7 @@ class WalletController extends Controller
         Gate::authorize('view', Wallet::class);
 
         return response()->json([
-            "data" => $wallet
+            "data" => WalletResource::make($wallet)
         ]);
     }
 
@@ -63,7 +64,7 @@ class WalletController extends Controller
 
         return response()->json([
             "message" => "Hisob muvaffaqiyatli tahrirlandi",
-            "data" => $wallet,
+            "data" => WalletResource::make($wallet),
         ]);
     }
 
@@ -77,7 +78,7 @@ class WalletController extends Controller
 
         return response()->json([
             "message" => "Hisob muvaffaqiyatli o'chirildi",
-            "data" => $wallet,
+            "data" => WalletResource::make($wallet),
         ]);
     }
 }
