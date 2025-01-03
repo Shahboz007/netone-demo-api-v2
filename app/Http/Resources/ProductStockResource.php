@@ -19,7 +19,9 @@ class ProductStockResource extends JsonResource
             'name' => $this->name,
             'product' => ProductResource::make($this->product),
             'amount_type' => $this->amountType,
-            'amount' => (float) $this->amount
+            'amount' => (float) $this->amount,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }
