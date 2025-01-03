@@ -34,7 +34,7 @@ class AuthController extends Controller
         return response()->json([
             "message" => "Xush kelibsiz!",
             "token" => $token,
-            "date" => $user
+            "data" => $user
         ], 200, ['token' => $token]);
     }
 
