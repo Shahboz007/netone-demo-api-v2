@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             // Optional
             RawMaterialSeeder::class,
             ProductSeeder::class,
-            CustomerSeeder::class,
+            // CustomerSeeder::class,
             ProductStockSeeder::class,
             ExpenseSeeder::class,
             WalletSeeder::class,
