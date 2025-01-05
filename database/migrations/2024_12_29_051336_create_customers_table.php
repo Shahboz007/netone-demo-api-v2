@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('phone')->unique();
-            $table->string('telegram')->unique();
+            $table->string('telegram')->unique()->nullable();
             $table->decimal('balance', 12, 2)->default(0);
             $table->timestamps();
         });
