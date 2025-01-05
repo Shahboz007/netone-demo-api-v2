@@ -28,4 +28,12 @@ class StoreCustomerRequest extends FormRequest
             'telegram' => 'nullable|string|max:255|unique:customers,telegram',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'phone.unique' => 'Bu telefon raqam allaqachon mavjud!',
+            'telegram.unique' => 'Bu telegram ID allaqachon mavjud!'
+        ];
+    }
 }
