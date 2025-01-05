@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCustomerRequest extends FormRequest
 {
@@ -24,8 +25,25 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|numeric|max:15|unique:customers,phone',
-            'telegram' => 'nullable|string|max:255|unique:customers,telegram',
+            'phone' => [
+                'required',
+                'numeric',
+                Rule::unique('customers', 'phone')->ignore($this->customer),
+            ],
+            'telegram' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('customers', 'telegram')->ignore($this->customer),
+            ],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'phone.unique' => 'Bu telefon raqam allaqachon mavjud!',
+            'telegram.unique' => 'Bu telegram ID allaqachon mavjud!'
         ];
     }
 }
