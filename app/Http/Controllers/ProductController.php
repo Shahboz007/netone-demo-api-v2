@@ -15,8 +15,8 @@ class ProductController extends Controller
     {
         // Gate
         Gate::authorize('viewAny', Product::class);
-        
-        $data = Product::all();
+
+        $data = Product::latest()->get();
 
         return response()->json([
             "data" => ProductResource::collection($data),
@@ -42,7 +42,7 @@ class ProductController extends Controller
     {
         // Gate
         Gate::authorize('view', Product::class);
-        
+
         return response()->json([
             "data" => ProductResource::make($product),
         ]);
@@ -53,7 +53,15 @@ class ProductController extends Controller
     {
         // Gate
         Gate::authorize('update', Product::class);
-        
+
+        // Check Exist
+        if ($request->validated('name')) {
+            $nameIsExists = Product::where('name', $request->validated('name'))
+                ->where('id', '<>', $product->id)
+                ->exists();
+            if ($nameIsExists) abort(422, "Bu mahsulot nomi allaqachon mavjud");
+        }
+
         $product->update($request->validated());
 
         return response()->json([
@@ -67,7 +75,7 @@ class ProductController extends Controller
     {
         // Gate
         Gate::authorize('delete', Product::class);
-        
+
         $product->delete();
 
         return response()->json([
