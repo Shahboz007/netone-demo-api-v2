@@ -36,7 +36,7 @@ class ProductStockPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, ProductStock $productStock): bool
+    public function update(User $user): bool
     {
         $accessRoles = $user->roles()->whereIn('id', [1, 3])->get();
         return !$accessRoles->isEmpty();
@@ -45,7 +45,7 @@ class ProductStockPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ProductStock $productStock): bool
+    public function delete(User $user): bool
     {
         return $user->isAdmin();
     }
