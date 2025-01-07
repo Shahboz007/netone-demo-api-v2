@@ -27,4 +27,11 @@ class StoreProductRequest extends FormRequest
             'sale_price' => 'required|numeric|min:0',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.unique' => 'Bu mahsulot nomi allaqachon mavjud',
+        ];
+    }
 }
