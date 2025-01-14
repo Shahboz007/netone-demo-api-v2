@@ -27,7 +27,7 @@ class ProductStockController extends Controller
     public function store(StoreProductStockRequest $request): JsonResponse
     {
         // Gate
-        Gate::authorize('creeate', ProductStock::class);
+        Gate::authorize('create', ProductStock::class);
 
         $newStock = ProductStock::create($request->validated());
 
