@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
         ]);
         $adminRole = Role::where('name', 'admin')->firstOrFail();
         $admin->roles()->attach($adminRole);
-        
+
         $storekeeper = User::create([
             "name" => "Storekeeper",
             "login" => "storekeeper",
@@ -41,15 +41,7 @@ class UserSeeder extends Seeder
         ]);
         $producerRole = Role::where('name', 'producer')->firstOrFail();
         $producer->roles()->attach($producerRole);
-        
-        $orderer = User::create([
-            "name" => "Orderer",
-            "login" => "orderer",
-            "phone" => "998123456786",
-            "password" => Hash::make("secret"),
-        ]);
-
         $ordererRole = Role::where('name', 'orderer')->firstOrFail();
-        $orderer->roles()->attach($ordererRole);
+        $producer->roles()->attach($ordererRole);
     }
 }
