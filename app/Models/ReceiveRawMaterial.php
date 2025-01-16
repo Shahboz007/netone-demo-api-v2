@@ -19,17 +19,22 @@ class ReceiveRawMaterial extends Model
         'amount',
     ];
 
-    public function user():BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function rawMaterial():BelongsTo
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function rawMaterial(): BelongsTo
     {
         return $this->belongsTo(RawMaterial::class, 'raw_material_id');
     }
 
-    public function amountType():BelongsTo
+    public function amountType(): BelongsTo
     {
         return $this->belongsTo(AmountType::class, 'amount_type_id');
     }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('receive_raw_materials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('supplier_id')->constrained('suppliers');
             $table->foreignId('raw_material_id')->constrained('raw_materials');
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
