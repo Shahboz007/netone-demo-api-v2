@@ -22,6 +22,7 @@ class StoreReceiveRawMaterialRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'supplier_id' => 'required|numeric|exists:suppliers,id',
             'date_received' => 'required|date|date_format:Y-m-d H:i:s',
             'raw_material_id' => 'required|numeric|exists:raw_materials,id',
             'amount' => 'required|numeric|min:0',

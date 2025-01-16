@@ -20,6 +20,7 @@ class ReceiveRawMaterialController extends Controller
 
         $query = ReceiveRawMaterial::with(
             'user.roles',
+            'supplier',
             'rawMaterial.amountType',
             'amountType',
         );
@@ -48,6 +49,7 @@ class ReceiveRawMaterialController extends Controller
             // Create
             $newReceive = ReceiveRawMaterial::create([
                 'user_id' => auth()->id(),
+                'supplier_id' => $request->validated('supplier_id'),
                 'date_received' => $request->validated('date_received'),
                 'raw_material_id' => $request->validated('raw_material_id'),
                 'amount_type_id' => $rawMaterial->amount_type_id,
@@ -78,6 +80,7 @@ class ReceiveRawMaterialController extends Controller
 
         $query = ReceiveRawMaterial::with(
             'user.roles',
+            'supplier',
             'rawMaterial.amountType',
             'amountType',
         );
