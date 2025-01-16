@@ -24,15 +24,6 @@ class UserSeeder extends Seeder
         $adminRole = Role::where('name', 'admin')->firstOrFail();
         $admin->roles()->attach($adminRole);
 
-        $storekeeper = User::create([
-            "name" => "Storekeeper",
-            "login" => "storekeeper",
-            "phone" => "998123456788",
-            "password" => Hash::make("secret"),
-        ]);
-        $storekeeperRole = Role::where('name', 'storekeeper')->firstOrFail();
-        $storekeeper->roles()->attach($storekeeperRole);
-
         $producer = User::create([
             "name" => "Producer",
             "login" => "producer",

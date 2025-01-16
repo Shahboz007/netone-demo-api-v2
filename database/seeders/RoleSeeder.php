@@ -14,8 +14,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        // IMPORTANT change the order is forbidden
         Role::create(['name' => 'admin']);
-        Role::create(['name' => 'storekeeper']);
         Role::create(['name' => 'producer']);
         Role::create(['name' => 'orderer']);
     }
