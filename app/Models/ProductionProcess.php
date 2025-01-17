@@ -13,12 +13,16 @@ class ProductionProcess extends Model
 
     protected $fillable = [
         'out_product_id',
-        'name',
         'out_amount'
     ];
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'out_product_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status_id');
     }
 }

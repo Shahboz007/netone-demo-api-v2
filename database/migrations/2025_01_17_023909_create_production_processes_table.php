@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('production_processes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('out_product_id')->constrained('products')->nullOnDelete();
-            $table->text('name');
+            $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('out_amount'); // 999 999.00
             $table->timestamps();
         });
