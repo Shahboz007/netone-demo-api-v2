@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductionRecipeRequest;
 use App\Http\Requests\UpdateProductionRecipeRequest;
+use App\Http\Resources\ProductionRecipeResource;
+use App\Http\Resources\ProductResource;
 use App\Models\ProductionRecipe;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +19,7 @@ class ProductionRecipeController extends Controller
         )->get();
 
         return response()->json([
-            'data' => $data
+            'data' => ProductionRecipeResource::collection($data)
         ]);
     }
 
@@ -41,7 +43,7 @@ class ProductionRecipeController extends Controller
             return response()->json([
                 "message" => "Ishlab chiqarish uchun retsept yaratildi",
                 "data" => $newRecipe
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->serverError();
@@ -49,9 +51,16 @@ class ProductionRecipeController extends Controller
     }
 
 
-    public function show(ProductionRecipe $productionRecipe)
+    public function show(string $id)
     {
-        //
+        $productionRecipe = ProductionRecipe::with(
+            'outProduct',
+            'recipeItems'
+        )->findOrFail($id);
+
+        return response()->json([
+            'data' => ProductionRecipeResource::make($productionRecipe)
+        ]);
     }
 
 
