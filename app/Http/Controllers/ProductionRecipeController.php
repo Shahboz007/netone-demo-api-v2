@@ -16,7 +16,9 @@ class ProductionRecipeController extends Controller
             'recipeItems'
         )->get();
 
-        return $data;
+        return response()->json([
+            'data' => $data
+        ]);
     }
 
 
