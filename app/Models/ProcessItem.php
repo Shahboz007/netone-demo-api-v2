@@ -11,7 +11,7 @@ class ProcessItem extends Model
 
     protected $fillable = [
         'production_process_id',
-        'raw_material_id',
+        'product_id',
         'amount'
     ];
 
@@ -20,8 +20,8 @@ class ProcessItem extends Model
         return $this->belongsTo(ProductionProcess::class, 'production_process_id');
     }
 
-    // public function rawMaterial(): BelongsTo
-    // {
-    //     return $this->belongsTo(RawMaterial::class, 'raw_material_id');
-    // }
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

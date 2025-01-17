@@ -26,7 +26,7 @@ class StoreProductionRecipeRequest extends FormRequest
             'out_product_id' => 'required|integer|exists:products,id',
             'out_amount' => 'required|numeric|min:0.01',
             'items_list' => 'required|array',
-            'items_list.*.raw_material_id' => 'required|integer|exists:raw_materials,id',
+            'items_list.*.product_id' => 'required|integer|exists:products,id',
             'items_list.*.amount' => 'required|numeric|min:0.01',
         ];
     }

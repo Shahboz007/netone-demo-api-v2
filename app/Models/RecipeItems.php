@@ -11,7 +11,7 @@ class RecipeItems extends Model
 
     protected $fillable = [
         'production_recipe_id',
-        'raw_material_id',
+        'product_id',
         'amount',
     ];
 
@@ -20,8 +20,8 @@ class RecipeItems extends Model
         return $this->belongsTo(ProductionRecipe::class, 'production_recipe_id');
     }
 
-    // public function rawMaterial(): BelongsTo
-    // {
-    //     return $this->belongsTo(RawMaterial::class, 'raw_material_id');
-    // }
+    public function rawMaterial(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

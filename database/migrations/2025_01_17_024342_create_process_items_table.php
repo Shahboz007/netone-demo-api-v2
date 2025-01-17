@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('process_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('production_process_id')->constrained('production_processes')->cascadeOnDelete();
-            $table->foreignId('raw_material_id')->constrained('raw_materials');
+            $table->foreignId('product_id')->constrained('products');
             $table->decimal('amount'); // 999 999.00
             $table->timestamps();
         });

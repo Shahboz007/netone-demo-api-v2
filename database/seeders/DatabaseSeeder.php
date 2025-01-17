@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
             StatusSeeder::class,
 
             // Optional
-            RawMaterialSeeder::class,
             ProductSeeder::class,
             // CustomerSeeder::class,
             ProductStockSeeder::class,
