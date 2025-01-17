@@ -8,11 +8,15 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ReceiveProductController extends Controller
 {
     public function index()
     {
+        // Gate
+        Gate::authorize('viewAny', ReceiveProduct::class);
+
         $query = ReceiveProduct::with(
             "user",
             "supplier",
@@ -34,6 +38,9 @@ class ReceiveProductController extends Controller
 
     public function store(StoreReceiveProductRequest $request)
     {
+        // Gate
+        Gate::authorize('create', ReceiveProduct::class);
+
         $productStock = ProductStock::where('product_id', $request->validated('product_id'))
             ->firstOrFail();
 
@@ -67,6 +74,9 @@ class ReceiveProductController extends Controller
 
     public function show($receiveId)
     {
+        // Gate
+        Gate::authorize('view', ReceiveProduct::class);
+
         $query = ReceiveProduct::with(
             "user",
             "supplier",
