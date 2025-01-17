@@ -13,14 +13,22 @@ class ReceiveProductController extends Controller
 {
     public function index()
     {
-        $query = ReceiveProduct::query();
+        $query = ReceiveProduct::with(
+            "user",
+            "supplier",
+            "product",
+            "amountType",
+        );
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
         }
 
         $data = $query->latest()->get();
-        dd($data->toArray());
+
+        return response()->json([
+            'data' => $data,
+        ]);
     }
 
 
@@ -57,9 +65,24 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function show(ReceiveProduct $receiveProduct)
+    public function show($receiveId)
     {
-        //
+        $query = ReceiveProduct::with(
+            "user",
+            "supplier",
+            "product",
+            "amountType",
+        )->where('id', $receiveId);
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->firstOrFail();
+
+        return response()->json([
+            'data' => $data,
+        ], 201);
     }
 
 
