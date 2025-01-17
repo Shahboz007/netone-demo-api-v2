@@ -6,8 +6,6 @@ require __DIR__ . "/api/auth/user.php";
 // Departments
 // Common
 require __DIR__ . "/api/common/amountType.php";
-require __DIR__ . "/api/common/rawMaterial.php";
-require __DIR__ . "/api/common/receiveRawMaterial.php";
 require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/customer.php";
 require __DIR__ . "/api/common/supplier.php";
