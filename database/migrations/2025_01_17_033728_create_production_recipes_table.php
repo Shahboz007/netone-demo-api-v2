@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('production_recipes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('out_product_id')->constrained('products');
-            $table->string('name');
+            $table->string('name')->unique();
             $table->decimal('out_amount'); // 999 999.00
             $table->timestamps();
         });
