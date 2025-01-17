@@ -20,8 +20,8 @@ class ProcessItem extends Model
         return $this->belongsTo(ProductionProcess::class, 'production_process_id');
     }
 
-    public function rawMaterial(): BelongsTo
-    {
-        return $this->belongsTo(RawMaterial::class, 'raw_material_id');
-    }
+    // public function rawMaterial(): BelongsTo
+    // {
+    //     return $this->belongsTo(RawMaterial::class, 'raw_material_id');
+    // }
 }

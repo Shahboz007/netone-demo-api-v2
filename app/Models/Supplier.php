@@ -19,8 +19,8 @@ class Supplier extends Model
         'balance',
     ];
 
-    public function receiveRawMaterials(): HasMany
-    {
-        return $this->hasMany(ReceiveRawMaterial::class, 'supplier_id');
-    }
+    // public function receiveRawMaterials(): HasMany
+    // {
+    //     return $this->hasMany(ReceiveRawMaterial::class, 'supplier_id');
+    // }
 }

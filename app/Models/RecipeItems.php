@@ -20,8 +20,8 @@ class RecipeItems extends Model
         return $this->belongsTo(ProductionRecipe::class, 'production_recipe_id');
     }
 
-    public function rawMaterial(): BelongsTo
-    {
-        return $this->belongsTo(RawMaterial::class, 'raw_material_id');
-    }
+    // public function rawMaterial(): BelongsTo
+    // {
+    //     return $this->belongsTo(RawMaterial::class, 'raw_material_id');
+    // }
 }

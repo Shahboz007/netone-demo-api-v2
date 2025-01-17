@@ -61,10 +61,10 @@ class User extends Authenticatable
         return $this->roles()->where('name', 'admin')->exists();
     }
 
-    public function receiveRawMaterials(): HasMany
-    {
-        return $this->hasMany(ReceiveRawMaterial::class, 'user_id');
-    }
+    // public function receiveRawMaterials(): HasMany
+    // {
+    //     return $this->hasMany(ReceiveRawMaterial::class, 'user_id');
+    // }
 
     public function orders(): HasMany
     {
