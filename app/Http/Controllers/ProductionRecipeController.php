@@ -11,7 +11,12 @@ class ProductionRecipeController extends Controller
 {
     public function index()
     {
-        //
+        $data = ProductionRecipe::with(
+            'outProduct',
+            'recipeItems'
+        )->get();
+
+        return $data;
     }
 
 
@@ -30,6 +35,7 @@ class ProductionRecipeController extends Controller
 
             $newRecipe->recipeItems()->createMany($request->validated('items_list'));
 
+            DB::commit();
             return response()->json([
                 "message" => "Ishlab chiqarish uchun retsept yaratildi",
                 "data" => $newRecipe

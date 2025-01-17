@@ -18,13 +18,13 @@ class ProductionRecipe extends Model
         'out_amount',
     ];
 
-    public function product(): BelongsTo
+    public function outProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'out_product_id');
     }
 
     public function recipeItems(): HasMany
     {
-        return $this->hasMany(RecipeItems::class, 'production_recipe_id');
+        return $this->hasMany(RecipeItems::class, 'production_recipe_id')->with('product');
     }
 }
