@@ -18,5 +18,9 @@ class StatusSeeder extends Seeder
         Status::create(["name" => "Jarayonda", "code" => "orderInProgress"]);
         Status::create(["name" => "Bekor qilindi", "code" => "orderCancel"]);
         Status::create(["name" => "Topshirildi", "code" => "orderCompleted"]);
+        // Production
+        Status::create(['name' => 'Jarayonda', 'code' => 'productionProcess']);
+        Status::create(['name' => 'Bekor qilindi', 'code' => 'productionCancel']);
+        Status::create(['name' => "To'xtatildi", 'code' => 'productionStopped']);
     }
 }
