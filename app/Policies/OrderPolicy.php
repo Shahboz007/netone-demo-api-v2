@@ -13,7 +13,7 @@ class OrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [1, 3, 4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
         return !$accessRoles->isEmpty();
     }
 
@@ -22,7 +22,7 @@ class OrderPolicy
      */
     public function view(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [1, 3, 4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
         return !$accessRoles->isEmpty();
     }
 
