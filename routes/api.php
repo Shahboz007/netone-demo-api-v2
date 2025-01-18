@@ -17,3 +17,4 @@ require __DIR__ . "/api/common/wallet.php";
 
 // Production
 require __DIR__ . "/api/production/recipe.php";
+require __DIR__ . "/api/production/process.php";

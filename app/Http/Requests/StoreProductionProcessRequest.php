@@ -22,8 +22,11 @@ class StoreProductionProcessRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'out_product_id' => 'required|integer|exists:products,id',
-            'out_amount' => 'required|numeric|min:0.01',
+            'production_recipe_id' => 'required|integer|exists:production_recipes,id',
+            'items_list' => 'required|array',
+            'items_list.*.product_id' => 'required|integer|exists:products,id',
+            'items_list.*.amount_type_id' => 'required|integer|exists:amount_types,id',
+            'items_list.*.amount' => 'required|numeric|min:0.01',
         ];
     }
 }
