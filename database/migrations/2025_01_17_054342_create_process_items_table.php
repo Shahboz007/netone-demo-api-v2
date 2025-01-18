@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('production_process_id')->constrained('production_processes')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained('products');
+            $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount'); // 999 999.00
             $table->timestamps();
         });

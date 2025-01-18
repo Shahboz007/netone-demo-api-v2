@@ -12,7 +12,8 @@ class ProcessItem extends Model
     protected $fillable = [
         'production_process_id',
         'product_id',
-        'amount'
+        'amount_type_id',
+        'amount',
     ];
 
     public function productionProcess(): BelongsTo
@@ -23,5 +24,10 @@ class ProcessItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function amountType(): BelongsTo
+    {
+        return $this->belongsTo(AmountType::class, 'amount_type_id');
     }
 }
