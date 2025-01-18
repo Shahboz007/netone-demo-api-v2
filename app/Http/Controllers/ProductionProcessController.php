@@ -46,7 +46,7 @@ class ProductionProcessController extends Controller
             return response()->json([
                 'message' => "Yangi ishlab chiqarish jarayoni qo'shildi",
                 'data' => $newProcess,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->serverError($e);
@@ -68,14 +68,33 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function update(UpdateProductionProcessRequest $request, ProductionProcess $productionProcess)
+    public function cancel(string $id)
     {
-        //
-    }
+        $data = ProductionProcess::with(
+            'productionRecipe',
+            'processItems',
+            'status'
+        )->findOrFail($id);
 
+        // Status productionProcess
+        $statusProductionProcess = Status::where('code', 'productionProcess')
+            ->where('id', $data->status_id)
+            ->exists();
 
-    public function destroy(ProductionProcess $productionProcess)
-    {
-        //
+        if (!$statusProductionProcess) abort(422, "Bu ishlab chiqarish jarayonini bekor qilib bo'lmaydi");
+
+        // Status productionCancel
+        $statusProductionCancel = Status::where('code', 'productionCancel')->firstOrFail();
+
+        $data->status_id = $statusProductionCancel->id;
+
+        $data->save();
+
+        return response()->json([
+            'message' => "#$data->id. Ishlab chiqarish jarayoni bekor qilindi",
+            'data' => [
+                'id' => $data->id,
+            ],
+        ]);
     }
 }
