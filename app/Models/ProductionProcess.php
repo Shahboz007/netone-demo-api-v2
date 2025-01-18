@@ -18,9 +18,9 @@ class ProductionProcess extends Model
         'out_amount'
     ];
 
-    public function product(): BelongsTo
+    public function productionRecipe(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'out_product_id');
+        return $this->belongsTo(ProductionRecipe::class, 'production_recipe_id');
     }
 
     public function processItems(): HasMany

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductionProcessRequest;
 use App\Http\Requests\UpdateProductionProcessRequest;
+use App\Http\Resources\ProductionProcessResource;
 use App\Models\ProductionProcess;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
@@ -13,12 +14,14 @@ class ProductionProcessController extends Controller
     public function index()
     {
         $data = ProductionProcess::with(
-            'product',
-            'processItem',
+            'productionRecipe',
+            'processItems',
             'status'
         )->latest()->get();
 
-        return $data;
+        return response()->json([
+            'data' => ProductionProcessResource::collection($data),
+        ]);
     }
 
 
@@ -51,9 +54,17 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function show(ProductionProcess $productionProcess)
+    public function show(string $id)
     {
-        //
+        $data = ProductionProcess::with(
+            'productionRecipe',
+            'processItems',
+            'status'
+        )->findOrFail($id);
+
+        return response()->json([
+            'data' => ProductionProcessResource::make($data)
+        ]);
     }
 
 
