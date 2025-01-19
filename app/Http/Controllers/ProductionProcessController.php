@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FinishProductionProcessRequest;
 use App\Http\Requests\StoreProductionProcessRequest;
 use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
@@ -64,6 +65,39 @@ class ProductionProcessController extends Controller
 
         return response()->json([
             'data' => ProductionProcessResource::make($data)
+        ]);
+    }
+
+
+    public function finish(FinishProductionProcessRequest $request, string $id)
+    {
+        $productionProcess = ProductionProcess::findOrFail($id);
+
+        // Status productionCompleted
+        $statusCurrent = Status::findOrFail($productionProcess->status_id);
+
+        if ($statusCurrent->code !== 'productionProcess') {
+            if ($statusCurrent->code === 'productionCancel') {
+                abort(422, 'Bu ishlab chiqarish jarayoni allaqachon bekor qilingan');
+            } else if ($statusCurrent->code === 'productionStopped') {
+                abort(422, "Bu ishlab chiqarish jarayoni allaqachon to'xtatilgan");
+            } else if ($statusCurrent->code === 'productionCompleted') {
+                abort(422, "Bu ishlab chiqarish jarayoni allaqachon tayyorlangan");
+            }
+
+            abort(422, "Bu ishlab chiqarish jarayonini tugallab bo'lmaydi");
+        }
+
+        // Status productionCompleted
+        $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
+
+        $productionProcess->status_id = $statusProductionCompleted->id;
+        $productionProcess->out_amount = $request->validated('total_amount');
+
+        $productionProcess->save();
+
+        return response()->json([
+            'message' => "$id. Ishlab chiqarish jarayoni yakunlandi"
         ]);
     }
 
