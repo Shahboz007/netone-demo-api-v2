@@ -47,7 +47,7 @@ class ProductionRecipeController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->serverError();
+            return $this->serverError($e);
         }
     }
 
