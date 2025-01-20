@@ -17,6 +17,7 @@ class ProductionRecipeItemResource extends JsonResource
         return [
             'id' => $this->id,
             'amount' => (float) $this->amount,
+            'amount_type' => $this->amountType,
             'product' => ProductResource::make($this->product),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('production_recipe_id')->constrained('production_recipes');
             $table->foreignId('product_id')->constrained('products');
+            $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
             $table->timestamps();
         });

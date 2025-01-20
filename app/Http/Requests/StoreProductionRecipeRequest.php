@@ -24,6 +24,7 @@ class StoreProductionRecipeRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'out_product_id' => 'required|integer|exists:products,id',
+            'out_amount_type_id' => 'required|integer|exists:amount_types,id',
             'out_amount' => 'required|numeric|min:0.01',
             'items_list' => 'required|array',
             'items_list.*.product_id' => 'required|integer|exists:products,id',

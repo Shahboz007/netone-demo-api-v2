@@ -34,6 +34,7 @@ class ProductionRecipeController extends Controller
             $newRecipe = ProductionRecipe::create([
                 "name" => $request->validated('name'),
                 'out_product_id' => $request->validated('out_product_id'),
+                'out_amount_type_id' => $request->validated('out_amount_type_id'),
                 'out_amount' => $request->validated('out_amount')
             ]);
 
