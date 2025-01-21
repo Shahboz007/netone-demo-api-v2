@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
 use App\Http\Requests\UpdateReceiveProductRequest;
-use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use Illuminate\Support\Facades\DB;
@@ -41,8 +40,13 @@ class ReceiveProductController extends Controller
         // Gate
         Gate::authorize('create', ReceiveProduct::class);
 
+
         $productStock = ProductStock::where('product_id', $request->validated('product_id'))
-            ->firstOrFail();
+            ->first();
+
+        if (!$productStock) {
+            abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+        }
 
         DB::beginTransaction();
 
