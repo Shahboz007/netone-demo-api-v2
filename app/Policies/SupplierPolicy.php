@@ -29,7 +29,8 @@ class SupplierPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
+        return !$accessRoles->isEmpty();
     }
 
     /**

@@ -13,7 +13,7 @@ class OrderCancelPolicy
      */
     public function viewAny(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [1, 3, 4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [1, 2, 3])->get();
         return !$accessRoles->isEmpty();
     }
 
@@ -22,7 +22,7 @@ class OrderCancelPolicy
      */
     public function view(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [1, 3, 4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [1, 2, 3])->get();
         return !$accessRoles->isEmpty();
     }
 
@@ -31,7 +31,7 @@ class OrderCancelPolicy
      */
     public function create(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
         return !$accessRoles->isEmpty();
     }
 

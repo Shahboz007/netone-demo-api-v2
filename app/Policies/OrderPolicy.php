@@ -31,7 +31,7 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
         return !$accessRoles->isEmpty();
     }
 
@@ -40,7 +40,7 @@ class OrderPolicy
      */
     public function update(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [4])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
         return !$accessRoles->isEmpty();
     }
 
