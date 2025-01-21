@@ -24,8 +24,8 @@ class StoreSupplierRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'required|numeric|unique:customers,phone',
-            'telegram' => 'nullable|string|max:255|unique:customers,telegram',
+            'phone' => 'required|numeric|unique:suppliers,phone',
+            'telegram' => 'nullable|string|max:255|unique:suppliers,telegram',
         ];
     }
 

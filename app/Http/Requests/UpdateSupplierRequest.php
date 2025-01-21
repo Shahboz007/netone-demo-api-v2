@@ -28,13 +28,13 @@ class UpdateSupplierRequest extends FormRequest
             'phone' => [
                 'required',
                 'numeric',
-                Rule::unique('customers', 'phone')->ignore($this->customer),
+                Rule::unique('suppliers', 'phone')->ignore($this->customer),
             ],
             'telegram' => [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('customers', 'telegram')->ignore($this->customer),
+                Rule::unique('suppliers', 'telegram')->ignore($this->customer),
             ],
         ];
     }
