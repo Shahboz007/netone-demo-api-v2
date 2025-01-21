@@ -14,10 +14,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'customer_id',
-        'product_id',
-        'amount_type_id',
         'status_id',
-        'amount',
     ];
 
     public function user(): BelongsTo
@@ -30,14 +27,9 @@ class Order extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public function product(): BelongsTo
+    public function orderDetails(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function amountType(): BelongsTo
-    {
-        return $this->belongsTo(AmountType::class, 'amount_type_id');
+        return $this->belongsTo(OrderDetail::class, 'order_id');
     }
 
     public function status(): BelongsTo
