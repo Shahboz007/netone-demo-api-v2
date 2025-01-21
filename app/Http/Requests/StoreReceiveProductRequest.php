@@ -24,7 +24,7 @@ class StoreReceiveProductRequest extends FormRequest
         return [
             'supplier_id' => 'required|integer|exists:suppliers,id',
             'product_id' => 'required|integer|exists:products,id',
-            'date_received' => 'required|date|before_or_equal:now',
+            'date_received' => 'required|string',
             'amount' => 'required|numeric|min:0.01'
         ];
     }
