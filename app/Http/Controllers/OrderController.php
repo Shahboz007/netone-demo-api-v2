@@ -62,7 +62,6 @@ class OrderController extends Controller
 
             return response()->json([
                 "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
-                "data" => $newOrder,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
