@@ -9,6 +9,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
@@ -42,24 +43,31 @@ class OrderController extends Controller
         // Gate
         Gate::authorize('create', Order::class);
 
-        $productStock = ProductStock::where('product_id', $request->validated('product_id'))->firstOr();
-
         // New Order status
         $newOrderStatus = Status::where('code', 'orderNew')->firstOrFail();
 
-        $newOrder = Order::create([
-            "user_id" => auth()->id(),
-            "customer_id" => $request->validated('customer_id'),
-            "product_id" => $request->validated('product_id'),
-            "amount_type_id" => $productStock->amount_type_id,
-            "status_id" => $newOrderStatus->id,
-            "amount" => $request->validated('amount'),
-        ]);
+        DB::beginTransaction();
 
-        return response()->json([
-            "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
-            "data" => OrderResource::make($newOrder),
-        ], 201);
+        try {
+            $newOrder = Order::create([
+                "user_id" => auth()->id(),
+                "customer_id" => $request->validated('customer_id'),
+                "status_id" => $newOrderStatus->id,
+            ]);
+
+
+            $newOrder->orderDetails()->createMany($request->validated('product_list'));
+
+            DB::commit();
+
+            return response()->json([
+                "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
+                "data" => $newOrder,
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->serverError($e);
+        }
     }
 
 
