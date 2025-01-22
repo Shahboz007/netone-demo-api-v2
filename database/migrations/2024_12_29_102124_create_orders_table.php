@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('customer_id')->constrained('customers');
             $table->foreignId('status_id')->constrained('statuses');
+            $table->decimal('total_price');
             $table->timestamps();
         });
     }

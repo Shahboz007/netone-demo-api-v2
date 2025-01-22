@@ -53,8 +53,15 @@ class OrderController extends Controller
                 "user_id" => auth()->id(),
                 "customer_id" => $request->validated('customer_id'),
                 "status_id" => $newOrderStatus->id,
+                'total_price' => 0
             ]);
 
+
+            // $totalPrice = 0;
+
+            // foreach($request->validated('product_list') as $product){
+
+            // }
 
             $newOrder->orderDetails()->createMany($request->validated('product_list'));
 
