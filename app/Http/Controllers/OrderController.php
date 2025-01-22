@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderShowResource;
+use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\Request;
@@ -46,6 +47,14 @@ class OrderController extends Controller
         // New Order status
         $newOrderStatus = Status::where('code', 'orderNew')->firstOrFail();
 
+        // Get Request Products
+        $productsId = array_column($request->validated('product_list'), 'product_id');
+        $products = Product::whereIn('id', $productsId)
+            ->get();
+
+        $pluckedCostPrice = $products->pluck('cost_price', 'id');
+        $pluckedSalePrice = $products->pluck('sale_price', 'id');
+
         DB::beginTransaction();
 
         try {
@@ -53,17 +62,29 @@ class OrderController extends Controller
                 "user_id" => auth()->id(),
                 "customer_id" => $request->validated('customer_id'),
                 "status_id" => $newOrderStatus->id,
-                'total_price' => 0
+                'total_cost_price' => 0,
+                'total_sale_price' => 0
             ]);
 
 
-            // $totalPrice = 0;
+            $totalCostPrice = 0;
+            $totalSalePrice = 0;
 
-            // foreach($request->validated('product_list') as $product){
-
-            // }
+            foreach ($request->validated('product_list') as $product) {
+                if ($product['amount_type_id'] === 1) {
+                    $totalCostPrice += $pluckedCostPrice[$product['product_id']] * $product['amount'];
+                    $totalSalePrice += $pluckedSalePrice[$product['product_id']] * $product['amount'];
+                } else {
+                    abort(422, 'Kechirasiz, siz faqat qopda sota olasiz!');
+                }
+            }
 
             $newOrder->orderDetails()->createMany($request->validated('product_list'));
+
+            $newOrder->total_cost_price = $totalCostPrice;
+            $newOrder->total_sale_price = $totalSalePrice;
+
+            $newOrder->save();
 
             DB::commit();
 
