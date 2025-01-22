@@ -13,6 +13,7 @@ class OrderDetail extends Model
         'order_id',
         'product_id',
         'amount_type_id',
+        'completed_amount',
         'amount',
     ];
 
