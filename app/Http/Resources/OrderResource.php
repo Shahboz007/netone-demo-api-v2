@@ -18,6 +18,8 @@ class OrderResource extends JsonResource
             "id" => $this->id,
             "user" => $this->user,
             "customer" => CustomerResource::make($this->customer),
+            "total_sale_price" => (float) $this->total_sale_price,
+            "total_cost_price" => auth()->user()->isAdmin() ? (float) $this->total_cost_price : 0,
             "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
