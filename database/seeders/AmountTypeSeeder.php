@@ -13,6 +13,7 @@ class AmountTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        AmountType::create(['name' => 'kg']);
         AmountType::create(['name' => 'qop']);
         AmountType::create(['name' => 'tonna']);
     }
