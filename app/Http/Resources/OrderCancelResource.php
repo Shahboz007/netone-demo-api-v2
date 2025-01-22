@@ -23,8 +23,6 @@ class OrderCancelResource extends JsonResource
             "order" => [
                 "id" => $this->order->id,
                 "customer" => CustomerResource::make($this->order->customer),
-                "amount_type" => $this->order->amountType,
-                "amount" => (float) $this->order->amount,
                 "status" => $this->order->status,
                 "updated_at" => $this->order->updated_at,
                 "created_at" => $this->order->created_at,

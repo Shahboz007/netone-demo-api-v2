@@ -20,9 +20,8 @@ class OrderCancelController extends Controller
         Gate::authorize('viewAny', OrderCancel::class);
 
         $query = OrderCancel::with(
-            'user.roles',
+            'user',
             'order.customer',
-            'order.amountType',
             'order.status'
         );
 
@@ -55,7 +54,7 @@ class OrderCancelController extends Controller
         $orderStatus = Status::findOrFail($order->status_id);
         $this->checkOrderStatus($orderStatus->code);
 
-        // Cancel Status of Order 
+        // Cancel Status of Order
         $orderCancelStatus = Status::where('code', 'orderCancel')->firstOrFail();
 
         DB::beginTransaction();
@@ -90,11 +89,10 @@ class OrderCancelController extends Controller
         Gate::authorize('view', OrderCancel::class);
 
         $query = OrderCancel::with(
-            'user.roles',
+            'user',
             'order.user',
             'order.customer',
-            'order.product',
-            'order.amountType',
+            'order.orderDetails',
             'order.status'
         );
 
