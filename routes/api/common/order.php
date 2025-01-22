@@ -3,4 +3,8 @@
 use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
-Route::apiResource('orders', OrderController::class)->middleware('auth:sanctum');
+Route::group(['prefix' => 'orders', 'middleware' => ['auth:sanctum']], function () {
+    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/', [OrderController::class, 'store']);
+    Route::get('/{id}', [OrderController::class, 'show']);
+});

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\OrderShowResource;
 use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\Request;
@@ -20,10 +21,9 @@ class OrderController extends Controller
         Gate::authorize('viewAny', Order::class);
 
         $query = Order::with(
-            'user.roles',
+            'user',
             'customer',
-            'product',
-            'amountType'
+            'status'
         );
 
         if (!$request->user()->isAdmin()) {
@@ -76,52 +76,20 @@ class OrderController extends Controller
         Gate::authorize('view', Order::class);
 
         $query = Order::with(
-            'user.roles',
+            'user',
             'customer',
-            'product',
-            'amountType'
+            'status',
+            'orderDetails'
         );
 
         if (!$request->user()->isAdmin()) {
             $query->where('user_id', $request->user()->id);
         }
 
-        $data = $query->get();
+        $data = $query->firstOrFail();
 
         return response()->json([
-            'data' => OrderResource::collection($data)
-        ]);
-    }
-
-
-    public function update(UpdateOrderRequest $request, string $id)
-    {
-        // Gate
-        Gate::authorize('update', Order::class);
-
-        // Get Order
-        $query = Order::with(
-            'user.roles',
-            'customer',
-            'product',
-            'amountType'
-        );
-
-        if (!$request->user()->isAdmin()) {
-            $query->where('user_id', $request->user()->id);
-        }
-
-        $order = $query->where('id', $id)->firstOrFail();
-
-        // Check Order Status for New Order
-        $isNew = Status::where('code', 'orderNew')->where('id', $order->status_id)->exists();
-        if (!$isNew) abort(422, "Buyurtmani o'zgartirish mumkin emas! Allaqachon buyurtma ishlab chiqarish jarayonida");
-
-        $order->update($request->validated());
-
-        return response()->json([
-            "message" => "Buyurtma muvaffaqiyatli tahrirlandi!",
-            "data" => OrderResource::make($order),
+            'data' => OrderShowResource::make($data)
         ]);
     }
 }
