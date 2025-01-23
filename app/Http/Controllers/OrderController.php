@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderShowResource;
 use App\Models\Product;
-use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +24,22 @@ class OrderController extends Controller
             'customer',
             'status'
         );
+
+        // Status
+        $allowedStatuses = [
+            'orderNew',
+            'orderInProgress',
+            'orderCancel',
+            'orderCompleted',
+        ];
+        $validated = $request->validate([
+            'status' => ['nullable', 'string', 'in:' . implode(',', $allowedStatuses)],
+        ]);
+
+        if (!empty($validated)) {
+            $status = Status::where('code', $validated['status'])->firstOrFail();
+            $query->where('status_id', $status->id);
+        }
 
         if (!$request->user()->isAdmin()) {
             $query->where('user_id', $request->user()->id);
