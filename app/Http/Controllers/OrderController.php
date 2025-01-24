@@ -12,13 +12,14 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Status;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', Order::class);
@@ -46,7 +47,7 @@ class OrderController extends Controller
 
             // Submitted
             if ($validated['status'] === 'orderSubmitted') {
-                $query->with('submittedOrder');
+                $query->with('completedOrder');
             } else if ($validated['status'] === 'orderCancel') {
                 $query->with('cancelOrder');
             }
@@ -127,7 +128,7 @@ class OrderController extends Controller
     }
 
 
-    public function show(Request $request, string $id)
+    public function show(Request $request, string $id): JsonResponse
     {
         // Gate
         Gate::authorize('view', Order::class);
@@ -138,7 +139,7 @@ class OrderController extends Controller
             'status',
             'orderDetails',
             'cancelOrder',
-            'submittedOrder'
+            'completedOrder'
         )->where('id', $id);
 
         if (!$request->user()->isAdmin()) {
@@ -152,7 +153,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function confirm(string $id)
+    public function confirm(string $id): JsonResponse
     {
         $order = Order::findOrFail($id);
 
@@ -172,7 +173,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function completed(UpdateOrderCompletedRequest $request, string $id)
+    public function completed(UpdateOrderCompletedRequest $request, string $id): JsonResponse
     {
 
         $order = Order::with('orderDetails')->findOrFail($id);
@@ -262,7 +263,7 @@ class OrderController extends Controller
         }
     }
 
-    public function submitted(UpdateOrderSubmittedRequest $request, string $id)
+    public function submitted(UpdateOrderSubmittedRequest $request, string $id): JsonResponse
     {
         $order = Order::with('orderDetails')->findOrFail($id);
 

@@ -20,7 +20,7 @@ class OrderResource extends JsonResource
             "customer" => CustomerResource::make($this->customer),
             "total_cost_price" => auth()->user()->isAdmin() ? (float) $this->total_cost_price : 0,
             "total_sale_price" => (float) $this->total_sale_price,
-            "submitted_data" => OrderSubmittedResource::make($this->submittedOrder),
+            "completed_data" => OrderSubmittedResource::make($this->completedOrder),
             "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
