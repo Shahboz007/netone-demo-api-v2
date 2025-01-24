@@ -59,7 +59,7 @@ class OrderController extends Controller
             $query->where('user_id', $request->user()->id);
         }
 
-        $data = $query->get();
+        $data = $query->orderByDesc('created_at')->get();
 
         return response()->json([
             'data' => OrderResource::collection($data)
