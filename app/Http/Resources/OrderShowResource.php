@@ -21,7 +21,7 @@ class OrderShowResource extends JsonResource
             "order_details" => OrderDetailResource::collection($this->orderDetails),
             "total_sale_price" => (float) $this->total_sale_price,
             "total_cost_price" => auth()->user()->isAdmin() ? (float) $this->total_cost_price : 0,
-            "submitted_data" => OrderSubmittedResource::make($this->submittedOrder),
+            "completed_data" => OrderSubmittedResource::make($this->completedOrder),
             "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
