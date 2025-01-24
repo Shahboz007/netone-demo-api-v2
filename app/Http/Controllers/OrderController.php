@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompletedOrder;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderCompletedRequest;
@@ -47,7 +48,7 @@ class OrderController extends Controller
             // Submitted
             if ($validated['status'] === 'orderSubmitted') {
                 $query->with('submittedOrder');
-            }else if($validated['status'] === 'orderCancel') {
+            } else if ($validated['status'] === 'orderCancel') {
                 $query->with('cancelOrder');
             }
 
@@ -98,6 +99,7 @@ class OrderController extends Controller
             $totalSalePrice = 0;
 
             foreach ($request->validated('product_list') as $product) {
+                // Qop
                 if ($product['amount_type_id'] === 2) {
                     $totalCostPrice += $pluckedCostPrice[$product['product_id']] * $product['amount'];
                     $totalSalePrice += $pluckedSalePrice[$product['product_id']] * $product['amount'];
@@ -138,7 +140,7 @@ class OrderController extends Controller
             'orderDetails',
             'cancelOrder',
             'submittedOrder'
-        );
+        )->where('id', $id);
 
         if (!$request->user()->isAdmin()) {
             $query->where('user_id', $request->user()->id);
@@ -170,16 +172,19 @@ class OrderController extends Controller
             ]
         ]);
     }
+
     public function completed(UpdateOrderCompletedRequest $request, string $id)
     {
 
         $order = Order::with('orderDetails')->findOrFail($id);
 
-        // Status Code
-        $statusCode = 'orderCompleted';
-        $StatusCompleted = Status::where('code', $statusCode)->firstOrFail();
+        // Validation Order Status
+        $allowedCodes = ['orderNew', 'orderInProgress'];
+        $allowedStatuses = Status::whereIn('code', $allowedCodes)->get();
+        if (empty($allowedStatuses)) abort(500, "Ichki xatolik yuz berdi, iltimos biz bilan bog'laning!");
+        if (!$allowedStatuses->contains('id', $order->status_id)) abort(422, "Bu buyurtmani tayyorlandi holatiga o'tkazish mumkin emas!");
 
-        //******* Validation Order Detials Item *******//
+        //*******--start-- Validation Order Detials Item *******//
         $updates = collect($request->validated('product_list'))
             ->pluck('completed_amount', 'product_id');
 
@@ -196,27 +201,59 @@ class OrderController extends Controller
                 abort(422, "Siz tayyorlangan mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
             }
         }
+        //*******--end-- Validation Order Details Item *******//
+
+        // Status Code
+        $statusCode = 'orderCompleted';
+        $statusCompleted = Status::where('code', $statusCode)->firstOrFail();
 
         DB::beginTransaction();
 
         try {
+            // Create New Completed Order
+            $newCompletedOrder = CompletedOrder::create([
+                'user_id' => auth()->id(),
+                'order_id' => $order->id,
+                'comment' => $request->validated('comment'),
+                'total_cost_price' => 0,
+                'total_sale_price' => 0,
+            ]);
+
+            $totalCostPrice = 0;
+            $totalSalePrice = 0;
 
             // Add Order Details completed amounts
             foreach ($order->orderDetails as $detail) {
                 if ($updates->has($detail->product_id)) {
-                    $detail->update(['completed_amount' => $updates->get($detail->product_id)]);
+                    $completedAmount = $updates->get($detail->product_id);
+
+                    // Calc Total Prices
+                    if ($detail->amount_type_id === 2) {// Qop
+                        $totalCostPrice += $detail->completed_amount * $detail->product->cost_price;
+                        $totalSalePrice += $detail->completed_amount * $detail->product->sale_price;
+                    } else {
+                        abort(422, "Buyurtmani tayyor holatga o'tkazish uchun, buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
+                    }
+
+                    // Update Order details item
+                    $detail->update(['completed_amount' => $completedAmount]);
                 }
             }
 
+            // Change Total Price Of Completed Order
+            $newCompletedOrder->total_cost_price = $totalCostPrice;
+            $newCompletedOrder->total_sale_price = $totalSalePrice;
+            $newCompletedOrder->save();
+
             // Change Order Status
-            $order->status_id = $StatusCompleted->id;
+            $order->status_id = $statusCompleted->id;
             $order->save();
 
             DB::commit();
             return response()->json([
                 'message' => "Buyurtma topshirishga tayyor, hozirgi holati tayyorlandi",
                 'data' => [
-                    'status' => $StatusCompleted
+                    'status' => $statusCompleted
                 ]
             ]);
         } catch (\Exception $e) {
@@ -236,54 +273,34 @@ class OrderController extends Controller
         }
 
         // Status Code
-        $StatusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
+        $statusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
 
         // Customer
         $customer = Customer::findOrFail($order->customer_id);
 
+        // Completed Order
+        // $order->
+
         DB::beginTransaction();
 
         try {
-            // Create New Submitted Order
-            $newSubmittedOrder = SubmittedOrder::create([
-                'user_id' => auth()->id(),
-                'order_id' => $order->id,
-                'comment' => $request->validated('comment'),
-                'total_cost_price' => 0,
-                'total_sale_price' => 0,
-            ]);
-
-            $totalCostPrice = 0;
-            $totalSalePrice = 0;
-
-            foreach ($order->orderDetails as $detail) {
-                // Qop
-                if ($detail->amount_type_id === 2) {
-                    $totalCostPrice += $detail->completed_amount * $detail->product->cost_price;
-                    $totalSalePrice += $detail->completed_amount * $detail->product->sale_price;
-                } else {
-                    abort(422, "Buyurtmani topshirish uchun buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
-                }
-            }
-
-            // Change Total Price
-            $newSubmittedOrder->total_cost_price = $totalCostPrice;
-            $newSubmittedOrder->total_sale_price = $totalSalePrice;
-            $newSubmittedOrder->save();
 
             // Order
-            $order->status_id = $StatusSubmitted->id;
+            $order->status_id = $statusSubmitted->id;
             $order->save();
 
+            // Completed Order
+
+
             // Customer
-            $customer->balance -= $totalSalePrice;
-            $customer->save();
+            // $customer->balance -= $totalSalePrice;
+            // $customer->save();
 
             DB::commit();
             return response()->json([
                 'message' => "Buyurtma muvaffaqiyatli topshirildi",
                 'data' => [
-                    'status' => $StatusSubmitted
+                    'status' => $statusSubmitted
                 ]
             ]);
         } catch (\Exception $e) {

@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SubmittedOrder extends Model
+class CompletedOrder extends Model
 {
     protected $fillable = [
         'user_id',
         'order_id',
         'total_cost_price',
         'total_sale_price',
+        'submitted_comment',
         'comment',
     ];
 
