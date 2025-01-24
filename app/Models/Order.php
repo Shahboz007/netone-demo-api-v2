@@ -10,9 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrderFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'customer_id',
