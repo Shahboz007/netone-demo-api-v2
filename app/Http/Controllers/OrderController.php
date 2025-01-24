@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateOrderCompletedRequest;
 use App\Http\Requests\UpdateOrderSubmittedRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderShowResource;
-use App\Models\AmountType;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Status;
@@ -44,6 +43,14 @@ class OrderController extends Controller
 
         if (!empty($validated)) {
             $status = Status::where('code', $validated['status'])->firstOrFail();
+
+            // Submitted
+            if ($validated['status'] === 'orderSubmitted') {
+                $query->with('submittedOrder');
+            }else if($validated['status'] === 'orderCancel') {
+                $query->with('cancelOrder');
+            }
+
             $query->where('status_id', $status->id);
         }
 
@@ -128,7 +135,9 @@ class OrderController extends Controller
             'user',
             'customer',
             'status',
-            'orderDetails'
+            'orderDetails',
+            'cancelOrder',
+            'submittedOrder'
         );
 
         if (!$request->user()->isAdmin()) {

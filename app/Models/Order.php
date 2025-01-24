@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
@@ -38,5 +39,15 @@ class Order extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class, 'status_id');
+    }
+
+    public function cancelOrder(): HasOne
+    {
+        return $this->hasOne(OrderCancel::class, 'order_id');
+    }
+
+    public function submittedOrder(): HasOne
+    {
+        return $this->hasOne(SubmittedOrder::class, 'order_id');
     }
 }
