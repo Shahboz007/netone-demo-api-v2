@@ -46,8 +46,8 @@ class Order extends Model
         return $this->hasOne(OrderCancel::class, 'order_id');
     }
 
-    public function submittedOrder(): HasOne
+    public function completedOrder(): HasOne
     {
-        return $this->hasOne(SubmittedOrder::class, 'order_id');
+        return $this->hasOne(CompletedOrder::class, 'order_id');
     }
 }

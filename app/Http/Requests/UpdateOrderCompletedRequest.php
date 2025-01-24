@@ -25,6 +25,7 @@ class UpdateOrderCompletedRequest extends FormRequest
             'product_list' => 'required|array',
             'product_list.*.product_id' => 'required|integer|exists:products,id',
             'product_list.*.completed_amount' => 'required|numeric|min:0',
+            'comment' => 'nullable|string|min:6|max:255',
         ];
     }
 }

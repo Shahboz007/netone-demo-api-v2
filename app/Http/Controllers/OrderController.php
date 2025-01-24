@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CompletedOrder;
-use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderCompletedRequest;
 use App\Http\Requests\UpdateOrderSubmittedRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderShowResource;
+use App\Models\CompletedOrder;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Status;
 use App\Models\SubmittedOrder;
@@ -214,6 +214,7 @@ class OrderController extends Controller
             $newCompletedOrder = CompletedOrder::create([
                 'user_id' => auth()->id(),
                 'order_id' => $order->id,
+                'status_id' => $statusCompleted->id,
                 'comment' => $request->validated('comment'),
                 'total_cost_price' => 0,
                 'total_sale_price' => 0,
@@ -229,8 +230,8 @@ class OrderController extends Controller
 
                     // Calc Total Prices
                     if ($detail->amount_type_id === 2) {// Qop
-                        $totalCostPrice += $detail->completed_amount * $detail->product->cost_price;
-                        $totalSalePrice += $detail->completed_amount * $detail->product->sale_price;
+                        $totalCostPrice += $completedAmount * $detail->product->cost_price;
+                        $totalSalePrice += $completedAmount * $detail->product->sale_price;
                     } else {
                         abort(422, "Buyurtmani tayyor holatga o'tkazish uchun, buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
                     }
@@ -279,7 +280,7 @@ class OrderController extends Controller
         $customer = Customer::findOrFail($order->customer_id);
 
         // Completed Order
-        // $order->
+        $completedOrder = CompletedOrder::where('order_id', $order->id)->firstOrFail();
 
         DB::beginTransaction();
 
@@ -290,15 +291,18 @@ class OrderController extends Controller
             $order->save();
 
             // Completed Order
+            $completedOrder->submitted_comment = $request->validated('comment');
+            $completedOrder->status_id = $statusSubmitted->id;
+            $completedOrder->save();
 
 
             // Customer
-            // $customer->balance -= $totalSalePrice;
-            // $customer->save();
+            $customer->balance -= $completedOrder->total_sale_price;
+            $customer->save();
 
             DB::commit();
             return response()->json([
-                'message' => "Buyurtma muvaffaqiyatli topshirildi",
+                'message' => "Buyurtma muvaffaqiyatli topshirildi! Mijoz balansini tekshiring",
                 'data' => [
                     'status' => $statusSubmitted
                 ]

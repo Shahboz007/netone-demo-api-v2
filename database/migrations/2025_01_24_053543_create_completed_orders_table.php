@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('order_id')->constrained('orders');
+            $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('total_cost_price', 12, 2);
             $table->decimal('total_sale_price', 12, 2);
             $table->string('comment')->nullable();

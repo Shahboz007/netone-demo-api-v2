@@ -22,7 +22,7 @@ class UpdateOrderSubmittedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'nullable|min:6|max:255',
+            'comment' => 'nullable|string|min:6|max:255',
         ];
     }
 }
