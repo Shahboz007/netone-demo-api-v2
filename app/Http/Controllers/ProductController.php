@@ -29,7 +29,11 @@ class ProductController extends Controller
         // Gate
         Gate::authorize('create', Product::class);
 
-        $newProduct = Product::create($request->validated());
+        $newProduct = Product::create([
+            'name' => $request->validated('name'),
+            'cost_price' => 0,
+            'sale_price' => $request->validated('sale_price'),
+        ]);
 
         return response()->json([
             "message" => "Yangi mahsulot muvaffaqiyatli qo'shildi!",
@@ -38,7 +42,7 @@ class ProductController extends Controller
     }
 
 
-    public function show(Product $product)
+    public function show(Product $product):JsonResponse
     {
         // Gate
         Gate::authorize('view', Product::class);
@@ -49,7 +53,7 @@ class ProductController extends Controller
     }
 
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product):JsonResponse
     {
         // Gate
         Gate::authorize('update', Product::class);
@@ -62,7 +66,10 @@ class ProductController extends Controller
             if ($nameIsExists) abort(422, "Bu mahsulot nomi allaqachon mavjud");
         }
 
-        $product->update($request->validated());
+        $product->update([
+            'name' => $request->validated('name'),
+            'sale_price' => $request->validated('sale_price'),
+        ]);
 
         return response()->json([
             "message" => "Mahsulot muvaffaqiyatli tahrirlandi!",
@@ -71,7 +78,7 @@ class ProductController extends Controller
     }
 
 
-    public function destroy(Product $product)
+    public function destroy(Product $product):JsonResponse
     {
         // Gate
         Gate::authorize('delete', Product::class);

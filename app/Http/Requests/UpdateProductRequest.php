@@ -23,7 +23,6 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string|max:255',
-            'cost_price' => 'nullable|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
         ];
     }
