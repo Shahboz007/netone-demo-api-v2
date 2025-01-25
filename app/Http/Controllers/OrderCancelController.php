@@ -107,7 +107,7 @@ class OrderCancelController extends Controller
         ]);
     }
 
-    private function checkOrderStatus(string $code)
+    private function checkOrderStatus(string $code): void
     {
         if ($code !== 'orderNew') {
             switch ($code) {
