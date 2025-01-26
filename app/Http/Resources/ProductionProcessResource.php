@@ -20,6 +20,8 @@ class ProductionProcessResource extends JsonResource
                 'id' => $this->productionRecipe->id,
                 'name' => $this->productionRecipe->name,
                 'out_amount' => (float) $this->productionRecipe->out_amount,
+                'out_amount_type' => $this->productionRecipe->outAmountType,
+                'out_product' => ProductResource::make($this->productionRecipe->outProduct),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ],

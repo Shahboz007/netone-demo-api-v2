@@ -8,11 +8,12 @@ use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
 use App\Models\ProductionProcess;
 use App\Models\Status;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class ProductionProcessController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $data = ProductionProcess::with(
             'productionRecipe',
@@ -55,7 +56,7 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $data = ProductionProcess::with(
             'productionRecipe',
@@ -69,7 +70,7 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function finish(FinishProductionProcessRequest $request, string $id)
+    public function finish(FinishProductionProcessRequest $request, string $id): JsonResponse
     {
         $productionProcess = ProductionProcess::findOrFail($id);
 
@@ -102,7 +103,7 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function cancel(string $id)
+    public function cancel(string $id): JsonResponse
     {
         $data = ProductionProcess::with(
             'productionRecipe',
