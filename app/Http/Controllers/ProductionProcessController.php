@@ -6,6 +6,7 @@ use App\Http\Requests\FinishProductionProcessRequest;
 use App\Http\Requests\StoreProductionProcessRequest;
 use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
+use App\Http\Resources\ProductionProcessShowResource;
 use App\Models\ProductionProcess;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
@@ -59,13 +60,13 @@ class ProductionProcessController extends Controller
     public function show(string $id): JsonResponse
     {
         $data = ProductionProcess::with(
-            'productionRecipe',
+            'productionRecipe.recipeItems',
             'processItems',
             'status'
         )->findOrFail($id);
 
         return response()->json([
-            'data' => ProductionProcessResource::make($data)
+            'data' => ProductionProcessShowResource::make($data)
         ]);
     }
 
