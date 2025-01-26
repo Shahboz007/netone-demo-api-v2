@@ -26,6 +26,7 @@ class ProductionProcessResource extends JsonResource
                 'updated_at' => $this->updated_at,
             ],
             'process_items' => ProductionProcessItemResource::collection($this->processItems),
+            'out_amount' => (float) $this->out_amount,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
