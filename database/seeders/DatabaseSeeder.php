@@ -21,11 +21,11 @@ class DatabaseSeeder extends Seeder
             AmountSettingsSeeder::class,
 
             // Optional
-            ProductSeeder::class,
+            // ProductSeeder::class,
             // CustomerSeeder::class,
-            ProductStockSeeder::class,
-            ExpenseSeeder::class,
-            WalletSeeder::class,
+            // ProductStockSeeder::class,
+            // ExpenseSeeder::class,
+            // WalletSeeder::class,
         ]);
     }
 }
