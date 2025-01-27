@@ -31,7 +31,7 @@ class SupplierController extends Controller
         $newCustomer = Supplier::create($request->validated());
 
         return response()->json([
-            'message' => "Yangi mijoz muvaffaqiyatli qo'shildi!",
+            'message' => "Yangi taminotchi muvaffaqiyatli qo'shildi!",
             'data' => SupplierResource::make($newCustomer)
         ], 201);
     }
@@ -70,7 +70,7 @@ class SupplierController extends Controller
         $supplier->update($request->validated());
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli tahrirlandi!",
+            'message' => "Taminotchi muvaffaqiyatli tahrirlandi!",
             'data' => SupplierResource::make($supplier)
         ]);
     }
@@ -84,7 +84,7 @@ class SupplierController extends Controller
         $supplier->delete();
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli o'chirildi!",
+            'message' => "Taminotchi muvaffaqiyatli o'chirildi!",
             'data' => SupplierResource::make($supplier)
         ]);
     }
