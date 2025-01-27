@@ -13,6 +13,7 @@ class CompletedOrder extends Model
         'status_id',
         'total_cost_price',
         'total_sale_price',
+        'customer_old_balance',
         'submitted_comment',
         'comment',
     ];
