@@ -14,11 +14,13 @@ class OrderCompletedResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $oldBalance = (float)$this->customer_old_balance;
+
         return [
             'id' => $this->id,
-            'total_sale_price' => (float) $this->total_sale_price,
-            'total_const_price' => auth()->user()->isAdmin() ? (float) $this->total_cost_price : 0,
-            'customer_old_balance' => (float) $this->customer_old_balance,
+            'total_sale_price' => (float)$this->total_sale_price,
+            'total_const_price' => auth()->user()->isAdmin() ? (float)$this->total_cost_price : 0,
+            'customer_old_balance' => $oldBalance < 0 ? $oldBalance : 0,
             'comment' => $this->comment,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
