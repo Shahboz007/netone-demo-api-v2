@@ -40,6 +40,23 @@ class OrderPolicy
      */
     public function update(User $user): bool
     {
+        return false;
+    }
+
+    public function confirm(User $user): bool
+    {
+        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        return !$accessRoles->isEmpty();
+    }
+
+    public function completed(User $user): bool
+    {
+        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        return !$accessRoles->isEmpty();
+    }
+
+    public function submit(User $user): bool
+    {
         $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
         return !$accessRoles->isEmpty();
     }

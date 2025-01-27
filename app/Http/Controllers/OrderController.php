@@ -155,6 +155,9 @@ class OrderController extends Controller
 
     public function confirm(string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('confirm', Order::class);
+
         $order = Order::findOrFail($id);
 
         // Status Code
@@ -175,6 +178,8 @@ class OrderController extends Controller
 
     public function completed(UpdateOrderCompletedRequest $request, string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('completed', Order::class);
 
         $order = Order::with('orderDetails')->findOrFail($id);
 
@@ -266,6 +271,9 @@ class OrderController extends Controller
 
     public function submitted(UpdateOrderSubmittedRequest $request, string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('submit', Order::class);
+
         $order = Order::with('orderDetails')->findOrFail($id);
 
         // Validation Order Status
