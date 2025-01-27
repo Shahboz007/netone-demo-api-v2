@@ -218,6 +218,7 @@ class OrderController extends Controller
                 'comment' => $request->validated('comment'),
                 'total_cost_price' => 0,
                 'total_sale_price' => 0,
+                'customer_old_balance' => 0,
             ]);
 
             $totalCostPrice = 0;
@@ -293,6 +294,7 @@ class OrderController extends Controller
             // Completed Order
             $completedOrder->submitted_comment = $request->validated('comment');
             $completedOrder->status_id = $statusSubmitted->id;
+            $completedOrder->customer_old_balance = $order->customer->balance;
             $completedOrder->save();
 
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('total_cost_price', 12, 2);
             $table->decimal('total_sale_price', 12, 2);
+            $table->decimal('customer_old_balance', 12, 2);
             $table->string('comment')->nullable();
             $table->string('submitted_comment')->nullable();
             $table->timestamps();
