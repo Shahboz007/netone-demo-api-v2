@@ -44,18 +44,18 @@ class ProductionProcessController extends Controller
         // Products
         $pluckProducts = Product::whereIn('id', $validateItemsKeys)->get()->pluck('name', 'id');
 
-        if($pluckStockItems->isEmpty()) {
+        if ($pluckStockItems->isEmpty()) {
             abort(422, "Zaxira mavjud emas");
         }
 
         foreach ($validateItems as $item) {
             $productName = $pluckProducts->get($item['product_id']);
 
-            if(!$pluckStockItems->has($item['product_id'])){
+            if (!$pluckStockItems->has($item['product_id'])) {
                 abort(422, "`$productName` mahsulotning zaxirasi mavjud emas!");
             }
 
-            if($pluckStockItems->get($item['product_id']) < $item['amount']){
+            if ($pluckStockItems->get($item['product_id']) < $item['amount']) {
                 abort(422, "`$productName` mahsulotning zaxirasi yetarli emas!");
             }
         }
@@ -67,7 +67,7 @@ class ProductionProcessController extends Controller
         DB::beginTransaction();
 
         try {
-            $processStatus  = Status::where('code', 'productionProcess')->firstOrFail();
+            $processStatus = Status::where('code', 'productionProcess')->firstOrFail();
 
             $newProcess = ProductionProcess::create([
                 'status_id' => $processStatus->id,
@@ -79,7 +79,7 @@ class ProductionProcessController extends Controller
 
             foreach ($stockItems as $item) {
 
-                if($pluckReqProductsAmountType[$item->product_id] !== 2){
+                if ($pluckReqProductsAmountType[$item->product_id] !== 2) {
                     abort(422, "Ishlab chiqarish uchun mahsulotlar faqat qop o'lchovi bo'yicha solinishi kerak!");
                 }
 
@@ -115,9 +115,9 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function finish(FinishProductionProcessRequest $request, string $id): JsonResponse
+    public function finish(FinishProductionProcessRequest $request, string $id)
     {
-        $productionProcess = ProductionProcess::findOrFail($id);
+        $productionProcess = ProductionProcess::with('productionRecipe')->findOrFail($id);
 
         // Status productionCompleted
         $statusCurrent = Status::findOrFail($productionProcess->status_id);
@@ -137,14 +137,28 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $productionProcess->status_id = $statusProductionCompleted->id;
-        $productionProcess->out_amount = $request->validated('total_amount');
+        $stock = ProductStock::findOrFail($productionProcess->productionRecipe->out_product_id);
 
-        $productionProcess->save();
+        DB::beginTransaction();
 
-        return response()->json([
-            'message' => "$id. Ishlab chiqarish jarayoni yakunlandi"
-        ]);
+        try {
+            $productionProcess->status_id = $statusProductionCompleted->id;
+            $productionProcess->out_amount = $request->validated('total_amount');
+
+            // Change stock
+            $stock->increment('amount', $productionProcess->out_amount);
+
+            $productionProcess->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "$id. Ishlab chiqarish jarayoni yakunlandi"
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->serverError($e);
+        }
     }
 
 
