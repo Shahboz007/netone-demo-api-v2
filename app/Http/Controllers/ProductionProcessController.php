@@ -117,7 +117,7 @@ class ProductionProcessController extends Controller
 
     public function finish(FinishProductionProcessRequest $request, string $id)
     {
-        $productionProcess = ProductionProcess::with('productionRecipe')->findOrFail($id);
+        $productionProcess = ProductionProcess::with('productionRecipe', 'processItems')->findOrFail($id);
 
         // Status productionCompleted
         $statusCurrent = Status::findOrFail($productionProcess->status_id);
@@ -138,6 +138,7 @@ class ProductionProcessController extends Controller
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
         $stock = ProductStock::findOrFail($productionProcess->productionRecipe->out_product_id);
+        $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
         DB::beginTransaction();
 
@@ -149,6 +150,16 @@ class ProductionProcessController extends Controller
             $stock->increment('amount', $productionProcess->out_amount);
 
             $productionProcess->save();
+
+            // Set cost price
+            $costPrice = 0;
+
+            $productionProcess->processItems()->chunkMap(function ($item) use ($costPrice) {
+                $costPrice += $item->amount * $item->product->sale_price;
+            });
+
+            $outProduct->update(['cost_price' => $costPrice]);
+
 
             DB::commit();
 
