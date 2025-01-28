@@ -11,6 +11,7 @@ use App\Models\CompletedOrder;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -176,7 +177,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function completed(UpdateOrderCompletedRequest $request, string $id): JsonResponse
+    public function completed(UpdateOrderCompletedRequest $request, string $id)
     {
         // Gate
         Gate::authorize('completed', Order::class);
@@ -189,7 +190,7 @@ class OrderController extends Controller
         if (empty($allowedStatuses)) abort(500, "Ichki xatolik yuz berdi, iltimos biz bilan bog'laning!");
         if (!$allowedStatuses->contains('id', $order->status_id)) abort(422, "Bu buyurtmani tayyorlandi holatiga o'tkazish mumkin emas!");
 
-        //*******--start-- Validation Order Detials Item *******//
+        //*******--start-- Validation Order Details Item *******//
         $updates = collect($request->validated('product_list'))
             ->pluck('completed_amount', 'product_id');
 
@@ -198,15 +199,39 @@ class OrderController extends Controller
         $prodItemLength = count($updates);
 
         if ($orderItemLength > $prodItemLength || $orderItemLength < $prodItemLength) {
-            abort(422, "Siz tayyorlangan mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+            abort(422, "Siz buyurtma mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
         }
 
         foreach ($order->orderDetails as $detail) {
             if (!$updates->has($detail->product_id)) {
-                abort(422, "Siz tayyorlangan mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+                abort(422, "Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
             }
         }
         //*******--end-- Validation Order Details Item *******//
+        $reqProductsId = array_column($request->validated('product_list'), 'product_id');
+
+        // Validate Product Stock
+        $stockList = ProductStock::with('product')->whereIn('product_id', $reqProductsId)
+            ->get();
+
+        if ($stockList->isEmpty()) {
+            abort(422, "Buyurtmani tayyorlab bo'lmadi. Zaxirani tekshiring!");
+        }
+
+        $productPluckList = Product::whereIn('id', $reqProductsId)->select('id','name')->get()->pluck('name', 'id');
+        $stockAmountPluckList = $stockList->pluck('amount', 'product_id');
+
+        foreach ($request->validated('product_list') as $item) {
+            if (!$stockAmountPluckList->has($item['product_id'])) {
+                $productName = $productPluckList->get($item['product_id']);
+                abort(422, "`$productName` mahsuloti bo'yicha zaxira mavjud emas!");
+            }
+
+            if($stockAmountPluckList->get($item['product_id']) < $item['completed_amount']) {
+                $productName = $productPluckList->get($item['product_id']);
+                abort(422, "`$productName` mahsuloti bo'yicha zaxira yetarli emas!");
+            }
+        }
 
         // Status Code
         $statusCode = 'orderCompleted';
@@ -244,6 +269,9 @@ class OrderController extends Controller
 
                     // Update Order details item
                     $detail->update(['completed_amount' => $completedAmount]);
+
+                    $stock = ProductStock::findOrFail($detail->product_id);
+                    $stock->decrement('amount', $completedAmount);
                 }
             }
 
