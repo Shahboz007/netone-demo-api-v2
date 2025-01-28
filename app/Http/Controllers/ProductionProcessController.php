@@ -154,12 +154,13 @@ class ProductionProcessController extends Controller
             // Set cost price
             $costPrice = 0;
 
-            $productionProcess->processItems()->chunkMap(function ($item) use ($costPrice) {
+            foreach ($productionProcess->processItems as $item) {
                 $costPrice += $item->amount * $item->product->sale_price;
-            });
+            }
 
             $outProduct->update(['cost_price' => $costPrice]);
 
+            $outProduct->save();
 
             DB::commit();
 
