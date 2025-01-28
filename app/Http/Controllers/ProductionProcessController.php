@@ -7,7 +7,9 @@ use App\Http\Requests\StoreProductionProcessRequest;
 use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
 use App\Http\Resources\ProductionProcessShowResource;
+use App\Models\Product;
 use App\Models\ProductionProcess;
+use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +33,37 @@ class ProductionProcessController extends Controller
     public function store(StoreProductionProcessRequest $request)
     {
 
+        // Validation Stock
+        $validateItems = $request->validated('items_list');
+        $validateItemsKeys = array_column($validateItems, 'product_id');
+
+        // Stock Items
+        $stockItems = ProductStock::whereIn('product_id', $validateItemsKeys)->get();
+        $pluckStockItems = $stockItems->pluck('amount', 'product_id');
+
+        // Products
+        $pluckProducts = Product::whereIn('id', $validateItemsKeys)->get()->pluck('name', 'id');
+
+        if($pluckStockItems->isEmpty()) {
+            abort(422, "Zaxira mavjud emas");
+        }
+
+        foreach ($validateItems as $item) {
+            $productName = $pluckProducts->get($item['product_id']);
+
+            if(!$pluckStockItems->has($item['product_id'])){
+                abort(422, "`$productName` mahsulotning zaxirasi mavjud emas!");
+            }
+
+            if($pluckStockItems->get($item['product_id']) < $item['amount']){
+                abort(422, "`$productName` mahsulotning zaxirasi yetarli emas!");
+            }
+        }
+
+        // Pluck Request Items
+        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
+        $pluckReqProducts = collect($validateItems)->pluck('amount', 'product_id');
+
         DB::beginTransaction();
 
         try {
@@ -43,6 +76,17 @@ class ProductionProcessController extends Controller
             ]);
 
             $newProcess->processItems()->createMany($request->validated('items_list'));
+
+            foreach ($stockItems as $item) {
+
+                if($pluckReqProductsAmountType[$item->product_id] !== 2){
+                    abort(422, "Ishlab chiqarish uchun mahsulotlar faqat qop o'lchovi bo'yicha solinishi kerak!");
+                }
+
+                $amount = $pluckReqProducts->get($item->product_id);
+
+                $item->decrement('amount', $amount);
+            }
 
             DB::commit();
 
