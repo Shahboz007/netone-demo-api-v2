@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\Finance\CurrencyController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'currencies', 'middleware' => ['auth:sanctum']], function () {
