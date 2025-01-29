@@ -18,7 +18,7 @@ class ExchangeRateResource extends JsonResource
             'id' => $this->id,
             'from_currency' => $this->fromCurrency,
             'to_currency' => $this->toCurrency,
-            'rate' => (float) $this->rate,
+            'rate' => $this->rate,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
