@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('currency_id')->constrained('currencies');
             $table->string('name');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
