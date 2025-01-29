@@ -19,7 +19,7 @@ class CurrencyController extends Controller
     public function show(Currency $currency)
     {
         return response()->json([
-            'data' => CurrencyResource::collection($currency),
+            'data' => CurrencyResource::make($currency),
         ]);
     }
 }
