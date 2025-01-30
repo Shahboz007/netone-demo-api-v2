@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentCustomerRequest;
+use App\Http\Resources\PaymentCustomerResource;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Status;
@@ -12,12 +13,24 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentCustomerController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+            ->where('paymentable_type', 'App\Models\Customer')
+            ->orderBy('created_at', 'desc');
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            'data' => PaymentCustomerResource::collection($data),
+        ]);
     }
 
-    public function store(StorePaymentCustomerRequest $request)
+    public function store(StorePaymentCustomerRequest $request): ?JsonResponse
     {
         // Customer
         $customer = Customer::findOrFail($request->validated('customer_id'));
@@ -63,15 +76,27 @@ class PaymentCustomerController extends Controller
 
             return response()->json([
                 'message' => "$customer->first_name $customer->last_name mijozdan o'tkazma muvaffaqiyatli qabul qilindi! Mijozning balansini tekshiring",
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->serverError($e);
         }
     }
 
-    public function show()
+    public function show(string $id)
     {
-        //
+        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+            ->where('paymentable_type', 'App\Models\Customer')
+            ->orderBy('created_at', 'desc');
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->findOrFail($id);
+
+        return response()->json([
+            'data' => PaymentCustomerResource::make($data),
+        ]);
     }
 }
