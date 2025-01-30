@@ -20,4 +20,9 @@ class Expense extends Model
     {
         return $this->hasMany(Expense::class, 'parent_id');
     }
+
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'paymentable');
+    }
 }
