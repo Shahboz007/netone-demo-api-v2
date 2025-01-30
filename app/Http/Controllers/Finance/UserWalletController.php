@@ -6,11 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserWalletRequest;
 use App\Http\Resources\UserWalletResource;
 use App\Models\User;
-use App\Models\Wallet;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use function Laravel\Prompts\table;
 
 class UserWalletController extends Controller
 {
@@ -26,7 +22,7 @@ class UserWalletController extends Controller
     public function store(StoreUserWalletRequest $request): JsonResponse
     {
         // Gate
-        Gate::authorize('viewAnyUserWallet');
+        if (!auth()->user()->isAdmin()) abort(403);
 
         $user = User::findOrFail($request->validated('user_id'));
 

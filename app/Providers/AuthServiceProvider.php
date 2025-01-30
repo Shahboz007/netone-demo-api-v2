@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Policies\UserWalletPolicy;
-use Illuminate\Auth\Access\Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -21,8 +22,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerPolicies();
-
-        Gate::define('createUserWallet', [UserWalletPolicy::class, 'create']);
+        //
     }
 }
