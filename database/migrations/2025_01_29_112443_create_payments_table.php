@@ -19,6 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('paymentable_id');
             $table->string('paymentable_type');
             $table->timestamps();
+
+            $table->index(['paymentable_id', 'paymentable_type']);
         });
     }
 
