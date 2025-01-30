@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->roles()->where('name', 'admin')->exists();
     }
 
+    public function wallets(): BelongsToMany
+    {
+        return $this->belongsToMany(Wallet::class)->withPivot('amount')->with('currency');
+    }
+
     public function receiveProducts(): HasMany
     {
         return $this->hasMany(ReceiveProduct::class, 'user_id');

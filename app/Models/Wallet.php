@@ -24,4 +24,9 @@ class Wallet extends Model
     {
         return $this->belongsToMany(Payment::class);
     }
+
+    public function users():BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withPivot('amount');
+    }
 }
