@@ -8,6 +8,7 @@ use App\Http\Resources\PaymentCustomerResource;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Status;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,7 @@ class PaymentCustomerController extends Controller
         ]);
     }
 
-    public function store(StorePaymentCustomerRequest $request): ?JsonResponse
+    public function store(StorePaymentCustomerRequest $request)
     {
         // Customer
         $customer = Customer::findOrFail($request->validated('customer_id'));
@@ -62,6 +63,11 @@ class PaymentCustomerController extends Controller
             }
 
             $payment->wallets()->attach($walletAttachList);
+
+            // Increment User Wallets
+            foreach ($request->validated('wallet_list') as $wallet) {
+                $this->incrementPivotAmount(auth()->id(), $wallet['wallet_id'], $wallet['amount']);
+            }
 
             // Convert To uzs
             $sum = 0;
@@ -98,5 +104,15 @@ class PaymentCustomerController extends Controller
         return response()->json([
             'data' => PaymentCustomerResource::make($data),
         ]);
+    }
+
+    public function incrementPivotAmount($userId, $walletId, $incrementBy)
+    {
+         DB::table('user_wallet')
+            ->where('user_id', $userId)
+            ->where('wallet_id', $walletId)
+            ->update([
+                'amount' => DB::raw("amount + {$incrementBy}")
+            ]);
     }
 }
