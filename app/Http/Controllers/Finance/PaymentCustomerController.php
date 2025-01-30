@@ -108,7 +108,7 @@ class PaymentCustomerController extends Controller
 
     public function incrementPivotAmount($userId, $walletId, $incrementBy): void
     {
-         DB::table('user_wallet')
+        DB::table('user_wallet')
             ->where('user_id', $userId)
             ->where('wallet_id', $walletId)
             ->update([
