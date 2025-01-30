@@ -26,5 +26,6 @@ class StatusSeeder extends Seeder
         Status::create(['name' => "Tayyor", 'code' => 'productionCompleted']);
         // Payment
         Status::create(['name' => "Mijozdan o'tkazma", 'code' => 'paymentCustomer']);
+        Status::create(['name' => "Xarajat", 'code' => 'paymentExpense']);
     }
 }
