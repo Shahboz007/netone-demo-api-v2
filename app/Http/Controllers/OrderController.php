@@ -335,8 +335,7 @@ class OrderController extends Controller
 
 
             // Customer
-            $customer->balance -= $completedOrder->total_sale_price;
-            $customer->save();
+            $customer->decrement('balance', $completedOrder->total_sale_price);
 
             DB::commit();
             return response()->json([
