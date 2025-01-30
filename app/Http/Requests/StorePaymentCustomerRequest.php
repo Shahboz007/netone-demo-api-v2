@@ -27,6 +27,7 @@ class StorePaymentCustomerRequest extends FormRequest
             'wallet_list.*.wallet_id' => 'required|numeric|exists:wallets,id',
             'wallet_list.*.amount' => 'required|numeric|min:0',
             'wallet_list.*.rate_amount' => 'required|numeric|min:0',
+            'comment' => 'nullable|string|min:6|max:255',
         ];
     }
 }
