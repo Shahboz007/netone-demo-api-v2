@@ -31,7 +31,7 @@ class PaymentCustomerController extends Controller
         ]);
     }
 
-    public function store(StorePaymentCustomerRequest $request)
+    public function store(StorePaymentCustomerRequest $request): ?JsonResponse
     {
         // Customer
         $customer = Customer::findOrFail($request->validated('customer_id'));
@@ -89,7 +89,7 @@ class PaymentCustomerController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $query = Payment::with('paymentable', 'user', 'wallets', 'status')
             ->where('paymentable_type', 'App\Models\Customer')
@@ -106,7 +106,7 @@ class PaymentCustomerController extends Controller
         ]);
     }
 
-    public function incrementPivotAmount($userId, $walletId, $incrementBy)
+    public function incrementPivotAmount($userId, $walletId, $incrementBy): void
     {
          DB::table('user_wallet')
             ->where('user_id', $userId)
