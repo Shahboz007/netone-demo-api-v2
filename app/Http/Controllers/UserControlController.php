@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserControlRequest;
+use App\Http\Requests\UpdateUserControlPasswordRequest;
 use App\Http\Requests\UpdateUserControlRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -107,6 +108,39 @@ class UserControlController extends Controller
             DB::rollBack();
             return $this->serverError($e);
         }
+    }
+
+    public function updatePassword(string $id, UpdateUserControlPasswordRequest $request): JsonResponse
+    {
+        // Gate
+        Gate::authorize('updatePassword', User::class);
+
+        $user = $this->getUser($id);
+
+        $user->password = Hash::make($request->validated('password'));
+        $user->save();
+
+        return response()->json([
+            'message' => $user->name . "ning paroli muvaffaqiyatli o'zgartirildi.",
+        ]);
+    }
+
+    public function updateStatus(string $id): JsonResponse
+    {
+        $user = $this->getUser($id);
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        if (!$user->is_active) {
+            return response()->json([
+                'message' => $user->name . " holati bloklandi",
+            ]);
+        }
+
+        return response()->json([
+            'message' => $user->name . " holati faol",
+        ]);
     }
 
     public function destroy(string $id): JsonResponse
