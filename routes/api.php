@@ -4,6 +4,8 @@
 require __DIR__ . "/api/auth/auth.php";
 require __DIR__ . "/api/auth/user.php";
 // Common
+require __DIR__ . "/api/common/role.php";
+require __DIR__ . "/api/common/userControl.php";
 require __DIR__ . "/api/common/amountType.php";
 require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/receiveProduct.php";
@@ -14,7 +16,6 @@ require __DIR__ . "/api/common/order.php";
 require __DIR__ . "/api/common/orderCancel.php";
 require __DIR__ . "/api/common/expense.php";
 require __DIR__ . "/api/common/wallet.php";
-require __DIR__ . "/api/common/userControl.php";
 
 // Production
 require __DIR__ . "/api/production/recipe.php";
