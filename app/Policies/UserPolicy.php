@@ -11,7 +11,7 @@ class UserPolicy
         return $user->isAdmin();
     }
 
-    public function view(User $user, User $model):bool
+    public function view(User $user):bool
     {
         return $user->isAdmin();
     }
@@ -21,12 +21,12 @@ class UserPolicy
         return $user->isAdmin();
     }
 
-    public function update(User $user, User $model):bool
+    public function update(User $user):bool
     {
         return $user->isAdmin();
     }
 
-    public function delete(User $user, User $model):bool
+    public function delete(User $user):bool
     {
         return $user->isAdmin();
     }
