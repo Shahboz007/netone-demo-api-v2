@@ -14,6 +14,7 @@ require __DIR__ . "/api/common/order.php";
 require __DIR__ . "/api/common/orderCancel.php";
 require __DIR__ . "/api/common/expense.php";
 require __DIR__ . "/api/common/wallet.php";
+require __DIR__ . "/api/common/userControl.php";
 
 // Production
 require __DIR__ . "/api/production/recipe.php";
