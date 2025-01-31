@@ -24,7 +24,6 @@ class UpdateUserControlRequest extends FormRequest
         return [
             'name' => 'nullable|string|max:255',
             'login' => 'nullable|string|max:255|unique:users',
-            'password' => 'nullable|string|min:8|confirmed',
             'phone' => 'nullable|string|max:255|unique:users',
             'roles' => 'nullable|array',
             'roles.*' => 'required|exists:roles,id',
