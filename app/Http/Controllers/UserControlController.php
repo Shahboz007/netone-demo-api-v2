@@ -8,12 +8,16 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class UserControlController extends Controller
 {
     public function index(): JsonResponse
     {
+        // Gate
+        Gate::authorize('viewAny', User::class);
+
         $data = User::with('roles')->where('id', '<>', 1)->get();
 
         return response()->json([
@@ -23,6 +27,9 @@ class UserControlController extends Controller
 
     public function store(StoreUserControlRequest $request)
     {
+        // Gate
+        Gate::authorize('create', User::class);
+
         DB::beginTransaction();
         try {
             $newUser = User::create([
@@ -48,6 +55,9 @@ class UserControlController extends Controller
 
     public function show(string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('view', User::class);
+
         $user = $this->getUser($id);
 
         return response()->json([
@@ -57,6 +67,9 @@ class UserControlController extends Controller
 
     public function update(UpdateUserControlRequest $request, string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('update', User::class);
+
         $user = $this->getUser($id);
 
         DB::beginTransaction();
@@ -82,6 +95,9 @@ class UserControlController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
+        // Gate
+        Gate::authorize('delete', User::class);
+
         $user = $this->getUser($id);
 
         $user->delete();
