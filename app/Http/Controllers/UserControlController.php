@@ -72,6 +72,22 @@ class UserControlController extends Controller
 
         $user = $this->getUser($id);
 
+        // Check Exist Login
+        $loginExists = User::where('login', $request->validated('login'))
+            ->where('id', '<>', $user->id)
+            ->exists();
+        if ($loginExists) {
+            abort(422, "Bu loginni oldin kirtilgan!");
+        }
+
+        // Check Exist Phone
+        $phoneExists = User::where('phone', $request->validated('phone'))
+            ->where('id', '<>', $user->id)
+            ->exists();
+        if ($phoneExists) {
+            abort(422, "Bu telefon raqamni oldin kirtilgan!");
+        }
+
         DB::beginTransaction();
 
         try {
