@@ -34,7 +34,7 @@ class ExpensePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Expense $expense): bool
+    public function update(User $user): bool
     {
         return $user->isAdmin();
     }
@@ -42,7 +42,7 @@ class ExpensePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Expense $expense): bool
+    public function delete(User $user): bool
     {
         return $user->isAdmin();
     }
@@ -50,7 +50,7 @@ class ExpensePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Expense $expense): bool
+    public function restore(User $user): bool
     {
         return false;
     }
@@ -58,7 +58,7 @@ class ExpensePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Expense $expense): bool
+    public function forceDelete(User $user): bool
     {
         return false;
     }
