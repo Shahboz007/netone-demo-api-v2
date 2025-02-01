@@ -15,17 +15,32 @@ class PaymentExpenseController extends Controller
 {
     public function index()
     {
-        //
+        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+            ->where('paymentable_type', 'App\Models\Expense')
+            ->orderBy('created_at', 'desc');
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
+
+
+        return  $data;
+        return response()->json([
+//            'data' => PaymentCustomerResource::collection($data),
+        ]);
     }
 
     public function store(StorePaymentExpenseRequest $request): ?JsonResponse
     {
+        abort(503);
         $reqAmount = $request->validated('amount');
 
         // Validation User Wallet
         $userWallet = auth()->user()->wallets()->wherePivot('wallet_id', $request->validated('wallet_id'))->firstOrFail();
 
-        if($userWallet->pivot->amount < $reqAmount){
+        if ($userWallet->pivot->amount < $reqAmount) {
             abort(422, "`$userWallet->name` bu hisobingizda mablag' yetarli emas! Hisobingizni tekshiring");
         }
 
@@ -70,7 +85,7 @@ class PaymentExpenseController extends Controller
 
             return response()->json([
                 'message' => "`$expense->name` xarajat uchun $formatNum  $currency muvaffaqiyatli o'tkazildi!",
-            ],201);
+            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
