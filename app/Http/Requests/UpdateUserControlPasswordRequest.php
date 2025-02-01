@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateWalletRequest extends FormRequest
+class UpdateUserControlPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,7 @@ class UpdateWalletRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'currency_id' => 'required|integer|exists:currencies,id',
+            'password' => 'required|string|min:8|max:32|confirmed',
         ];
     }
 }

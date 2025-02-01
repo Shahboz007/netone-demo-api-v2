@@ -13,8 +13,7 @@ class WalletSeeder extends Seeder
      */
     public function run(): void
     {
-        Wallet::create(['name' => 'Hisob 1']);
-        Wallet::create(['name' => 'Hisob 2']);
-        Wallet::create(['name' => 'Hisob 3']);
+        Wallet::create(['name' => 'Hisob 1', 'currency_id' => 1]);
+        Wallet::create(['name' => 'Hisob 2', 'currency_id' => 2]);
     }
 }

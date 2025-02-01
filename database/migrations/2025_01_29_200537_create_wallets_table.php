@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('role_user', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('role_id')->constrained('roles');
+        Schema::create('wallets', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('currency_id')->constrained('currencies');
+            $table->string('name');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
         });
     }
 
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('role_user');
+        Schema::dropIfExists('wallets');
     }
 };

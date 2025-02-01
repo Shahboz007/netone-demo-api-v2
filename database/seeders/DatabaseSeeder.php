@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             AmountTypeSeeder::class,
             StatusSeeder::class,
             AmountSettingsSeeder::class,
+            CurrencySeeder::class,
+            ExchangeRateSeeder::class,
+            WalletSeeder::class,
 
             // Optional
             // ProductSeeder::class,

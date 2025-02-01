@@ -7,7 +7,9 @@ use App\Http\Requests\StoreProductionProcessRequest;
 use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
 use App\Http\Resources\ProductionProcessShowResource;
+use App\Models\Product;
 use App\Models\ProductionProcess;
+use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -31,10 +33,41 @@ class ProductionProcessController extends Controller
     public function store(StoreProductionProcessRequest $request)
     {
 
+        // Validation Stock
+        $validateItems = $request->validated('items_list');
+        $validateItemsKeys = array_column($validateItems, 'product_id');
+
+        // Stock Items
+        $stockItems = ProductStock::whereIn('product_id', $validateItemsKeys)->get();
+        $pluckStockItems = $stockItems->pluck('amount', 'product_id');
+
+        // Products
+        $pluckProducts = Product::whereIn('id', $validateItemsKeys)->get()->pluck('name', 'id');
+
+        if ($pluckStockItems->isEmpty()) {
+            abort(422, "Zaxira mavjud emas");
+        }
+
+        foreach ($validateItems as $item) {
+            $productName = $pluckProducts->get($item['product_id']);
+
+            if (!$pluckStockItems->has($item['product_id'])) {
+                abort(422, "`$productName` mahsulotning zaxirasi mavjud emas!");
+            }
+
+            if ($pluckStockItems->get($item['product_id']) < $item['amount']) {
+                abort(422, "`$productName` mahsulotning zaxirasi yetarli emas!");
+            }
+        }
+
+        // Pluck Request Items
+        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
+        $pluckReqProducts = collect($validateItems)->pluck('amount', 'product_id');
+
         DB::beginTransaction();
 
         try {
-            $processStatus  = Status::where('code', 'productionProcess')->firstOrFail();
+            $processStatus = Status::where('code', 'productionProcess')->firstOrFail();
 
             $newProcess = ProductionProcess::create([
                 'status_id' => $processStatus->id,
@@ -43,6 +76,17 @@ class ProductionProcessController extends Controller
             ]);
 
             $newProcess->processItems()->createMany($request->validated('items_list'));
+
+            foreach ($stockItems as $item) {
+
+                if ($pluckReqProductsAmountType[$item->product_id] !== 2) {
+                    abort(422, "Ishlab chiqarish uchun mahsulotlar faqat qop o'lchovi bo'yicha solinishi kerak!");
+                }
+
+                $amount = $pluckReqProducts->get($item->product_id);
+
+                $item->decrement('amount', $amount);
+            }
 
             DB::commit();
 
@@ -71,9 +115,9 @@ class ProductionProcessController extends Controller
     }
 
 
-    public function finish(FinishProductionProcessRequest $request, string $id): JsonResponse
+    public function finish(FinishProductionProcessRequest $request, string $id)
     {
-        $productionProcess = ProductionProcess::findOrFail($id);
+        $productionProcess = ProductionProcess::with('productionRecipe', 'processItems')->findOrFail($id);
 
         // Status productionCompleted
         $statusCurrent = Status::findOrFail($productionProcess->status_id);
@@ -93,14 +137,40 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $productionProcess->status_id = $statusProductionCompleted->id;
-        $productionProcess->out_amount = $request->validated('total_amount');
+        $stock = ProductStock::findOrFail($productionProcess->productionRecipe->out_product_id);
+        $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
-        $productionProcess->save();
+        DB::beginTransaction();
 
-        return response()->json([
-            'message' => "$id. Ishlab chiqarish jarayoni yakunlandi"
-        ]);
+        try {
+            $productionProcess->status_id = $statusProductionCompleted->id;
+            $productionProcess->out_amount = $request->validated('total_amount');
+
+            // Change stock
+            $stock->increment('amount', $productionProcess->out_amount);
+
+            $productionProcess->save();
+
+            // Set cost price
+            $costPrice = 0;
+
+            foreach ($productionProcess->processItems as $item) {
+                $costPrice += $item->amount * $item->product->sale_price;
+            }
+
+            $outProduct->update(['cost_price' => $costPrice]);
+
+            $outProduct->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "$id. Ishlab chiqarish jarayoni yakunlandi"
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->serverError($e);
+        }
     }
 
 

@@ -1,21 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Finance;
 
+use App\Http\Controllers\Controller;
 use App\Models\Wallet;
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
 use App\Http\Resources\WalletResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 
 class WalletController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', Wallet::class);
 
-        $data = Wallet::all();
+        $data = Wallet::with('currency')->get();
 
         return response()->json([
             "data" => WalletResource::collection($data),
@@ -23,7 +25,7 @@ class WalletController extends Controller
     }
 
 
-    public function store(StoreWalletRequest $request)
+    public function store(StoreWalletRequest $request): JsonResponse
     {
         // Gate
         Gate::authorize('create', Wallet::class);
@@ -37,10 +39,12 @@ class WalletController extends Controller
     }
 
 
-    public function show(Wallet $wallet)
+    public function show(string $id): JsonResponse
     {
         // Gate
         Gate::authorize('view', Wallet::class);
+
+        $wallet  = Wallet::with('currency')->findOrFail($id);
 
         return response()->json([
             "data" => WalletResource::make($wallet)
@@ -48,7 +52,7 @@ class WalletController extends Controller
     }
 
 
-    public function update(UpdateWalletRequest $request, Wallet $wallet)
+    public function update(UpdateWalletRequest $request, Wallet $wallet): JsonResponse
     {
         // Gate
         Gate::authorize('update', Wallet::class);
@@ -69,7 +73,7 @@ class WalletController extends Controller
     }
 
 
-    public function destroy(Wallet $wallet)
+    public function destroy(Wallet $wallet): JsonResponse
     {
         // Gate
         Gate::authorize('delete', Wallet::class);

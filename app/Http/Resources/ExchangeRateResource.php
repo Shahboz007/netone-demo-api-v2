@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class WalletResource extends JsonResource
+class ExchangeRateResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,9 @@ class WalletResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'currency' => CurrencyResource::make($this->currency),
-            'is_active' => (bool) $this->is_active,
+            'from_currency' => CurrencyResource::make($this->fromCurrency),
+            'to_currency' => CurrencyResource::make($this->toCurrency),
+            'rate' => $this->rate,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class WalletResource extends JsonResource
+class PaymentWalletResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,11 +16,10 @@ class WalletResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
             'currency' => CurrencyResource::make($this->currency),
-            'is_active' => (bool) $this->is_active,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'wallet' => WalletResource::make($this),
+            'amount' => (float)$this->amount,
+            'res_amount' => (float)$this->res_amount,
         ];
     }
 }
