@@ -13,7 +13,7 @@ class UserWallet extends Model
 
     public function user():BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->with('roles');
     }
 
     public function wallet():BelongsTo
