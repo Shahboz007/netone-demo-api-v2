@@ -17,7 +17,7 @@ class WalletController extends Controller
         // Gate
         Gate::authorize('viewAny', Wallet::class);
 
-        $data = Wallet::all();
+        $data = Wallet::with('currency')->get();
 
         return response()->json([
             "data" => WalletResource::collection($data),
@@ -39,10 +39,12 @@ class WalletController extends Controller
     }
 
 
-    public function show(Wallet $wallet): JsonResponse
+    public function show(string $id): JsonResponse
     {
         // Gate
         Gate::authorize('view', Wallet::class);
+
+        $wallet  = Wallet::with('currency')->findOrFail($id);
 
         return response()->json([
             "data" => WalletResource::make($wallet)

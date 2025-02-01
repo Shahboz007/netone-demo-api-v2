@@ -17,6 +17,7 @@ class WalletResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'currency' => CurrencyResource::make($this->currency),
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
