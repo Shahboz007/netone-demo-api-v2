@@ -7,11 +7,12 @@ use App\Models\Wallet;
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
 use App\Http\Resources\WalletResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 
 class WalletController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', Wallet::class);
@@ -24,7 +25,7 @@ class WalletController extends Controller
     }
 
 
-    public function store(StoreWalletRequest $request)
+    public function store(StoreWalletRequest $request): JsonResponse
     {
         // Gate
         Gate::authorize('create', Wallet::class);
@@ -38,7 +39,7 @@ class WalletController extends Controller
     }
 
 
-    public function show(Wallet $wallet)
+    public function show(Wallet $wallet): JsonResponse
     {
         // Gate
         Gate::authorize('view', Wallet::class);
@@ -49,7 +50,7 @@ class WalletController extends Controller
     }
 
 
-    public function update(UpdateWalletRequest $request, Wallet $wallet)
+    public function update(UpdateWalletRequest $request, Wallet $wallet): JsonResponse
     {
         // Gate
         Gate::authorize('update', Wallet::class);
@@ -70,7 +71,7 @@ class WalletController extends Controller
     }
 
 
-    public function destroy(Wallet $wallet)
+    public function destroy(Wallet $wallet): JsonResponse
     {
         // Gate
         Gate::authorize('delete', Wallet::class);

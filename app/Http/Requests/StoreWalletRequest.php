@@ -22,7 +22,8 @@ class StoreWalletRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:wallets,name'
+            'name' => 'required|string|max:255|unique:wallets,name',
+            'currency_id' => 'required|integer|exists:currencies,id',
         ];
     }
 }
