@@ -30,7 +30,7 @@ class StorePaymentCustomerRequest extends FormRequest
                 'exists:user_wallet,wallet_id,user_id,'. auth()->id()
             ],
             'wallet_list.*.amount' => 'required|numeric|min:0',
-            'wallet_list.*.rate_amount' => 'required|numeric|min:0',
+            'wallet_list.*.rate_amount' => 'required|numeric|min:1',
             'comment' => 'nullable|string|min:6|max:255',
         ];
     }
