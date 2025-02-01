@@ -63,7 +63,7 @@ class User extends Authenticatable
 
     public function wallets(): BelongsToMany
     {
-        return $this->belongsToMany(Wallet::class)->withPivot('amount')->with('currency');
+        return $this->belongsToMany(Wallet::class,'user_wallet')->withPivot('amount')->with('currency');
     }
 
     public function receiveProducts(): HasMany

@@ -16,9 +16,9 @@ class UserWalletResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'wallet' => WalletResource::make($this),
-            'currency' => CurrencyResource::make($this->currency),
-            'amount' => (float) $this->pivot->amount,
+            'user' => $this->user,
+            'wallet' => WalletResource::make($this->wallet),
+            'amount' => (float) $this->amount,
         ];
     }
 }

@@ -6,16 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserWalletRequest;
 use App\Http\Resources\UserWalletResource;
 use App\Models\User;
+use App\Models\UserWallet;
+use App\Models\Wallet;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class UserWalletController extends Controller
 {
     public function index(): JsonResponse
     {
-        $data = User::with('wallets')->findOrFail(auth()->id());
+        $query = UserWallet::with('user', 'wallet.currency');
+
+        if(!auth()->user()->isAdmin()){
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
 
         return response()->json([
-            'data' => UserWalletResource::collection($data->wallets),
+            'data' => UserWalletResource::collection($data),
         ]);
     }
 
@@ -42,11 +51,15 @@ class UserWalletController extends Controller
         ], 201);
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
-        $user = User::findOrFail(auth()->id());
+         $query = UserWallet::with('user', 'wallet.currency');
 
-        $data = $user->wallets()->wherePivot('id', 3)->firstOrFail();
+        if(!auth()->user()->isAdmin()){
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->findOrFail($id);
 
         return response()->json([
             'data' => UserWalletResource::make($data),
