@@ -19,6 +19,8 @@ class UserWalletResource extends JsonResource
             'user' => $this->user,
             'wallet' => WalletResource::make($this->wallet),
             'amount' => (float) $this->amount,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }
