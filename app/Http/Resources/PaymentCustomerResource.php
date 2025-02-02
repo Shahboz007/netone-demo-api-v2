@@ -17,6 +17,7 @@ class PaymentCustomerResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => $this->user,
+            'customer' => CustomerResource::make($this->paymentable),
             'wallet_list' => PaymentWalletResource::collection($this->wallets),
             'status' => $this->status,
             'comment' => $this->comment,
