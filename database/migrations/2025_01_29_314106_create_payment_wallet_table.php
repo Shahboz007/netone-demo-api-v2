@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('wallet_id')->constrained('wallets');
             $table->decimal('amount', 12, 2);
             $table->decimal('rate_amount', 12, 2);
+            $table->decimal('sum_price', 12, 2);
             $table->timestamps();
         });
     }

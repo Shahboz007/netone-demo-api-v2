@@ -30,7 +30,7 @@ class Payment extends Model
     public function wallets(): BelongsToMany
     {
         return $this->belongsToMany(Wallet::class)
-            ->withPivot(['amount','rate_amount'])
+            ->withPivot(['amount', 'rate_amount', 'sum_price'])
             ->with('currency');
     }
 

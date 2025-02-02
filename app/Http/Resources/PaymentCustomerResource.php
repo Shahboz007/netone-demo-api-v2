@@ -14,11 +14,14 @@ class PaymentCustomerResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+
         return [
             'id' => $this->id,
             'user' => $this->user,
             'customer' => CustomerResource::make($this->paymentable),
             'wallet_list' => PaymentWalletResource::collection($this->wallets),
+            'total_price' => (float)$this->total_price,
             'status' => $this->status,
             'comment' => $this->comment,
             'created_at' => $this->created_at,
