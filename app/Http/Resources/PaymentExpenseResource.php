@@ -14,6 +14,16 @@ class PaymentExpenseResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'user' => UserResource::make($this->user),
+            'expense' => ExpenseResource::make($this->paymentable),
+            'wallet' => PaymentWalletResource::make($this->wallets[0]),
+            'total_price' => (float)$this->wallets[0]->pivot->sum_price,
+            'status' => $this->status,
+            'comment' => $this->comment,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }
