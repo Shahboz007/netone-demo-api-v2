@@ -31,6 +31,7 @@ class StorePaymentExpenseRequest extends FormRequest
 //                Rule::exists('user_wallet', 'wallet_id')->where('user_id', auth()->id()),
             ],
             'amount' => 'required|numeric|min:0',
+            'rate_amount' => 'required|numeric|min:1',
             'comment' => 'nullable|string|min:3|max:255',
         ];
     }

@@ -18,8 +18,9 @@ class PaymentWalletResource extends JsonResource
             'id' => $this->id,
             'currency' => CurrencyResource::make($this->currency),
             'wallet' => WalletResource::make($this),
-            'amount' => (float)$this->amount,
-            'res_amount' => (float)$this->res_amount,
+            'amount' => (float)$this->pivot->amount,
+            'rate_amount' => (float)$this->pivot->rate_amount,
+            'sum_price' => (float)$this->pivot->sum_price
         ];
     }
 }

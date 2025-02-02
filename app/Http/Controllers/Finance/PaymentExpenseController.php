@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentExpenseRequest;
+use App\Http\Resources\PaymentExpenseResource;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Status;
@@ -13,9 +14,21 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentExpenseController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+            ->where('paymentable_type', 'App\Models\Expense')
+            ->orderBy('created_at', 'desc');
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            'data' => PaymentExpenseResource::collection($data),
+        ]);
     }
 
     public function store(StorePaymentExpenseRequest $request): ?JsonResponse
@@ -25,7 +38,7 @@ class PaymentExpenseController extends Controller
         // Validation User Wallet
         $userWallet = auth()->user()->wallets()->wherePivot('wallet_id', $request->validated('wallet_id'))->firstOrFail();
 
-        if($userWallet->pivot->amount < $reqAmount){
+        if ($userWallet->pivot->amount < $reqAmount) {
             abort(422, "`$userWallet->name` bu hisobingizda mablag' yetarli emas! Hisobingizni tekshiring");
         }
 
@@ -49,7 +62,8 @@ class PaymentExpenseController extends Controller
             // Attach Amount To Wallet
             $payment->wallets()->attach($request->validated('wallet_id'), [
                 'amount' => $reqAmount,
-                'rate_amount' => 0,
+                'rate_amount' => $request->validated('rate_amount'),
+                'sum_price' => $reqAmount * $request->validated('rate_amount'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -69,8 +83,8 @@ class PaymentExpenseController extends Controller
             $formatNum = number_format($reqAmount, 2, '.', ',');
 
             return response()->json([
-                'message' => "`$expense->name` xarajat uchun $formatNum  $currency muvaffaqiyatli o'tkazildi!",
-            ],201);
+                'message' => "`$expense->name` xarajat uchun $formatNum $currency  muvaffaqiyatli o'tkazildi!",
+            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -79,8 +93,20 @@ class PaymentExpenseController extends Controller
 
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
-        //
+        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+            ->where('paymentable_type', 'App\Models\Expense')
+            ->orderBy('created_at', 'desc');
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->findOrFail($id);
+
+        return response()->json([
+            'data' => PaymentExpenseResource::make($data),
+        ]);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PaymentCustomerResource extends JsonResource
+class PaymentExpenseResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,14 +14,12 @@ class PaymentCustomerResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
-
         return [
             'id' => $this->id,
-            'user' => $this->user,
-            'customer' => CustomerResource::make($this->paymentable),
-            'wallet_list' => PaymentWalletResource::collection($this->wallets),
-            'total_price' => (float)$this->total_price,
+            'user' => UserResource::make($this->user),
+            'expense' => ExpenseResource::make($this->paymentable),
+            'wallet' => PaymentWalletResource::make($this->wallets[0]),
+            'total_price' => (float)$this->wallets[0]->pivot->sum_price,
             'status' => $this->status,
             'comment' => $this->comment,
             'created_at' => $this->created_at,

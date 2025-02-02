@@ -16,9 +16,12 @@ class PaymentCustomerController extends Controller
 {
     public function index(): JsonResponse
     {
-        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
+            ->select('payments.*', DB::raw('SUM(payment_wallet.sum_price) as total_price'))
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->where('paymentable_type', 'App\Models\Customer')
-            ->orderBy('created_at', 'desc');
+            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
+            ->orderBy('payments.created_at', 'desc');
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
@@ -57,6 +60,7 @@ class PaymentCustomerController extends Controller
                 $walletAttachList[$wallet['wallet_id']] = [
                     'amount' => $wallet['amount'],
                     'rate_amount' => $wallet['rate_amount'],
+                    'sum_price' => $wallet['amount'] * $wallet['rate_amount'],
                     'updated_at' => now(),
                     'created_at' => now(),
                 ];
@@ -66,7 +70,7 @@ class PaymentCustomerController extends Controller
 
             // Increment User Wallets
             foreach ($request->validated('wallet_list') as $wallet) {
-                $this->incrementPivotAmount(auth()->id(), $wallet['wallet_id'], $wallet['amount']);
+                $this->incrementUserWallet(auth()->id(), $wallet['wallet_id'], $wallet['amount']);
             }
 
             // Convert To uzs
@@ -91,9 +95,12 @@ class PaymentCustomerController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
+        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
+            ->select('payments.*', DB::raw('SUM(payment_wallet.sum_price) as total_price'))
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->where('paymentable_type', 'App\Models\Customer')
-            ->orderBy('created_at', 'desc');
+            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
+            ->orderBy('payments.created_at', 'desc');
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
@@ -106,7 +113,7 @@ class PaymentCustomerController extends Controller
         ]);
     }
 
-    public function incrementPivotAmount($userId, $walletId, $incrementBy): void
+    public function incrementUserWallet($userId, $walletId, $incrementBy): void
     {
         DB::table('user_wallet')
             ->where('user_id', $userId)
