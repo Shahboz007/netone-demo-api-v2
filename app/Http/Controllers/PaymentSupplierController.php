@@ -98,8 +98,10 @@ class PaymentSupplierController extends Controller
 
             DB::commit();
 
+            $formatSum = number_format($sum, 2, '.', ',');
+
             return response()->json([
-                "message" => "Taminotchiga o'zkazma muvaffaqiyatli o'tkazildi",
+                "message" => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
             ],201);
 
         } catch (\Exception $e) {
