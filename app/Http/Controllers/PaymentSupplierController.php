@@ -3,14 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePaymentSupplierRequest;
+use App\Http\Resources\PaymentSupplierResource;
 use App\Models\Payment;
 use App\Models\Status;
 use App\Models\Supplier;
 use App\Models\UserWallet;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class PaymentSupplierController extends Controller
 {
+    public function index(): JsonResponse
+    {
+        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
+            ->select('payments.*', DB::raw("SUM(payment_wallet.sum_price) as total_price"))
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->where('paymentable_type', 'App\Models\Supplier')
+            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
+            ->orderBy('payments.created_at', 'desc');
+
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            'data' => PaymentSupplierResource::collection($data),
+        ]);
+    }
+
     public function store(StorePaymentSupplierRequest $request)
     {
         // Supplier
@@ -78,11 +101,32 @@ class PaymentSupplierController extends Controller
 
             return response()->json([
                 "message" => "Taminotchiga o'zkazma muvaffaqiyatli o'tkazildi",
-            ]);
+            ],201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->serverError($e);
         }
+    }
+
+    public function show(string $id): JsonResponse
+    {
+        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
+            ->select('payments.*', DB::raw("SUM(payment_wallet.sum_price) as total_price"))
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->where('paymentable_type', 'App\Models\Supplier')
+            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
+            ->orderBy('payments.created_at', 'desc');
+
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->findOrFail($id);
+
+        return response()->json([
+            'data' => PaymentSupplierResource::make($data),
+        ]);
     }
 }
