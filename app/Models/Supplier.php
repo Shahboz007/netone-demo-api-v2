@@ -9,9 +9,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Supplier extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplierFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'first_name',
         'last_name',
