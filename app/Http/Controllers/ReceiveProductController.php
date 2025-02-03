@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
+use App\Http\Resources\ReceiveProductResource;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use App\Models\Status;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReceiveProductController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', ReceiveProduct::class);
@@ -22,6 +24,7 @@ class ReceiveProductController extends Controller
             "supplier",
             "product",
             "amountType",
+            "status"
         );
 
         if (!auth()->user()->isAdmin()) {
@@ -31,7 +34,7 @@ class ReceiveProductController extends Controller
         $data = $query->latest()->get();
 
         return response()->json([
-            'data' => $data,
+            'data' => ReceiveProductResource::collection($data),
         ]);
     }
 
@@ -89,7 +92,7 @@ class ReceiveProductController extends Controller
             return response()->json([
                 'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $receivedAmount x $receivedPrice = $totalPrice uzs.",
                 'data' => $newReceive
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -98,7 +101,7 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function show($receiveId)
+    public function show($receiveId): JsonResponse
     {
         // Gate
         Gate::authorize('view', ReceiveProduct::class);
@@ -108,6 +111,7 @@ class ReceiveProductController extends Controller
             "supplier",
             "product",
             "amountType",
+            "status"
         )->where('id', $receiveId);
 
         if (!auth()->user()->isAdmin()) {
@@ -117,7 +121,7 @@ class ReceiveProductController extends Controller
         $data = $query->firstOrFail();
 
         return response()->json([
-            'data' => $data,
-        ], 201);
+            'data' => ReceiveProductResource::make($data),
+        ]);
     }
 }

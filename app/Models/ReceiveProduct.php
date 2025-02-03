@@ -40,4 +40,9 @@ class ReceiveProduct extends Model
     {
         return $this->belongsTo(AmountType::class, 'amount_type_id');
     }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status_id');
+    }
 }

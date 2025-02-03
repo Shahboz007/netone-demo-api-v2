@@ -16,11 +16,13 @@ class ReceiveProductResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "user" => $this->user,
-            "supplier" => $this->supplier,
+            "user" => UserResource::make($this->user),
+            "supplier" => SupplierResource::make($this->supplier),
             "product" => ProductResource::make($this->product),
             "amount_type" => $this->amountType,
             "amount" => (float) $this->amount,
+            "price" => (float) $this->price,
+            "total_price" => (float) $this->total_price,
             "received_date" => $this->received_date,
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
