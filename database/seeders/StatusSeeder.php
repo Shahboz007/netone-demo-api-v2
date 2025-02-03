@@ -27,5 +27,8 @@ class StatusSeeder extends Seeder
         // Payment
         Status::create(['name' => "Mijozdan o'tkazma", 'code' => 'paymentCustomer']);
         Status::create(['name' => "Xarajat", 'code' => 'paymentExpense']);
+        // Receive Product
+        Status::create(['name' => "To'lov qilinmagan", 'code' => 'receiveProductDebt']);
+        Status::create(['name' => "To'lov qilingan", 'code' => 'receiveProductPayment']);
     }
 }
