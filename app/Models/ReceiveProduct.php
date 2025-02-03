@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReceiveProduct extends Model
 {
-    /** @use HasFactory<\Database\Factories\ReceiveProductFactory> */
-    use HasFactory;
-
     protected $fillable = [
         "user_id",
         "supplier_id",

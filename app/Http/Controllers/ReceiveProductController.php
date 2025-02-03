@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
-use App\Http\Requests\UpdateReceiveProductRequest;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use App\Models\Status;
@@ -120,17 +119,5 @@ class ReceiveProductController extends Controller
         return response()->json([
             'data' => $data,
         ], 201);
-    }
-
-
-    public function update(UpdateReceiveProductRequest $request, ReceiveProduct $receiveProduct)
-    {
-        //
-    }
-
-
-    public function destroy(ReceiveProduct $receiveProduct)
-    {
-        //
     }
 }
