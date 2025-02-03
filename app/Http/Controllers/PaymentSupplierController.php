@@ -42,11 +42,10 @@ class PaymentSupplierController extends Controller
         // Validation User Wallet
         $userAllWallets = UserWallet::where('user_id', auth()->id())->get();
         $pluckWalletAmount = $userAllWallets->pluck('amount', 'wallet_id')->toArray();
-        $pluckWalletName = $userAllWallets->pluck('name', 'wallet_id')->toArray();
-
-        foreach ($request->validated('wallet_list') as $walletItem) {
-            if ($pluckWalletAmount[$walletItem['wallet_id']] && $pluckWalletAmount[$walletItem['wallet_id']] < $walletItem['amount']) {
-                $walletName = $pluckWalletName[$walletItem['wallet_Id']];
+        $pluckWalletName = $userAllWallets->pluck('wallet', 'wallet_id')->toArray();
+        foreach ($request->validated('wallet_list') as $item) {
+            if ($pluckWalletAmount[$item['wallet_id']] && $pluckWalletAmount[$item['wallet_id']] < $item['amount']) {
+                $walletName = $pluckWalletName[$item['wallet_id']]['name'];
                 abort(422, "`$walletName` bu hisobingizda mablag' yetarli emas! Hisobingizni tekshiring");
             }
         }
