@@ -19,6 +19,7 @@ class ProductResource extends JsonResource
             "name" => $this->name,
             "cost_price" => auth()->user()->isAdmin() ? (float)$this->cost_price : 0,
             "sale_price" => (float)$this->sale_price,
+            "price_amount_type" => $this->priceAmountType,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
         ];

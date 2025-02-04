@@ -25,7 +25,9 @@ class StoreReceiveProductRequest extends FormRequest
             'supplier_id' => 'required|integer|exists:suppliers,id',
             'product_id' => 'required|integer|exists:products,id',
             'date_received' => 'required|string',
-            'amount' => 'required|numeric|min:0.01'
+            'amount' => 'required|numeric|min:0.01',
+            'price' => 'required|numeric|min:0',
+            'comment' => 'nullable|string'
         ];
     }
 }

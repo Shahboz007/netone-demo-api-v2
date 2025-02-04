@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Supplier extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplierFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'first_name',
         'last_name',
@@ -18,6 +16,11 @@ class Supplier extends Model
         'telegram',
         'balance',
     ];
+
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'paymentable');
+    }
 
     public function receiveProducts(): HasMany
     {

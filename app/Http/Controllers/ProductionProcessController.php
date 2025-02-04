@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FinishProductionProcessRequest;
 use App\Http\Requests\StoreProductionProcessRequest;
-use App\Http\Requests\UpdateProductionProcessRequest;
 use App\Http\Resources\ProductionProcessResource;
 use App\Http\Resources\ProductionProcessShowResource;
 use App\Models\Product;
@@ -61,7 +60,7 @@ class ProductionProcessController extends Controller
         }
 
         // Pluck Request Items
-        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
+//        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
         $pluckReqProducts = collect($validateItems)->pluck('amount', 'product_id');
 
         DB::beginTransaction();
@@ -78,11 +77,6 @@ class ProductionProcessController extends Controller
             $newProcess->processItems()->createMany($request->validated('items_list'));
 
             foreach ($stockItems as $item) {
-
-                if ($pluckReqProductsAmountType[$item->product_id] !== 2) {
-                    abort(422, "Ishlab chiqarish uchun mahsulotlar faqat qop o'lchovi bo'yicha solinishi kerak!");
-                }
-
                 $amount = $pluckReqProducts->get($item->product_id);
 
                 $item->decrement('amount', $amount);

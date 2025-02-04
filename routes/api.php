@@ -21,9 +21,10 @@ require __DIR__ . "/api/common/wallet.php";
 require __DIR__ . "/api/production/recipe.php";
 require __DIR__ . "/api/production/process.php";
 
-// Currency
+// Finance
 require __DIR__ . "/api/finance/currency.php";
 require __DIR__ . "/api/finance/exchangeRate.php";
 require __DIR__ . '/api/finance/paymentCustomer.php';
 require __DIR__ .'/api/finance/userWallet.php';
 require __DIR__ .'/api/finance/paymentExpense.php';
+require __DIR__ ."/api/finance/paymentSupplier.php";
