@@ -56,13 +56,13 @@ class ExpenseController extends Controller
         Gate::authorize('update', Expense::class);
 
         $expense = Expense::with('children')->find($id);
-        if (!$expense) abort(422, 'Bu xarajat turi topilmadi!');
+        if (!$expense) return $this->mainErrRes('Bu xarajat turi topilmadi!');
 
         // validate exist
         if ($request->validated('name')) {
             $isExist = Expense::where('name', $request->validated('name'))
                 ->where('id', "<>", $expense->id)->exists();
-            if ($isExist) abort(422, 'Bu xarajat turi mavjud!');
+            if ($isExist) return $this->mainErrRes('Bu xarajat turi mavjud!');
         }
 
         // Check Parent And Children
@@ -70,7 +70,7 @@ class ExpenseController extends Controller
             $pluckChildren = $expense->children->pluck('name', 'id');
 
             if ($expense->id === $request->validated('parent_id') || !empty($pluckChildren[$request->validated('parent_id')])) {
-                abort(422, "Ma'lumotni noto'g'ri kiritdingiz!");
+                return $this->mainErrRes("Ma'lumotni noto'g'ri kiritdingiz!");
             }
         }
 
