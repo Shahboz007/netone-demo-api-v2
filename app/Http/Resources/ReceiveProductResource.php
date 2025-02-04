@@ -23,7 +23,7 @@ class ReceiveProductResource extends JsonResource
             "amount" => (float) $this->amount,
             "price" => (float) $this->price,
             "total_price" => (float) $this->total_price,
-            "received_date" => $this->received_date,
+            "date_received" => $this->date_received,
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
         ];

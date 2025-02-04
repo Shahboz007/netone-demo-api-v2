@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
-    use HasFactory;
-
     protected $fillable = [
+        'price_amount_type_id',
         'name',
         'cost_price',
         'sale_price',
     ];
+
+
+    public function priceAmountType(): BelongsTo
+    {
+        return $this->belongsTo(AmountType::class, 'price_amount_type_id');
+    }
 
     public function stock(): HasOne
     {

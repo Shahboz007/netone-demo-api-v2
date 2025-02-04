@@ -16,7 +16,7 @@ class ProductController extends Controller
         // Gate
         Gate::authorize('viewAny', Product::class);
 
-        $data = Product::latest()->get();
+        $data = Product::with('priceAmountType')->latest()->get();
 
         return response()->json([
             "data" => ProductResource::collection($data),
@@ -33,6 +33,7 @@ class ProductController extends Controller
             'name' => $request->validated('name'),
             'cost_price' => 0,
             'sale_price' => $request->validated('sale_price'),
+            'price_amount_type_id' => $request->validated('price_amount_type_id'),
         ]);
 
         return response()->json([
@@ -42,7 +43,7 @@ class ProductController extends Controller
     }
 
 
-    public function show(Product $product):JsonResponse
+    public function show(Product $product): JsonResponse
     {
         // Gate
         Gate::authorize('view', Product::class);
@@ -53,7 +54,7 @@ class ProductController extends Controller
     }
 
 
-    public function update(UpdateProductRequest $request, Product $product):JsonResponse
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
         // Gate
         Gate::authorize('update', Product::class);
@@ -66,10 +67,22 @@ class ProductController extends Controller
             if ($nameIsExists) abort(422, "Bu mahsulot nomi allaqachon mavjud");
         }
 
-        $product->update([
-            'name' => $request->validated('name'),
-            'sale_price' => $request->validated('sale_price'),
-        ]);
+        // Update Data
+        $name = $request->validated('name');
+        $sale_price = $request->validated('sale_price');
+        $price_amount_type_id = $request->validated('price_amount_type_id');
+
+        if ($name) {
+            $product->name = $request->validated('name');
+        }
+        if ($sale_price) {
+            $product->sale_price = $request->validated('sale_price');
+        }
+        if ($price_amount_type_id) {
+            $product->price_amount_type_id = $request->validated('price_amount_type_id');
+        }
+
+        $product->save();
 
         return response()->json([
             "message" => "Mahsulot muvaffaqiyatli tahrirlandi!",
@@ -78,7 +91,7 @@ class ProductController extends Controller
     }
 
 
-    public function destroy(Product $product):JsonResponse
+    public function destroy(Product $product): JsonResponse
     {
         // Gate
         Gate::authorize('delete', Product::class);
