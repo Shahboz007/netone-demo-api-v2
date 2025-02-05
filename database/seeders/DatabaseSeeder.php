@@ -24,10 +24,12 @@ class DatabaseSeeder extends Seeder
 
             // Optional
             // ProductSeeder::class,
-            // CustomerSeeder::class,
+             CustomerSeeder::class,
             // ProductStockSeeder::class,
             // ExpenseSeeder::class,
             // WalletSeeder::class,
+            OrderSeeder::class,
+            CompletedOrderSeeder::class,
         ]);
     }
 }
