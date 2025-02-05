@@ -52,7 +52,20 @@ class OrderCancelController extends Controller
 
         // Check status
         $orderStatus = Status::findOrFail($order->status_id);
-        $this->checkOrderStatus($orderStatus->code);
+
+        if ($orderStatus->code !== 'orderNew') {
+            switch ($orderStatus->code) {
+                case 'orderInProgress':
+                    return $this->mainErrRes("Buyurtmani bekor qilib bo'lmaydi! Buyurtma ishlab chiqarish jarayonida");
+                case 'orderCancel':
+                    return $this->mainErrRes("Buyurtma allaqachon berkor qilingan!");
+                case 'orderCompleted':
+                    return $this->mainErrRes("Buyurtma allaqachon topshirilgan!");
+                default:
+                    return $this->mainErrRes("Buyurtmani bekor qilib bo'lmaydi!");
+            }
+
+        }
 
         // Cancel Status of Order
         $orderCancelStatus = Status::where('code', 'orderCancel')->firstOrFail();
@@ -105,21 +118,5 @@ class OrderCancelController extends Controller
         return response()->json([
             'data' => OrderCancelShowResource::make($data)
         ]);
-    }
-
-    private function checkOrderStatus(string $code): void
-    {
-        if ($code !== 'orderNew') {
-            switch ($code) {
-                case 'orderInProgress':
-                    abort(422, "Buyurtmani bekor qilib bo'lmaydi! Buyurtma ishlab chiqarish jarayonida");
-                case 'orderCancel':
-                    abort(422, "Buyurtma allaqachon berkor qilingan!");
-                case 'orderCompleted':
-                    abort(422, "Buyurtma allaqachon topshirilgan!");
-                default:
-                    abort(422, "Buyurtmani bekor qilib bo'lmaydi!");
-            }
-        }
     }
 }

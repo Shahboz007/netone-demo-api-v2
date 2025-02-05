@@ -44,18 +44,18 @@ class ProductionProcessController extends Controller
         $pluckProducts = Product::whereIn('id', $validateItemsKeys)->get()->pluck('name', 'id');
 
         if ($pluckStockItems->isEmpty()) {
-            abort(422, "Zaxira mavjud emas");
+            return $this->mainErrRes("Zaxira mavjud emas");
         }
 
         foreach ($validateItems as $item) {
             $productName = $pluckProducts->get($item['product_id']);
 
             if (!$pluckStockItems->has($item['product_id'])) {
-                abort(422, "`$productName` mahsulotning zaxirasi mavjud emas!");
+                return $this->mainErrRes("`$productName` mahsulotning zaxirasi mavjud emas!");
             }
 
             if ($pluckStockItems->get($item['product_id']) < $item['amount']) {
-                abort(422, "`$productName` mahsulotning zaxirasi yetarli emas!");
+                return $this->mainErrRes("`$productName` mahsulotning zaxirasi yetarli emas!");
             }
         }
 
@@ -118,14 +118,14 @@ class ProductionProcessController extends Controller
 
         if ($statusCurrent->code !== 'productionProcess') {
             if ($statusCurrent->code === 'productionCancel') {
-                abort(422, 'Bu ishlab chiqarish jarayoni allaqachon bekor qilingan');
+                return $this->mainErrRes('Bu ishlab chiqarish jarayoni allaqachon bekor qilingan');
             } else if ($statusCurrent->code === 'productionStopped') {
-                abort(422, "Bu ishlab chiqarish jarayoni allaqachon to'xtatilgan");
+                return $this->mainErrRes("Bu ishlab chiqarish jarayoni allaqachon to'xtatilgan");
             } else if ($statusCurrent->code === 'productionCompleted') {
-                abort(422, "Bu ishlab chiqarish jarayoni allaqachon tayyorlangan");
+                return $this->mainErrRes("Bu ishlab chiqarish jarayoni allaqachon tayyorlangan");
             }
 
-            abort(422, "Bu ishlab chiqarish jarayonini tugallab bo'lmaydi");
+            return $this->mainErrRes("Bu ishlab chiqarish jarayonini tugallab bo'lmaydi");
         }
 
         // Status productionCompleted
@@ -181,7 +181,7 @@ class ProductionProcessController extends Controller
             ->where('id', $data->status_id)
             ->exists();
 
-        if (!$statusProductionProcess) abort(422, "Bu ishlab chiqarish jarayonini bekor qilib bo'lmaydi");
+        if (!$statusProductionProcess) return $this->mainErrRes("Bu ishlab chiqarish jarayonini bekor qilib bo'lmaydi");
 
         // Status productionCancel
         $statusProductionCancel = Status::where('code', 'productionCancel')->firstOrFail();
