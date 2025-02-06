@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Statement;
 
 use App\Http\Controllers\Controller;
-use App\Services\Statement\StatementMonthlySales;
+use App\Services\Statement\StatementYearlySales;
 
 class StatementProfitAndLostController extends Controller
 {
@@ -11,7 +11,12 @@ class StatementProfitAndLostController extends Controller
     {
         $year = 2024;
 
-        $list[0] = StatementMonthlySales::getMonthlySales($year, "Sotishdan tushgan daromad");
+        $allMonthSales  = new StatementYearlySales($year);
+
+        $list[] = $allMonthSales->getYearlySalePrice("Daromad");
+        $list[] = $allMonthSales->getYearlyCostPrice("Tannarxi");
+        $list[] = $allMonthSales->getYearlyMarja("Marja");
+        $list[] = $allMonthSales->getYearlyMarjaByPercent("Marja rentabellik");
 
         return $list;
     }
