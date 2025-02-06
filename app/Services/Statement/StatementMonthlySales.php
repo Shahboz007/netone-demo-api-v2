@@ -42,14 +42,16 @@ class StatementMonthlySales
         $totalSalePrice = $monthlySubmittedOrders->sum('sale_price');
         $totalCostPrice = $monthlySubmittedOrders->sum('cost_price');
 
-        //
-
         $list["title"] = $title;
         $list["total_sale_price"] = $totalSalePrice;
         $list["total_cost_price"] = $totalCostPrice;
 
         foreach ($monthlySubmittedOrders as $item) {
-            $list[$item->month_number] = $item;
+            $list[$item->month_number]["id"] = $item->id;
+            $list[$item->month_number]["month_number"] = $item->month_number;
+            $list[$item->month_number]["month_name"] = $item->month_name;
+            $list[$item->month_number]["sale_price"] = (float)$item->sale_price;
+            $list[$item->month_number]["cost_price"] = (float)$item->cost_price;
         }
 
         return $list;
