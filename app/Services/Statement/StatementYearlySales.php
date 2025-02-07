@@ -98,7 +98,7 @@ class StatementYearlySales
 
         foreach ($this->data as $item) {
             $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
-            $percent = round($item->sale_price / $marja * 100, 2);
+            $percent = round($marja / $item->sale_price * 100, 2);
 
             $list["month_number_$item->month_number"] = $percent;
             $totalMarjaPercent += $percent;
