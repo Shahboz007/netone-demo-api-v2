@@ -30,7 +30,6 @@ class StatementYearlySales
                 // ....
             ]
         --*/
-        $list = [];
 
 
         // Completed Orders
