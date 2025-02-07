@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Statement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StatementProfitAndLostResource;
 use App\Services\Statement\StatementYearlySales;
 use Illuminate\Http\Request;
 
@@ -32,6 +33,10 @@ class StatementProfitAndLostController extends Controller
         $list[] = $allMonthSales->getYearlyMarja("Marja");
         $list[] = $allMonthSales->getYearlyMarjaByPercent("Marja rentabellik");
 
-        return $list;
+        return response()->json([
+            'data' => $list,
+            'current_year' => $year,
+            'current_month' => now()->month,
+        ]);
     }
 }

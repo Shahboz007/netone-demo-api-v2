@@ -4,6 +4,7 @@ namespace App\Services\Statement;
 
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StatementYearlySales
 {
@@ -17,6 +18,7 @@ class StatementYearlySales
 
         /*------------------------------
             [
+                "key": "123asd",
                 "title": "text",
                 "total_amount": 0,
                 "month_number_1": [
@@ -53,8 +55,8 @@ class StatementYearlySales
 
     public function getYearlySalePrice(string $title): array
     {
+        $list['key'] = $this->getKey();
         $list["title"] = $title;
-
 
         foreach ($this->data as $item) {
             $list["month_number_$item->month_number"] = (float)$item->sale_price;;
@@ -68,6 +70,7 @@ class StatementYearlySales
     function getYearlyCostPrice(string $title): array
     {
 
+        $list['key'] = $this->getKey();
         $list["title"] = $title;
 
         foreach ($this->data as $item) {
@@ -115,6 +118,7 @@ class StatementYearlySales
 
     public function getYearlyCancelOrder(string $title): array
     {
+        $list['key'] = $this->getKey();
         $list["title"] = $title;
 
 
@@ -127,8 +131,9 @@ class StatementYearlySales
         return $list;
     }
 
-     public function getYearlyShippingRawMaterial(string $title): array
+    public function getYearlyShippingRawMaterial(string $title): array
     {
+        $list['key'] = $this->getKey();
         $list["title"] = $title;
 
 
@@ -139,6 +144,11 @@ class StatementYearlySales
         $list["total_amount"] = 0;
 
         return $list;
+    }
+
+    private function getKey(): string
+    {
+        return Str::uuid()->toString();
     }
 
     private function calcMarjaAmount(float $salePrice, float $costPrice): float
