@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             "name" => "Admin",
             "login" => "admin",
             "phone" => "998123456789",
-            "password" => Hash::make("secret"),
+            "password" => Hash::make("secret!@"),
         ]);
         $adminRole = Role::where('name', 'admin')->firstOrFail();
         $admin->roles()->attach($adminRole);
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             "name" => "Producer",
             "login" => "producer",
             "phone" => "998123456787",
-            "password" => Hash::make("secret"),
+            "password" => Hash::make("secret!@"),
         ]);
         $producerRole = Role::where('name', 'producer')->firstOrFail();
         $producer->roles()->attach($producerRole);
