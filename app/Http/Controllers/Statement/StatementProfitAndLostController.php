@@ -23,14 +23,14 @@ class StatementProfitAndLostController extends Controller
 
         $allMonthSales = new StatementYearlySales($year);
 
-        $list[] = $allMonthSales->getYearlySalePrice("Daromad");
-        $list[] = $allMonthSales->getYearlyCancelOrder("Qaytarilgan");
-        $list[] = $allMonthSales->getYearlySalePrice("Sof daromad");
-        $list[] = $allMonthSales->getYearlyCostPrice("Sotilgan mahsulot narxi");
-        $list[] = $allMonthSales->getYearlyCostPrice("Tannarxi");
-        $list[] = $allMonthSales->getYearlyShippingRawMaterial("Xom ashyo yetkazib berish");
-        $list[] = $allMonthSales->getYearlyMarja("Marja");
-        $list[] = $allMonthSales->getYearlyMarjaByPercent("Marja rentabellik");
+        $list[] = $allMonthSales->getYearlySalePrice(["title" => "Daromad"]);
+        $list[] = $allMonthSales->getYearlyCancelOrder(["title" => "Qaytarilgan"]);
+        $list[] = $allMonthSales->getYearlySalePrice(["title" => "Sof daromad", "strong" => true]);
+        $list[] = $allMonthSales->getYearlyCostPrice(["title" => "Sotilgan mahsulot narxi", "strong" => true]);
+        $list[] = $allMonthSales->getYearlyCostPrice(["title" => "Tannarxi"]);
+        $list[] = $allMonthSales->getYearlyShippingRawMaterial(["title" => "Xom ashyo yetkazib berish"]);
+        $list[] = $allMonthSales->getYearlyMarja(["title" => "Marja", "strong" => true]);
+        $list[] = $allMonthSales->getYearlyMarjaByPercent(["title" => "Marja rentabellik", "is_color" => true]);
 
         return response()->json([
             'data' => $list,

@@ -53,10 +53,10 @@ class StatementYearlySales
         $this->totalCostPrice = $this->data->sum('cost_price');
     }
 
-    public function getYearlySalePrice(string $title): array
+    public function getYearlySalePrice(array $params): array
     {
-        $list['id'] = $this->getID();
-        $list["title"] = $title;
+        // List
+        $list = $this->createList($params);
 
         foreach ($this->data as $item) {
             $list["month_number_$item->month_number"] = (float)$item->sale_price;;
@@ -67,11 +67,10 @@ class StatementYearlySales
         return $list;
     }
 
-    function getYearlyCostPrice(string $title): array
+    function getYearlyCostPrice(array $params): array
     {
-
-        $list['id'] = $this->getID();
-        $list["title"] = $title;
+        // List
+        $list = $this->createList($params);
 
         foreach ($this->data as $item) {
             $list["month_number_$item->month_number"] = (float)$item->cost_price;
@@ -82,9 +81,10 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyMarja(string $title): array
+    public function getYearlyMarja(array $params): array
     {
-        $list["title"] = $title;
+        // List
+        $list = $this->createList($params);
 
         $totalMarjaAmount = 0;
 
@@ -98,9 +98,10 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyMarjaByPercent(string $title): array
+    public function getYearlyMarjaByPercent(array $params): array
     {
-        $list["title"] = $title;
+        // List
+        $list = $this->createList($params);
 
         $totalMarjaPercent = 0;
 
@@ -116,10 +117,10 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyCancelOrder(string $title): array
+    public function getYearlyCancelOrder(array $params): array
     {
-        $list['id'] = $this->getID();
-        $list["title"] = $title;
+        // List
+        $list = $this->createList($params);
 
 
         foreach ($this->data as $item) {
@@ -131,11 +132,10 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyShippingRawMaterial(string $title): array
+    public function getYearlyShippingRawMaterial(array $params): array
     {
-        $list['id'] = $this->getID();
-        $list["title"] = $title;
-
+        // List
+        $list = $this->createList($params);
 
         foreach ($this->data as $item) {
             $list["month_number_$item->month_number"] = 0;
@@ -149,6 +149,16 @@ class StatementYearlySales
     private function getID(): string
     {
         return Str::uuid()->toString();
+    }
+
+    private function createList(array $params): array
+    {
+        $list['id'] = $this->getID();
+
+        if ($params['title']) $list['title'] = $params['title'];
+        $list['strong'] = isset($params['strong']);
+        $list['is_color'] = isset($params['is_color']);
+        return $list;
     }
 
     private function calcMarjaAmount(float $salePrice, float $costPrice): float
