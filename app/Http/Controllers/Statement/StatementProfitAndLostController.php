@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Statement;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\StatementProfitAndLostResource;
 use App\Services\Statement\StatementYearlySales;
 use Illuminate\Http\Request;
 
