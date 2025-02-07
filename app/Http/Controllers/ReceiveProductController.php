@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
 use App\Http\Resources\ReceiveProductResource;
+use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use App\Models\Status;
@@ -44,22 +45,38 @@ class ReceiveProductController extends Controller
         // Gate
         Gate::authorize('create', ReceiveProduct::class);
 
+        // Req Product Plucked List
+        $reqProductIdList = array_column($request->validated('product_list'), 'product_id');
 
-        $productStock = ProductStock::where('product_id', $request->validated('product_id'))
-            ->first();
+        // Check Product Stock
+        $productStockList = ProductStock::whereIn('product_id', $reqProductIdList)->get();
 
-        if (!$productStock) {
+        if ($productStockList->isEmpty()) {
             abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+        }
+
+        $pluckedProductStockList = $productStockList->pluck('amount', 'product_id');
+
+        foreach ($request->validated('product_list') as $item) {
+            if (!$pluckedProductStockList[$item['product_id']]) {
+                abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+            }
+
+            if ($pluckedProductStockList[$item['product_id']] < $item['amount']) {
+                return $this->mainErrRes("Zaxira yetarli emas!");
+            }
         }
 
         // Supplier
         $supplier = Supplier::findOrFail($request->validated('supplier_id'));
 
-        // Calc Total Price
-        $totalPrice = $request->validated('price') * $request->validated('amount');
-
         // Status Receive Debt
         $statusReceiveDebt = Status::where('code', 'receiveProductDebt')->firstOrFail();
+
+        // Products
+        $products = Product::with('priceAmountType')->with('')->where('id', $reqProductIdList)->get();
+        $pluckedProductsName = $products->pluck('productAmountType', 'id')->toArray();
+        dd($pluckedProductsName);
 
         DB::beginTransaction();
 
@@ -68,31 +85,42 @@ class ReceiveProductController extends Controller
             $newReceive = ReceiveProduct::create([
                 'user_id' => auth()->id(),
                 'supplier_id' => $supplier->id,
-                'product_id' => $request->validated('product_id'),
-                'amount_type_id' => $productStock->amount_type_id,
                 'status_id' => $statusReceiveDebt->id,
                 'date_received' => $request->validated('date_received'),
-                'amount' => $request->validated('amount'),
-                'price' => $request->validated('price'),
-                'total_price' => $totalPrice,
+                'total_price' => 0,
                 'comment' => $request->validated('comment'),
             ]);
 
+            // Attach Details
+            $productList = [];
+
+            foreach ($request->validated('product_list') as $item) {
+                $productName =
+
+                    $productList[] = [
+                        'product_id' => $item['product_id'],
+                        'amount_type_id' => $item['amount'],
+                        'price' => $item['price']
+                    ];
+            }
+
+            //            $newReceive->receiveProductDetails()->createMany();
+
             // Change Stock Amount
-            $productStock->increment('amount', $request->validated('amount'));
+            //            $productStockList->increment('amount', $request->validated('amount'));
 
             // Change of Supplier's balance
-            $supplier->increment('balance', $totalPrice);
+            //            $supplier->increment('balance', $totalPrice);
 
-            DB::commit();
+            //            DB::commit();
 
-            $receivedAmount = $request->validated('amount');
-            $receivedPrice = $request->validated('price');
+            //            $receivedAmount = $request->validated('amount');
+            //            $receivedPrice = $request->validated('price');
 
-            return response()->json([
-                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $receivedAmount x $receivedPrice = $totalPrice uzs.",
-                'data' => $newReceive
-            ], 201);
+            //            return response()->json([
+            //                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $receivedAmount x $receivedPrice = $totalPrice uzs.",
+            //                'data' => $newReceive
+            //            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 

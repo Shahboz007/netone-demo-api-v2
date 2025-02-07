@@ -2,22 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
-class ProductStock extends Model
+class ReceiveProductDetail extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductStockFactory> */
-    use HasFactory;
-
     protected $fillable = [
+        'receive_product_id',
         'product_id',
-        'name',
         'amount_type_id',
+        'status_id',
         'amount',
+        'price',
+        'sum_price',
     ];
+
+    public function receiveProduct(): BelongsTo
+    {
+        return $this->belongsTo(ReceiveProduct::class, 'receive_product_id');
+    }
 
     public function product(): BelongsTo
     {
@@ -27,5 +30,10 @@ class ProductStock extends Model
     public function amountType(): BelongsTo
     {
         return $this->belongsTo(AmountType::class, 'amount_type_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status_id');
     }
 }
