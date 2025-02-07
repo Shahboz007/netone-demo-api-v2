@@ -34,7 +34,7 @@ class StatementProfitAndLostController extends Controller
 
         return response()->json([
             'data' => $list,
-            'current_year' => $year,
+            'current_year' => (int)$year,
             'current_month' => now()->month,
         ]);
     }
