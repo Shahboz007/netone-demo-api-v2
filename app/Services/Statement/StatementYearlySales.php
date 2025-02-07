@@ -18,7 +18,7 @@ class StatementYearlySales
 
         /*------------------------------
             [
-                "key": "123asd",
+                "id": "123asd",
                 "title": "text",
                 "total_amount": 0,
                 "month_number_1": [
@@ -55,7 +55,7 @@ class StatementYearlySales
 
     public function getYearlySalePrice(string $title): array
     {
-        $list['key'] = $this->getKey();
+        $list['id'] = $this->getID();
         $list["title"] = $title;
 
         foreach ($this->data as $item) {
@@ -70,7 +70,7 @@ class StatementYearlySales
     function getYearlyCostPrice(string $title): array
     {
 
-        $list['key'] = $this->getKey();
+        $list['id'] = $this->getID();
         $list["title"] = $title;
 
         foreach ($this->data as $item) {
@@ -118,7 +118,7 @@ class StatementYearlySales
 
     public function getYearlyCancelOrder(string $title): array
     {
-        $list['key'] = $this->getKey();
+        $list['id'] = $this->getID();
         $list["title"] = $title;
 
 
@@ -133,7 +133,7 @@ class StatementYearlySales
 
     public function getYearlyShippingRawMaterial(string $title): array
     {
-        $list['key'] = $this->getKey();
+        $list['id'] = $this->getID();
         $list["title"] = $title;
 
 
@@ -146,7 +146,7 @@ class StatementYearlySales
         return $list;
     }
 
-    private function getKey(): string
+    private function getID(): string
     {
         return Str::uuid()->toString();
     }
