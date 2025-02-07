@@ -158,6 +158,7 @@ class StatementYearlySales
         if ($params['title']) $list['title'] = $params['title'];
         $list['strong'] = isset($params['strong']);
         $list['is_color'] = isset($params['is_color']);
+        $list['is_diff'] = isset($params['is_diff']);
         return $list;
     }
 
