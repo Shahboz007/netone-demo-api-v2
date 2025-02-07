@@ -19,7 +19,7 @@ class StatementYearlySales
             [
                 "title": "text",
                 "total_amount": 0,
-                "1": [
+                "month_number_1": [
                        "id": 300,
                        "month_number": 1,
                        "month_name": "January",
@@ -52,7 +52,7 @@ class StatementYearlySales
 
 
         foreach ($this->data as $item) {
-            $list[$item->month_number] = (float)$item->sale_price;;
+            $list["month_number_$item->month_number"] = (float)$item->sale_price;;
         }
 
         $list["total_amount"] = $this->totalSalePrice;
@@ -66,7 +66,7 @@ class StatementYearlySales
         $list["title"] = $title;
 
         foreach ($this->data as $item) {
-            $list[$item->month_number] = (float)$item->cost_price;
+            $list["month_number_$item->month_number"] = (float)$item->cost_price;
         }
 
         $list["total_amount"] = $this->totalCostPrice;
@@ -82,7 +82,7 @@ class StatementYearlySales
 
         foreach ($this->data as $item) {
             $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
-            $list[$item->month_number] = $marja;
+            $list["month_number_$item->month_number"] = $marja;
             $totalMarjaAmount += $marja;
         }
 
@@ -100,7 +100,7 @@ class StatementYearlySales
             $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
             $percent = round($item->sale_price / $marja * 100, 2);
 
-            $list[$item->month_number] = $percent;
+            $list["month_number_$item->month_number"] = $percent;
             $totalMarjaPercent += $percent;
         }
 
