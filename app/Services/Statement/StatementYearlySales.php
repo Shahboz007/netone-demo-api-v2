@@ -34,14 +34,20 @@ class StatementYearlySales
 
         // Completed Orders
         $this->data = DB::table('completed_orders')
-            ->selectRaw('MIN(id) as id, MONTH(created_at) as month_number, MONTHNAME(created_at) as month_name, SUM(total_sale_price) as sale_price,SUM(total_cost_price) as cost_price')
+            ->selectRaw('
+                MIN(id) as id,
+                MONTH(created_at) as month_number,
+                MONTHNAME(created_at) as month_name,
+                SUM(total_sale_price) as sale_price,
+                SUM(total_cost_price) as cost_price
+            ')
             ->whereYear('created_at', $year)
             ->where('status_id', $salesStatus->id)
             ->groupByRaw('MONTH(created_at), MONTH(created_at), MONTHNAME(created_at)')
             ->orderByRaw('MONTH(created_at)')
             ->get();
 
-        $this->totalCostPrice = $this->data->sum('sale_price');
+        $this->totalSalePrice = $this->data->sum('sale_price');
         $this->totalCostPrice = $this->data->sum('cost_price');
     }
 
@@ -107,6 +113,33 @@ class StatementYearlySales
         return $list;
     }
 
+    public function getYearlyCancelOrder(string $title): array
+    {
+        $list["title"] = $title;
+
+
+        foreach ($this->data as $item) {
+            $list["month_number_$item->month_number"] = 0;
+        }
+
+        $list["total_amount"] = 0;
+
+        return $list;
+    }
+
+     public function getYearlyShippingRawMaterial(string $title): array
+    {
+        $list["title"] = $title;
+
+
+        foreach ($this->data as $item) {
+            $list["month_number_$item->month_number"] = 0;
+        }
+
+        $list["total_amount"] = 0;
+
+        return $list;
+    }
 
     private function calcMarjaAmount(float $salePrice, float $costPrice): float
     {

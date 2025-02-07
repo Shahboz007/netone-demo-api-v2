@@ -24,7 +24,11 @@ class StatementProfitAndLostController extends Controller
         $allMonthSales = new StatementYearlySales($year);
 
         $list[] = $allMonthSales->getYearlySalePrice("Daromad");
+        $list[] = $allMonthSales->getYearlyCancelOrder("Qaytarilgan");
+        $list[] = $allMonthSales->getYearlySalePrice("Sof daromad");
+        $list[] = $allMonthSales->getYearlyCostPrice("Sotilgan mahsulot narxi");
         $list[] = $allMonthSales->getYearlyCostPrice("Tannarxi");
+        $list[] = $allMonthSales->getYearlyShippingRawMaterial("Xom ashyo yetkazib berish");
         $list[] = $allMonthSales->getYearlyMarja("Marja");
         $list[] = $allMonthSales->getYearlyMarjaByPercent("Marja rentabellik");
 
