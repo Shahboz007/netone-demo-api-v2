@@ -20,6 +20,7 @@ class OrderDetailResource extends JsonResource
             "amount_type" => $this->amountType,
             "amount" => (float) $this->amount,
             "completed_amount" => (float) $this->completed_amount,
+            "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
         ];
