@@ -46,37 +46,36 @@ class ReceiveProductController extends Controller
         Gate::authorize('create', ReceiveProduct::class);
 
         // Req Product Plucked List
-        $reqProductIdList = array_column($request->validated('product_list'), 'product_id');
+        $reqPolkaArr = array_column($request->validated('product_list'), 'polka_id');
 
-        // Check Product Stock
-        $productStockList = ProductStock::whereIn('product_id', $reqProductIdList)->get();
+        // Stock
+        $stockList = ProductStock::whereIn('id', $reqPolkaArr)->get();
+        $stockAmountArr = $stockList->pluck('amount', 'id')->toArray();
 
-        if ($productStockList->isEmpty()) {
-            abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+        if ($stockList->isEmpty()) {
+            return $this->mainErrRes('Mahsulotlar uchun zaxira polka ochilmagan. Admin zaxira polka yaratishi kerak');
         }
 
-        $pluckedProductStockList = $productStockList->pluck('amount', 'product_id');
+        // Products
+        $products = Product::whereIn('id', array_column($request->validated('product_list'), 'product_id'))->get();
+        $pluckedProductsName = $products->pluck('name', 'id')->toArray();
+        $pluckedProductsPriceAmountType = $products->pluck('price_amount_type_id', 'id')->toArray();
 
+        // Stock Items
         foreach ($request->validated('product_list') as $item) {
-            if (!$pluckedProductStockList[$item['product_id']]) {
-                abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+            if (!isset($stockAmountArr[$item['polka_id']])) {
+                $productName = $pluckedProductsName[$item['product_id']];
+                return $this->mainErrRes("`$productName` mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak");
             }
 
-            if ($pluckedProductStockList[$item['product_id']] < $item['amount']) {
-                return $this->mainErrRes("Zaxira yetarli emas!");
-            }
         }
+
 
         // Supplier
         $supplier = Supplier::findOrFail($request->validated('supplier_id'));
 
         // Status Receive Debt
         $statusReceiveDebt = Status::where('code', 'receiveProductDebt')->firstOrFail();
-
-        // Products
-        $products = Product::with('priceAmountType')->with('')->where('id', $reqProductIdList)->get();
-        $pluckedProductsName = $products->pluck('productAmountType', 'id')->toArray();
-        dd($pluckedProductsName);
 
         DB::beginTransaction();
 
@@ -90,37 +89,51 @@ class ReceiveProductController extends Controller
                 'total_price' => 0,
                 'comment' => $request->validated('comment'),
             ]);
+            $totalPrice = 0;
 
             // Attach Details
             $productList = [];
 
             foreach ($request->validated('product_list') as $item) {
-                $productName =
+                $sum = $item['amount'] * $item['price'];
 
-                    $productList[] = [
-                        'product_id' => $item['product_id'],
-                        'amount_type_id' => $item['amount'],
-                        'price' => $item['price']
-                    ];
+                $productList[] = [
+                    'receive_product_id' => $newReceive->id,
+                    'product_id' => $item['product_id'],
+                    'amount' => $item['amount'],
+                    'price' => $item['price'],
+
+                    'amount_type_id' => $pluckedProductsPriceAmountType[$item['product_id']],
+                    'status_id' => $statusReceiveDebt->id,
+                    'sum_price' => $sum,
+                ];
+
+                $totalPrice += $sum;
             }
 
-            //            $newReceive->receiveProductDetails()->createMany();
+            $newReceive->receiveProductDetails()->createMany($productList);
+
+            $newReceive->total_price = $totalPrice;
+            $newReceive->save();
 
             // Change Stock Amount
-            //            $productStockList->increment('amount', $request->validated('amount'));
+            foreach ($request->validated('product_list') as $item) {
+                DB::table('product_stocks')
+                    ->where('id', $item['polka_id'])
+                    ->where('product_id', $item['product_id'])
+                    ->increment('amount', $item['amount']);
+            }
 
             // Change of Supplier's balance
-            //            $supplier->increment('balance', $totalPrice);
+            $supplier->increment('balance', $totalPrice);
+            DB::commit();
 
-            //            DB::commit();
+            $formatVal = number_format($totalPrice, 2, '.', ',');
 
-            //            $receivedAmount = $request->validated('amount');
-            //            $receivedPrice = $request->validated('price');
-
-            //            return response()->json([
-            //                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $receivedAmount x $receivedPrice = $totalPrice uzs.",
-            //                'data' => $newReceive
-            //            ], 201);
+            return response()->json([
+                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $formatVal uzs.",
+                'data' => $newReceive
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 

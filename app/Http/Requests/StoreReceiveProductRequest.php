@@ -27,6 +27,7 @@ class StoreReceiveProductRequest extends FormRequest
             'comment' => 'nullable|string',
             'product_list' => 'required|array',
             'product_list.*.product_id' => 'required|integer|exists:products,id',
+            'product_list.*.polka_id' => 'required|integer|exists:product_stocks,id',
             'product_list.*.amount' => 'required|numeric|min:0.01',
             'product_list.*.price' => 'required|numeric|min:0',
         ];
