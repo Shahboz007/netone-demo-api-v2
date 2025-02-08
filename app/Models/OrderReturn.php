@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderReturn extends Model
 {
@@ -24,5 +25,10 @@ class OrderReturn extends Model
     public function order():BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function orderReturnDetails():HasMany
+    {
+        return $this->hasMany(OrderReturnDetail::class, 'order_return_id');
     }
 }
