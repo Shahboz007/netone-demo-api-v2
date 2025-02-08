@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
 use App\Http\Resources\ReceiveProductResource;
+use App\Http\Resources\ReceiveProductShowResource;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
@@ -23,8 +24,6 @@ class ReceiveProductController extends Controller
         $query = ReceiveProduct::with(
             "user",
             "supplier",
-            "product",
-            "amountType",
             "status"
         );
 
@@ -33,7 +32,6 @@ class ReceiveProductController extends Controller
         }
 
         $data = $query->latest()->get();
-
         return response()->json([
             'data' => ReceiveProductResource::collection($data),
         ]);
@@ -150,8 +148,7 @@ class ReceiveProductController extends Controller
         $query = ReceiveProduct::with(
             "user",
             "supplier",
-            "product",
-            "amountType",
+            "receiveProductDetails",
             "status"
         )->where('id', $receiveId);
 
@@ -160,9 +157,8 @@ class ReceiveProductController extends Controller
         }
 
         $data = $query->firstOrFail();
-
         return response()->json([
-            'data' => ReceiveProductResource::make($data),
+            'data' => ReceiveProductShowResource::make($data),
         ]);
     }
 }

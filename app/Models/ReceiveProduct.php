@@ -30,7 +30,8 @@ class ReceiveProduct extends Model
 
     public function receiveProductDetails(): HasMany
     {
-        return $this->hasMany(ReceiveProductDetail::class, 'receive_product_id');
+        return $this->hasMany(ReceiveProductDetail::class, 'receive_product_id')
+            ->with(['product', 'amountType']);
     }
 
     public function status(): BelongsTo
