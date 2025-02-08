@@ -99,17 +99,23 @@ class OrderController extends Controller
             $totalCostPrice = 0;
             $totalSalePrice = 0;
 
-            foreach ($request->validated('product_list') as $product) {
-                // Qop
-                if ($product['amount_type_id'] === 2) {
-                    $totalCostPrice += $pluckedCostPrice[$product['product_id']] * $product['amount'];
-                    $totalSalePrice += $pluckedSalePrice[$product['product_id']] * $product['amount'];
-                } else {
-                    return $this->mainErrRes('Kechirasiz, siz faqat qopda sota olasiz!');
-                }
+            foreach ($request->validated('product_list') as $item) {
+                $totalCostPrice += $pluckedCostPrice[$item['product_id']] * $item['amount'];
+                $totalSalePrice += $pluckedSalePrice[$item['product_id']] * $item['amount'];
             }
 
-            $newOrder->orderDetails()->createMany($request->validated('product_list'));
+            // Create Order Details
+            $detailItemList = [];
+            foreach ($request->validated('product_list') as $item) {
+                $detailItemList[] = [
+                    'product_id' => $item['product_id'],
+                    'amount' => $item['amount'],
+                    'amount_type_id' => $item['amount_type_id'],
+                    'status_id' => $newOrderStatus->id,
+                ];
+            }
+
+            $newOrder->orderDetails()->createMany($detailItemList);
 
 
             $newOrder->total_cost_price = $totalCostPrice;
@@ -188,7 +194,7 @@ class OrderController extends Controller
         $allowedCodes = ['orderNew', 'orderInProgress'];
         $allowedStatuses = Status::whereIn('code', $allowedCodes)->get();
         if (empty($allowedStatuses)) return $this->mainErrRes("Ichki xatolik yuz berdi, iltimos biz bilan bog'laning!");
-        if (!$allowedStatuses->contains('id', $order->status_id))   return $this->mainErrRes( "Bu buyurtmani tayyorlandi holatiga o'tkazish mumkin emas!");
+        if (!$allowedStatuses->contains('id', $order->status_id)) return $this->mainErrRes("Bu buyurtmani tayyorlandi holatiga o'tkazish mumkin emas!");
 
         //*******--start-- Validation Order Details Item *******//
         $updates = collect($request->validated('product_list'))
@@ -199,12 +205,12 @@ class OrderController extends Controller
         $prodItemLength = count($updates);
 
         if ($orderItemLength > $prodItemLength || $orderItemLength < $prodItemLength) {
-              return $this->mainErrRes( "Siz buyurtma mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+            return $this->mainErrRes("Siz buyurtma mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
         }
 
         foreach ($order->orderDetails as $detail) {
             if (!$updates->has($detail->product_id)) {
-                  return $this->mainErrRes( "Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+                return $this->mainErrRes("Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
             }
         }
         //*******--end-- Validation Order Details Item *******//
@@ -215,7 +221,7 @@ class OrderController extends Controller
             ->get();
 
         if ($stockList->isEmpty()) {
-              return $this->mainErrRes( "Buyurtmani tayyorlab bo'lmadi. Zaxirani tekshiring!");
+            return $this->mainErrRes("Buyurtmani tayyorlab bo'lmadi. Zaxirani tekshiring!");
         }
 
         $productPluckList = Product::whereIn('id', $reqProductsId)->select('id', 'name')->get()->pluck('name', 'id');
@@ -224,12 +230,12 @@ class OrderController extends Controller
         foreach ($request->validated('product_list') as $item) {
             if (!$stockAmountPluckList->has($item['product_id'])) {
                 $productName = $productPluckList->get($item['product_id']);
-                  return $this->mainErrRes( "`$productName` mahsuloti bo'yicha zaxira mavjud emas!");
+                return $this->mainErrRes("`$productName` mahsuloti bo'yicha zaxira mavjud emas!");
             }
 
             if ($stockAmountPluckList->get($item['product_id']) < $item['completed_amount']) {
                 $productName = $productPluckList->get($item['product_id']);
-                  return $this->mainErrRes( "`$productName` mahsuloti bo'yicha zaxira yetarli emas!");
+                return $this->mainErrRes("`$productName` mahsuloti bo'yicha zaxira yetarli emas!");
             }
         }
 
@@ -264,7 +270,7 @@ class OrderController extends Controller
                         $totalCostPrice += $completedAmount * $detail->product->cost_price;
                         $totalSalePrice += $completedAmount * $detail->product->sale_price;
                     } else {
-                          return $this->mainErrRes( "Buyurtmani tayyor holatga o'tkazish uchun, buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
+                        return $this->mainErrRes("Buyurtmani tayyor holatga o'tkazish uchun, buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
                     }
 
                     // Update Order details item
@@ -307,7 +313,7 @@ class OrderController extends Controller
         // Validation Order Status
         $statusCompleted = Status::where('code', 'orderCompleted')->firstOrFail();
         if ($order->status_id !== $statusCompleted->id) {
-              return $this->mainErrRes( "Bu buyurtma topshirish uchun tayyor emas! Buyurtma egasiga topshirilishi uchun tayyorlandi holatida bo'lishi kerak!");
+            return $this->mainErrRes("Bu buyurtma topshirish uchun tayyor emas! Buyurtma egasiga topshirilishi uchun tayyorlandi holatida bo'lishi kerak!");
         }
 
         // Status Code

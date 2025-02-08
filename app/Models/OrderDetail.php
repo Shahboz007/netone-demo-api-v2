@@ -13,6 +13,7 @@ class OrderDetail extends Model
         'order_id',
         'product_id',
         'amount_type_id',
+        'status_id',
         'completed_amount',
         'amount',
     ];
@@ -30,5 +31,10 @@ class OrderDetail extends Model
     public function amountType(): BelongsTo
     {
         return $this->belongsTo(AmountType::class, 'amount_type_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status_id');
     }
 }
