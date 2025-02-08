@@ -15,31 +15,35 @@ class OrderReturnController extends Controller
 {
     public function index()
     {
-        //
+        $data = OrderReturn::all();
+
+        return $data;
     }
 
 
     public function store(StoreOrderReturnRequest $request)
     {
+        // Current Order
+        $order = Order::findOrFail($request->validated('order_id'));
+        $statusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
+        if ($order->status_id != $statusSubmitted->id) {
+            return $this->mainErrRes('Bu buyurtma allaqachon qaytarilgan');
+        }
+
         // Validation Order Details
         $orderDetails = OrderDetail::where('order_id', $request->validated('order_id'))
             ->whereIn('id', array_column($request->validated('order_item_list'), 'order_item_id'))
             ->get();
 
-        $pluckItems = $orderDetails->pluck('amount', 'id')->toArray();
+        $pluckDetailsItems = $orderDetails->pluck('amount', 'id')->toArray();
+        dd($orderDetails->sum('total'));
 
         foreach ($request->validated('order_item_list') as $item) {
-            if (!isset($pluckItems[$item['order_item_id']])) {
+            if (!isset($pluckDetailsItems[$item['order_item_id']])) {
                 return $this->mainErrRes("Buyurtmaga tegishli bo'lmagan mahsulotni tanladingiz");
             }
         }
 
-        // Current Order
-        $order = Order::with('orderDetails')->findOrFail($request->validated('order_id'));
-        $statusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
-        if ($order->status_id != $statusSubmitted->id) {
-            return $this->mainErrRes('Bu buyurtma allaqachon qaytarilgan');
-        }
 
         // Status Order Returned
         $statusOrderReturned = Status::where('code', 'orderReturned')->firstOrFail();
@@ -54,6 +58,7 @@ class OrderReturnController extends Controller
                 'total_cost_price' => 0,
                 'comment' => $request->validated('comment'),
             ]);
+
 
             // Attach Items to Order Returned
             $list = [];
