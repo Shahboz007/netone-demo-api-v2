@@ -99,20 +99,27 @@ class OrderController extends Controller
             $totalCostPrice = 0;
             $totalSalePrice = 0;
 
-            foreach ($request->validated('product_list') as $item) {
-                $totalCostPrice += $pluckedCostPrice[$item['product_id']] * $item['amount'];
-                $totalSalePrice += $pluckedSalePrice[$item['product_id']] * $item['amount'];
-            }
-
             // Create Order Details
             $detailItemList = [];
             foreach ($request->validated('product_list') as $item) {
+                $costPrice = $pluckedCostPrice[$item['product_id']];
+                $salePrice = $pluckedSalePrice[$item['product_id']];
+                $sumCostPrice = $costPrice * $item['amount'];
+                $sumSalePrice = $salePrice * $item['amount'];
+
                 $detailItemList[] = [
                     'product_id' => $item['product_id'],
                     'amount' => $item['amount'],
                     'amount_type_id' => $item['amount_type_id'],
                     'status_id' => $newOrderStatus->id,
+                    'cost_price' => $costPrice,
+                    'sale_price' => $salePrice,
+                    'sum_cost_price' => $sumCostPrice,
+                    'sum_sale_price' => $sumSalePrice,
                 ];
+
+                $totalCostPrice += $sumCostPrice;
+                $totalSalePrice += $sumSalePrice;
             }
 
             $newOrder->orderDetails()->createMany($detailItemList);

@@ -16,6 +16,10 @@ class OrderDetail extends Model
         'status_id',
         'completed_amount',
         'amount',
+        'sale_price',
+        'cost_price',
+        'sum_sale_price',
+        'sum_cost_price',
     ];
 
     public function order(): BelongsTo
