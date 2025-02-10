@@ -111,7 +111,6 @@ class OrderController extends Controller
                     'product_id' => $item['product_id'],
                     'amount' => $item['amount'],
                     'amount_type_id' => $item['amount_type_id'],
-                    'status_id' => $newOrderStatus->id,
                     'cost_price' => $costPrice,
                     'sale_price' => $salePrice,
                     'sum_cost_price' => $sumCostPrice,
