@@ -24,82 +24,81 @@ class OrderReturnController extends Controller
     public function store(StoreOrderReturnRequest $request)
     {
         // Current Order
-        $order = Order::findOrFail($request->validated('order_id'));
-        $statusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
-        if ($order->status_id != $statusSubmitted->id) {
-            return $this->mainErrRes('Bu buyurtma allaqachon qaytarilgan');
+        $currentOrder = Order::with('orderDetails')->findOrFail($request->validated('order_id'));
+        $pluckCurrentOrderItems = $currentOrder->orderDetails->pluck('amount', 'id');
+
+        // Validate Current Order Status
+        $statusOrderSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
+        if ($currentOrder->status_id !== $statusOrderSubmitted->id) {
+            return $this->mainErrRes("Buyurtma noto'g'ri tanlanmoqda");
         }
 
-        // Validation Order Details
-        $orderDetails = OrderDetail::where('order_id', $request->validated('order_id'))
-            ->whereIn('id', array_column($request->validated('order_item_list'), 'order_item_id'))
-            ->get();
-
-        $pluckDetailsItems = $orderDetails->pluck('amount', 'id')->toArray();
-        dd($orderDetails->sum('total'));
-
+        // Validate Current Order Items with Request items to match
         foreach ($request->validated('order_item_list') as $item) {
-            if (!isset($pluckDetailsItems[$item['order_item_id']])) {
-                return $this->mainErrRes("Buyurtmaga tegishli bo'lmagan mahsulotni tanladingiz");
+            if (isset($pluckCurrentOrderItems[$item['item_id']])) {
+                if ($pluckCurrentOrderItems[$item['item_id']] < $item['amount']) {
+                    return $this->mainErrRes("Qaytarilayotgan mahsulotlar miqdori, buyurtma qilingan mahsulot miqdoriddan ko'p. Qilinayotgan ish bo'yicha adminga xabar beriladi");
+                }
+            } else {
+                return $this->mainErrRes("Buyurtma mahsulotini to'g'ri tanladingiz");
             }
         }
 
+        // Pluck Sale Price and Cost price of Current Order items
+        $pluckSalePriceList = $currentOrder->orderDetails->pluck('sale_price', 'id');
+        $pluckCostPriceList = $currentOrder->orderDetails->pluck('cost_price', 'id');
 
-        // Status Order Returned
-        $statusOrderReturned = Status::where('code', 'orderReturned')->firstOrFail();
-
+        dd('render');
         DB::beginTransaction();
         try {
-            // Create New Order Return
+            // New Return Order
             $newOrderReturn = OrderReturn::create([
                 'user_id' => auth()->id(),
-                'order_id' => $request->validated('order_id'),
+                'order_id' => $currentOrder->id,
+                'comment' => $request->validated('comment'),
                 'total_sale_price' => 0,
                 'total_cost_price' => 0,
-                'comment' => $request->validated('comment'),
             ]);
 
+            // Totals
+            $totalCostPrice = 0;
+            $totalSalePrice = 0;
 
-            // Attach Items to Order Returned
-            $list = [];
-            foreach ($request->validated('order_item_list') as $item) {
-                $list[] = [
+            // Attach Order Items AND Change Stock Amount
+            $itemsList = [];
+            foreach ($request->validated('product_list') as $item) {
+                $sumCostPrice = $item['amount'] * $pluckCostPriceList[$item['item_id']];
+                $sumSalePrice = $item['amount'] * $pluckSalePriceList[$item['item_id']];
+
+                $itemsList[] = [
                     'order_return_id' => $newOrderReturn->id,
-                    'order_detail_id' => $item['order_item_id'],
+                    'order_details_id' => $item['item_id'],
                     'amount' => $item['amount'],
                     'amount_type_id' => $item['amount_type_id'],
+                    'cost_price' => $pluckCostPriceList[$item['item_id']],
+                    'sale_price' => $pluckSalePriceList[$item['item_id']],
+                    'sum_cost_price' => $sumCostPrice,
+                    'sum_sale_price' => $sumSalePrice,
                 ];
-            }
-            $newOrderReturn->orderReturnDetails()->createMany($list);
 
-            // Change Of Order And Details item status
-            if (count($list) == $order->orderDetails->count()) {
-                $order->status_id = $statusOrderReturned->id;
+                $totalCostPrice += $sumCostPrice;
+                $totalSalePrice += $sumSalePrice;
             }
-            foreach ($list as $item) {
-                DB::table('order_details')
-                    ->where('id', $item['order_detail_id'])
-                    ->where('order_id', $order->id)
-                    ->update(['status_id' => $statusOrderReturned->id]);
-            }
+            $newOrderReturn->orderReturnDetails()->createMany($itemsList);
 
+            // Update New Return Order Price
+            $newOrderReturn->total_cost_price = $totalCostPrice;
+            $newOrderReturn->total_sale_price = $totalSalePrice;
+            $newOrderReturn->save();
 
+            // Finish🚀
             DB::commit();
-
-            if (count($list) == $order->orderDetails->count()) {
-                return response()->json([
-                    'message' => "#$order->id buyurtmaning mahsulotlari muvaffaqiyatli to'liq qaytarildi",
-                ]);
-            }
-
-
-            $count = count($list);
-
             return response()->json([
-                'message' => "#$order->id buyurtmaning $count ta mahsulot muvaffaqiyatli qaytarildi",
+                "message" => "Qaytarilgan mahsulotlar muvaffaqiyatli qabul qilindi",
             ]);
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollback();
             return $this->serverError($e);
         }
     }

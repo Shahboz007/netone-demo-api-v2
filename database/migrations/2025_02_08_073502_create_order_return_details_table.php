@@ -17,6 +17,10 @@ return new class extends Migration
             $table->foreignId('order_detail_id')->constrained('order_details');
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
+            $table->decimal('cost_price', 12,2);
+            $table->decimal('sale_price', 12,2);
+            $table->decimal('sum_cost_price', 12,2);
+            $table->decimal('sum_sale_price', 12,2);
             $table->timestamps();
         });
     }

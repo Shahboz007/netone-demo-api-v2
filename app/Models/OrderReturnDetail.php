@@ -14,6 +14,10 @@ class OrderReturnDetail extends Model
         "order_detail_id",
         "amount_type_id",
         "amount",
+        "cost_price",
+        "sale_price",
+        "sum_cost_price",
+        "sum_sale_price",
     ];
 
     public function orderReturn()
