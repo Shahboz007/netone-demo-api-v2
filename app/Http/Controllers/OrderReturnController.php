@@ -27,7 +27,7 @@ class OrderReturnController extends Controller
     {
         // Current Order
         $currentOrder = Order::with('orderDetails')->findOrFail($request->validated('order_id'));
-        $pluckCurrentOrderItemsAmount = $currentOrder->orderDetails->pluck('amount', 'id');
+        $pluckCurrentOrderItemsAmount = $currentOrder->orderDetails->pluck('completed_amount', 'id');
 
         // Validate Current Order Status
         $statusOrderSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
@@ -39,7 +39,7 @@ class OrderReturnController extends Controller
         foreach ($request->validated('order_item_list') as $item) {
             if (isset($pluckCurrentOrderItemsAmount[$item['item_id']])) {
                 if ($pluckCurrentOrderItemsAmount[$item['item_id']] < $item['amount']) {
-                    return $this->mainErrRes("Qaytarilayotgan mahsulotlar miqdori, buyurtma qilingan mahsulot miqdoriddan ko'p. Qilinayotgan ish bo'yicha adminga xabar beriladi");
+                    return $this->mainErrRes("Qaytarilayotgan mahsulotlar miqdori, buyurtma qilingan mahsulot miqdoridan ko'p. Qilinayotgan ish bo'yicha adminga xabar beriladi");
                 }
             } else {
                 return $this->mainErrRes("Buyurtma mahsulotini to'g'ri tanladingiz");
@@ -59,10 +59,10 @@ class OrderReturnController extends Controller
 
         // Validate Request polka with Product Stock Polka
         foreach ($request->validated('order_item_list') as $item) {
-            if (isset($pluckProductStock[$item['item_id']])) {
+            if (isset($pluckProductStock[$item['polka_id']])) {
                 if ($pluckProductStock[$item['polka_id']] !== $pluckCurrentOrderItemsProduct[$item['item_id']]['id']) {
                     $name = $pluckCurrentOrderItemsProduct[$item['item_id']]['name'];
-                    return $this->mainErrRes("`$name` mahsulotnig polkasi noto'g'ri tanlanmoqda");
+                    return $this->mainErrRes("`$name` mahsulotning polkasi noto'g'ri tanlanmoqda");
                 }
             } else {
                 return $this->mainErrRes("Mahsulot polkasi noto'g'ri tanlanmoqda");
@@ -89,13 +89,13 @@ class OrderReturnController extends Controller
 
             // Attach Order Items AND Change Stock Amount
             $itemsList = [];
-            foreach ($request->validated('product_list') as $item) {
+            foreach ($request->validated('order_item_list') as $item) {
                 $sumCostPrice = $item['amount'] * $pluckCostPriceList[$item['item_id']];
                 $sumSalePrice = $item['amount'] * $pluckSalePriceList[$item['item_id']];
 
                 $itemsList[] = [
                     'order_return_id' => $newOrderReturn->id,
-                    'order_details_id' => $item['item_id'],
+                    'order_detail_id' => $item['item_id'],
                     'amount' => $item['amount'],
                     'amount_type_id' => $item['amount_type_id'],
                     'cost_price' => $pluckCostPriceList[$item['item_id']],
