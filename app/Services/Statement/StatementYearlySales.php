@@ -8,7 +8,8 @@ use Illuminate\Support\Str;
 
 class StatementYearlySales
 {
-    private $data = [];
+    private $completedOrderData = [];
+    private $returnedOrderData = [];
     private float $totalSalePrice = 0;
     private float $totalCostPrice = 0;
 
@@ -35,7 +36,7 @@ class StatementYearlySales
 
 
         // Completed Orders
-        $this->data = DB::table('completed_orders')
+        $this->completedOrderData = DB::table('completed_orders')
             ->selectRaw('
                 MIN(id) as id,
                 MONTH(created_at) as month_number,
@@ -45,20 +46,33 @@ class StatementYearlySales
             ')
             ->whereYear('created_at', $year)
             ->where('status_id', $salesStatus->id)
-            ->groupByRaw('MONTH(created_at), MONTH(created_at), MONTHNAME(created_at)')
+            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
             ->orderByRaw('MONTH(created_at)')
             ->get();
 
-        $this->totalSalePrice = $this->data->sum('sale_price');
-        $this->totalCostPrice = $this->data->sum('cost_price');
+        $this->returnedOrderData = DB::table('order_returns')
+            ->selectRaw('
+                MIN(id) as id,
+                MONTH(created_at) as month_number,
+                MONTHNAME(created_at) as month_name,
+                SUM(total_sale_price) as sale_price,
+                SUM(total_cost_price) as cost_price
+            ')
+            ->whereYear('created_at', $year)
+            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
+            ->orderByRaw('MONTH(created_at)')
+            ->get();
+
+        $this->totalSalePrice = $this->completedOrderData->sum('sale_price');
+        $this->totalCostPrice = $this->completedOrderData->sum('cost_price');
     }
 
-    public function getYearlySalePrice(array $params): array
+    public function getYearlyProfit(array $params): array
     {
         // List
         $list = $this->createList($params);
 
-        foreach ($this->data as $item) {
+        foreach ($this->completedOrderData as $item) {
             $list["month_number_$item->month_number"] = (float)$item->sale_price;;
         }
 
@@ -67,12 +81,63 @@ class StatementYearlySales
         return $list;
     }
 
-    function getYearlyCostPrice(array $params): array
+    public function getYearlyReturnOrder(array $params): array
     {
         // List
         $list = $this->createList($params);
 
-        foreach ($this->data as $item) {
+        $sum = 0;
+        foreach ($this->returnedOrderData as $item) {
+            $amount = (float)$item->sale_price;
+            $sum += $amount;
+            $list["month_number_$item->month_number"] = $amount;
+        }
+
+        $list["total_amount"] = $sum;
+
+        return $list;
+    }
+
+    public function getYearlyNetProfit(array $params): array
+    {
+        $list = $this->createList($params);
+
+        // Total Amount
+        $totalAmount = 0;
+
+        $completedOrderList = $this->completedOrderData->toArray();
+        $returnedOrderList = $this->returnedOrderData->toArray();
+
+        for ($i = 0; $i < count($completedOrderList); $i++) {
+
+            if (isset($completedOrderList[$i])) {
+                $profitItem = $completedOrderList[$i];
+
+                $monthNumber = $profitItem->month_number;
+                $profitItemSalePrice = $profitItem->sale_price;
+
+                $amount = $profitItemSalePrice;
+
+                if (isset($returnedOrderList[$i])) {
+                    $amount = $profitItemSalePrice - $returnedOrderList[$i]->sale_price;
+                }
+
+                $list["month_number_$monthNumber"] = $amount;
+                $totalAmount += $amount;
+            }
+        }
+
+        $list["total_amount"] = $totalAmount;
+
+        return $list;
+    }
+
+    public function getYearlyCostPrice(array $params): array
+    {
+        // List
+        $list = $this->createList($params);
+
+        foreach ($this->completedOrderData as $item) {
             $list["month_number_$item->month_number"] = (float)$item->cost_price;
         }
 
@@ -88,7 +153,7 @@ class StatementYearlySales
 
         $totalMarjaAmount = 0;
 
-        foreach ($this->data as $item) {
+        foreach ($this->completedOrderData as $item) {
             $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
             $list["month_number_$item->month_number"] = $marja;
             $totalMarjaAmount += $marja;
@@ -105,7 +170,7 @@ class StatementYearlySales
 
         $totalMarjaPercent = 0;
 
-        foreach ($this->data as $item) {
+        foreach ($this->completedOrderData as $item) {
             $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
             $percent = round($marja / $item->sale_price * 100, 2);
 
@@ -117,27 +182,12 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyCancelOrder(array $params): array
-    {
-        // List
-        $list = $this->createList($params);
-
-
-        foreach ($this->data as $item) {
-            $list["month_number_$item->month_number"] = 0;
-        }
-
-        $list["total_amount"] = 0;
-
-        return $list;
-    }
-
     public function getYearlyShippingRawMaterial(array $params): array
     {
         // List
         $list = $this->createList($params);
 
-        foreach ($this->data as $item) {
+        foreach ($this->completedOrderData as $item) {
             $list["month_number_$item->month_number"] = 0;
         }
 
