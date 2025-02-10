@@ -272,12 +272,9 @@ class OrderController extends Controller
                     $completedAmount = $updates->get($detail->product_id);
 
                     // Calc Total Prices
-                    if ($detail->amount_type_id === 2) {// Qop
-                        $totalCostPrice += $completedAmount * $detail->product->cost_price;
-                        $totalSalePrice += $completedAmount * $detail->product->sale_price;
-                    } else {
-                        return $this->mainErrRes("Buyurtmani tayyor holatga o'tkazish uchun, buyurtma mahsulotlarining o'lchov birligi qopda bo'lishi kerak!");
-                    }
+                    $totalCostPrice += $completedAmount * $detail->product->cost_price;
+                    $totalSalePrice += $completedAmount * $detail->product->sale_price;
+
 
                     // Update Order details item
                     $detail->update(['completed_amount' => $completedAmount]);
