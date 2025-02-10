@@ -24,7 +24,6 @@ class OrderDetailResource extends JsonResource
             "sum_cost_price" => auth()->user()->isAdmin() ? (float)$this->sum_cost_price : 0,
             "sum_sale_price"=> (float) $this->sum_sale_price,
             "completed_amount" => (float)$this->completed_amount,
-            "status" => $this->status,
             "updated_at" => $this->updated_at,
             "created_at" => $this->created_at,
         ];
