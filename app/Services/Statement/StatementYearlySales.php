@@ -3,6 +3,7 @@
 namespace App\Services\Statement;
 
 use App\Models\Status;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class StatementYearlySales
 
     public function __construct($year)
     {
-        $salesStatus = Status::where('code', 'orderSubmitted')->firstOrFail();
+
 
         /*------------------------------
             [
@@ -35,33 +36,9 @@ class StatementYearlySales
         --*/
 
 
-        // Completed Orders
-        $this->completedOrderData = DB::table('completed_orders')
-            ->selectRaw('
-                MIN(id) as id,
-                MONTH(created_at) as month_number,
-                MONTHNAME(created_at) as month_name,
-                SUM(total_sale_price) as sale_price,
-                SUM(total_cost_price) as cost_price
-            ')
-            ->whereYear('created_at', $year)
-            ->where('status_id', $salesStatus->id)
-            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
-            ->orderByRaw('MONTH(created_at)')
-            ->get();
-
-        $this->returnedOrderData = DB::table('order_returns')
-            ->selectRaw('
-                MIN(id) as id,
-                MONTH(created_at) as month_number,
-                MONTHNAME(created_at) as month_name,
-                SUM(total_sale_price) as sale_price,
-                SUM(total_cost_price) as cost_price
-            ')
-            ->whereYear('created_at', $year)
-            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
-            ->orderByRaw('MONTH(created_at)')
-            ->get();
+        // All Data
+        $this->completedOrderData = $this->getYearlyCompletedOrder($year);
+        $this->returnedOrderData = $this->getYearlyReturnedOrder($year);
 
         $this->totalSalePrice = $this->completedOrderData->sum('sale_price');
         $this->totalCostPrice = $this->completedOrderData->sum('cost_price');
@@ -215,5 +192,40 @@ class StatementYearlySales
     private function calcMarjaAmount(float $salePrice, float $costPrice): float
     {
         return $salePrice - $costPrice;
+    }
+
+    private function getYearlyCompletedOrder(int $year): Collection
+    {
+        $salesStatus = Status::where('code', 'orderSubmitted')->firstOrFail();
+
+        return DB::table('completed_orders')
+            ->selectRaw('
+                MIN(id) as id,
+                MONTH(created_at) as month_number,
+                MONTHNAME(created_at) as month_name,
+                SUM(total_sale_price) as sale_price,
+                SUM(total_cost_price) as cost_price
+            ')
+            ->whereYear('created_at', $year)
+            ->where('status_id', $salesStatus->id)
+            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
+            ->orderByRaw('MONTH(created_at)')
+            ->get();
+    }
+
+    private function getYearlyReturnedOrder(int $year): Collection
+    {
+        return DB::table('order_returns')
+            ->selectRaw('
+                MIN(id) as id,
+                MONTH(created_at) as month_number,
+                MONTHNAME(created_at) as month_name,
+                SUM(total_sale_price) as sale_price,
+                SUM(total_cost_price) as cost_price
+            ')
+            ->whereYear('created_at', $year)
+            ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
+            ->orderByRaw('MONTH(created_at)')
+            ->get();
     }
 }
