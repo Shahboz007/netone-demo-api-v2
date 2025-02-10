@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderReturnRequest;
 use App\Http\Requests\UpdateOrderReturnRequest;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderReturn;
+use App\Models\ProductStock;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
 use function PHPUnit\Framework\assertDirectoryDoesNotExist;
@@ -25,7 +27,7 @@ class OrderReturnController extends Controller
     {
         // Current Order
         $currentOrder = Order::with('orderDetails')->findOrFail($request->validated('order_id'));
-        $pluckCurrentOrderItems = $currentOrder->orderDetails->pluck('amount', 'id');
+        $pluckCurrentOrderItemsAmount = $currentOrder->orderDetails->pluck('amount', 'id');
 
         // Validate Current Order Status
         $statusOrderSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
@@ -35,8 +37,8 @@ class OrderReturnController extends Controller
 
         // Validate Current Order Items with Request items to match
         foreach ($request->validated('order_item_list') as $item) {
-            if (isset($pluckCurrentOrderItems[$item['item_id']])) {
-                if ($pluckCurrentOrderItems[$item['item_id']] < $item['amount']) {
+            if (isset($pluckCurrentOrderItemsAmount[$item['item_id']])) {
+                if ($pluckCurrentOrderItemsAmount[$item['item_id']] < $item['amount']) {
                     return $this->mainErrRes("Qaytarilayotgan mahsulotlar miqdori, buyurtma qilingan mahsulot miqdoriddan ko'p. Qilinayotgan ish bo'yicha adminga xabar beriladi");
                 }
             } else {
@@ -48,7 +50,28 @@ class OrderReturnController extends Controller
         $pluckSalePriceList = $currentOrder->orderDetails->pluck('sale_price', 'id');
         $pluckCostPriceList = $currentOrder->orderDetails->pluck('cost_price', 'id');
 
-        dd('render');
+        // Product Stock
+        $productStock = ProductStock::select('id', 'product_id', 'amount')
+            ->whereIn('id', array_column($request->validated('order_item_list'), 'polka_id'))
+            ->get();
+        $pluckProductStock = $productStock->pluck('product_id', 'id')->toArray();
+        $pluckCurrentOrderItemsProduct = $currentOrder->orderDetails->pluck('product', 'id')->toArray();
+
+        // Validate Request polka with Product Stock Polka
+        foreach ($request->validated('order_item_list') as $item) {
+            if (isset($pluckProductStock[$item['item_id']])) {
+                if ($pluckProductStock[$item['polka_id']] !== $pluckCurrentOrderItemsProduct[$item['item_id']]['id']) {
+                    $name = $pluckCurrentOrderItemsProduct[$item['item_id']]['name'];
+                    return $this->mainErrRes("`$name` mahsulotnig polkasi noto'g'ri tanlanmoqda");
+                }
+            } else {
+                return $this->mainErrRes("Mahsulot polkasi noto'g'ri tanlanmoqda");
+            }
+        }
+
+        // Customer
+        $customer = Customer::findOrFail($currentOrder->customer_id);
+
         DB::beginTransaction();
         try {
             // New Return Order
@@ -83,6 +106,11 @@ class OrderReturnController extends Controller
 
                 $totalCostPrice += $sumCostPrice;
                 $totalSalePrice += $sumSalePrice;
+
+                // Increment Polka Stock
+                DB::table('product_stocks')
+                    ->where('id', $item['polka_id'])
+                    ->increment('amount', $item['amount']);
             }
             $newOrderReturn->orderReturnDetails()->createMany($itemsList);
 
@@ -91,7 +119,10 @@ class OrderReturnController extends Controller
             $newOrderReturn->total_sale_price = $totalSalePrice;
             $newOrderReturn->save();
 
-            // Finish🚀
+            // Increment Customer Balance
+            $customer->increment('balance', $totalSalePrice);
+
+            // Finish
             DB::commit();
             return response()->json([
                 "message" => "Qaytarilgan mahsulotlar muvaffaqiyatli qabul qilindi",
