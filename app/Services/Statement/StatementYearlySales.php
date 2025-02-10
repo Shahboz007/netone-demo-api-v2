@@ -41,7 +41,8 @@ class StatementYearlySales
         // All Data
         $this->completedOrderData = $this->getYearlyCompletedOrder($year);
         $this->returnedOrderData = $this->getYearlyReturnedOrder($year);
-        $this->netProfitData = $this->yearlyNetProfit($year);
+
+        // Calc Data
 
         $this->totalSalePrice = $this->completedOrderData->sum('sale_price');
         $this->totalCostPrice = $this->completedOrderData->sum('cost_price');
