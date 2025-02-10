@@ -11,6 +11,8 @@ class StatementYearlySales
 {
     private $completedOrderData = [];
     private $returnedOrderData = [];
+    private $netProfitData = [];
+
     private float $totalSalePrice = 0;
     private float $totalCostPrice = 0;
 
@@ -39,12 +41,13 @@ class StatementYearlySales
         // All Data
         $this->completedOrderData = $this->getYearlyCompletedOrder($year);
         $this->returnedOrderData = $this->getYearlyReturnedOrder($year);
+        $this->netProfitData = $this->yearlyNetProfit($year);
 
         $this->totalSalePrice = $this->completedOrderData->sum('sale_price');
         $this->totalCostPrice = $this->completedOrderData->sum('cost_price');
     }
 
-    public function getYearlyProfit(array $params): array
+    public function yearlyProfit(array $params): array
     {
         // List
         $list = $this->createList($params);
@@ -58,7 +61,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyReturnOrder(array $params): array
+    public function yearlyReturnOrder(array $params): array
     {
         // List
         $list = $this->createList($params);
@@ -75,7 +78,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyNetProfit(array $params): array
+    public function yearlyNetProfit(array $params): array
     {
         $list = $this->createList($params);
 
@@ -109,7 +112,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyCostPrice(array $params): array
+    public function yearlyCostPrice(array $params): array
     {
         // List
         $list = $this->createList($params);
@@ -123,7 +126,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyMarja(array $params): array
+    public function yearlyMarja(array $params): array
     {
         // List
         $list = $this->createList($params);
@@ -140,7 +143,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyMarjaByPercent(array $params): array
+    public function yearlyMarjaByPercent(array $params): array
     {
         // List
         $list = $this->createList($params);
@@ -159,7 +162,7 @@ class StatementYearlySales
         return $list;
     }
 
-    public function getYearlyShippingRawMaterial(array $params): array
+    public function yearlyShippingRawMaterial(array $params): array
     {
         // List
         $list = $this->createList($params);

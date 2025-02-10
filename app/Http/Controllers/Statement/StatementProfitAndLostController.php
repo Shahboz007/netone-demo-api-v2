@@ -24,16 +24,16 @@ class StatementProfitAndLostController extends Controller
         $allMonthSales = new StatementYearlySales($year);
 
         // Profit
-        $list[0] = $allMonthSales->getYearlyProfit(["title" => "Daromad","is_diff" => true]);
+        $list[0] = $allMonthSales->yearlyProfit(["title" => "Daromad","is_diff" => true]);
         // Return Orders
-        $list[1] = $allMonthSales->getYearlyReturnOrder(["title" => "Qaytarilgan"]);
+        $list[1] = $allMonthSales->yearlyReturnOrder(["title" => "Qaytarilgan"]);
         // Net Profit
-        $list[2] = $allMonthSales->getYearlyNetProfit(["title" => "Sof daromad", "strong" => true]);
-        $list[3] = $allMonthSales->getYearlyCostPrice(["title" => "Sotilgan mahsulot narxi", "strong" => true]);
-        $list[4] = $allMonthSales->getYearlyCostPrice(["title" => "Tannarxi"]);
-        $list[5] = $allMonthSales->getYearlyShippingRawMaterial(["title" => "Xom ashyo yetkazib berish"]);
-        $list[6] = $allMonthSales->getYearlyMarja(["title" => "Marja", "strong" => true]);
-        $list[7] = $allMonthSales->getYearlyMarjaByPercent(["title" => "Marja rentabellik", "is_color" => true]);
+        $list[2] = $allMonthSales->yearlyNetProfit(["title" => "Sof daromad", "strong" => true]);
+        $list[3] = $allMonthSales->yearlyCostPrice(["title" => "Sotilgan mahsulot narxi", "strong" => true]);
+        $list[4] = $allMonthSales->yearlyCostPrice(["title" => "Tannarxi"]);
+        $list[5] = $allMonthSales->yearlyShippingRawMaterial(["title" => "Xom ashyo yetkazib berish"]);
+        $list[6] = $allMonthSales->yearlyMarja(["title" => "Marja", "strong" => true]);
+        $list[7] = $allMonthSales->yearlyMarjaByPercent(["title" => "Marja rentabellik", "is_color" => true]);
 
         return response()->json([
             'data' => $list,
