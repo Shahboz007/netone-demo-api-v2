@@ -148,7 +148,7 @@ class OrderReturnController extends Controller
     }
 
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $query = OrderReturn::with('user', 'orderReturnDetails', 'order.customer', 'order.user');
 
@@ -159,8 +159,6 @@ class OrderReturnController extends Controller
         $data = $query->findOrFail($id);
         return response()->json([
             "data" => OrderReturnShowResource::make($data),
-            "total_sale_price" => (float)$data->sum('total_sale_price'),
-            "total_cost_price" => (float)$data->sum('total_cost_price'),
         ]);
     }
 
