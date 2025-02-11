@@ -150,7 +150,7 @@ class OrderReturnController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $query = OrderReturn::with('user', 'orderReturnDetails', 'order.customer', 'order.user');
+        $query = OrderReturn::with('user', 'orderReturnDetails', 'order');
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());

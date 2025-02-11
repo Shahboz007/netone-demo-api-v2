@@ -24,12 +24,13 @@ class OrderReturn extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id')
+            ->with(['user', 'customer', 'completedOrder']);
     }
 
     public function orderReturnDetails(): HasMany
     {
         return $this->hasMany(OrderReturnDetail::class, 'order_return_id')
-            ->with(['orderDetail.product','orderDetail.amountType', 'amountType']);
+            ->with(['orderDetail.product', 'orderDetail.amountType', 'amountType']);
     }
 }
