@@ -17,18 +17,19 @@ class OrderReturn extends Model
         'total_cost_price',
     ];
 
-    public function user():BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->with('roles');
     }
 
-    public function order():BelongsTo
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
 
-    public function orderReturnDetails():HasMany
+    public function orderReturnDetails(): HasMany
     {
-        return $this->hasMany(OrderReturnDetail::class, 'order_return_id');
+        return $this->hasMany(OrderReturnDetail::class, 'order_return_id')
+            ->with(['orderDetail.product','orderDetail.amountType', 'amountType']);
     }
 }
