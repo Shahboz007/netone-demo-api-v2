@@ -9,9 +9,23 @@ use Illuminate\Support\Str;
 
 class StatementYearlySales
 {
-    private $completedOrderData = [];
-    private $returnedOrderData = [];
-    private $netProfitData = [];
+    private Collection|null $completedOrderData = null;
+    private Collection|null $returnedOrderData = null;
+
+    // Calculated Data
+    /*--------------------------------
+        [
+            [
+                "month_number": 1,
+                "month_name":"January",
+                "sale_price": 0,
+                "cost_price": 0
+            ],
+            ...other
+        ]
+     * */
+    private array $netProfitData = [];
+    private float $totalNetProfit = 0;
 
     private float $totalSalePrice = 0;
     private float $totalCostPrice = 0;
@@ -32,8 +46,7 @@ class StatementYearlySales
                        "sale_price": 0,
                        "cost_price": 0
                  ],
-                // and other month
-                // ....
+                 ....other
             ]
         --*/
 
@@ -43,9 +56,14 @@ class StatementYearlySales
         $this->returnedOrderData = $this->getYearlyReturnedOrder($year);
 
         // Calc Data
+        $data = $this->getCalcNetProfitData($this->completedOrderData, $this->returnedOrderData);
+        $this->netProfitData = $data['list'];
 
+
+        // Totals
         $this->totalSalePrice = $this->completedOrderData->sum('sale_price');
         $this->totalCostPrice = $this->completedOrderData->sum('cost_price');
+        $this->totalNetProfit = $data['total_amount'];
     }
 
     public function yearlyProfit(array $params): array
@@ -82,35 +100,9 @@ class StatementYearlySales
     public function yearlyNetProfit(array $params): array
     {
         $list = $this->createList($params);
+        $list["total_amount"] = $this->totalNetProfit;
 
-        // Total Amount
-        $totalAmount = 0;
-
-        $completedOrderList = $this->completedOrderData->toArray();
-        $returnedOrderList = $this->returnedOrderData->toArray();
-
-        for ($i = 0; $i < count($completedOrderList); $i++) {
-
-            if (isset($completedOrderList[$i])) {
-                $profitItem = $completedOrderList[$i];
-
-                $monthNumber = $profitItem->month_number;
-                $profitItemSalePrice = $profitItem->sale_price;
-
-                $amount = $profitItemSalePrice;
-
-                if (isset($returnedOrderList[$i])) {
-                    $amount = $profitItemSalePrice - $returnedOrderList[$i]->sale_price;
-                }
-
-                $list["month_number_$monthNumber"] = $amount;
-                $totalAmount += $amount;
-            }
-        }
-
-        $list["total_amount"] = $totalAmount;
-
-        return $list;
+        return array_merge($list, $this->netProfitData);
     }
 
     public function yearlyCostPrice(array $params): array
@@ -134,8 +126,10 @@ class StatementYearlySales
 
         $totalMarjaAmount = 0;
 
-        foreach ($this->completedOrderData as $item) {
-            $marja = $this->calcMarjaAmount($item->sale_price, $item->cost_price);
+        foreach ($this->completedOrderData as $key => $item) {
+            $netProfitAmount = $this->netProfitData["month_number_$item->month_number"];
+
+            $marja = $this->calcMarjaAmount($netProfitAmount, $item->cost_price);
             $list["month_number_$item->month_number"] = $marja;
             $totalMarjaAmount += $marja;
         }
@@ -231,5 +225,40 @@ class StatementYearlySales
             ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
             ->orderByRaw('MONTH(created_at)')
             ->get();
+    }
+
+    private function getCalcNetProfitData($completedOrderData, $returnedOrderData): array
+    {
+        $list = [];
+
+        // Total Amount
+        $totalAmount = 0;
+
+        $completedOrderList = $completedOrderData->toArray();
+        $returnedOrderList = $returnedOrderData->toArray();
+
+        for ($i = 0; $i < count($completedOrderList); $i++) {
+
+            if (isset($completedOrderList[$i])) {
+                $profitItem = $completedOrderList[$i];
+
+                $monthNumber = $profitItem->month_number;
+                $profitItemSalePrice = $profitItem->sale_price;
+
+                $amount = $profitItemSalePrice;
+
+                if (isset($returnedOrderList[$i])) {
+                    $amount = $profitItemSalePrice - $returnedOrderList[$i]->sale_price;
+                }
+
+                $list["month_number_$monthNumber"] = $amount;
+                $totalAmount += $amount;
+            }
+        }
+
+        return [
+            "total_amount" => $totalAmount,
+            "list" => $list
+        ];
     }
 }
