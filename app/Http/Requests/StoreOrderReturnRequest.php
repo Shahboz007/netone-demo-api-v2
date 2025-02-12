@@ -22,20 +22,12 @@ class StoreOrderReturnRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_id' => 'required|exists:orders,id',
-            'order_item_list' => 'required|array',
-            'order_item_list.*.item_id' => 'required|integer|exists:order_details,id',
-            'order_item_list.*.amount' => 'required|numeric|min:0.01',
-            'order_item_list.*.amount_type_id' => 'required|integer|exists:amount_types,id',
-            'order_item_list.*.polka_id' => 'required|integer|exists:product_stocks,id',
+            'product_list' => 'required|array',
+            'product_list.*.product_id' => 'required|integer|exists:products,id',
+            'product_list.*.polka_id' => 'required|integer|exists:product_stocks,id',
+            'product_list.*.amount' => 'required|numeric|min:0.01',
+            'product_list.*.amount_type_id' => 'required|integer|exists:amount_types,id',
             'comment' => 'nullable|string'
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'order_item_list.*.polka_id' => "Mavjud bo'lmagan polka tanlanmoqda"
         ];
     }
 }

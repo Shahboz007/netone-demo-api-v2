@@ -11,7 +11,7 @@ class OrderReturnDetail extends Model
 
     protected $fillable = [
         "order_return_id",
-        "order_detail_id",
+        "polka_id",
         "amount_type_id",
         "amount",
         "cost_price",
@@ -25,9 +25,9 @@ class OrderReturnDetail extends Model
         return $this->belongsTo(OrderReturn::class, 'order_return_id');
     }
 
-    public function orderDetail(): BelongsTo
+    public function productStock(): BelongsTo
     {
-        return $this->belongsTo(OrderDetail::class, 'order_detail_id');
+        return $this->belongsTo(ProductStock::class, 'polka_id');
     }
 
     public function amountType(): BelongsTo

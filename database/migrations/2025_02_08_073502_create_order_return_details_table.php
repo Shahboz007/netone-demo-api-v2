@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('order_return_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_return_id')->constrained('order_returns');
-            $table->foreignId('order_detail_id')->constrained('order_details');
+            $table->foreignId('polka_id')->constrained('product_stocks');
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
             $table->decimal('cost_price', 12,2);

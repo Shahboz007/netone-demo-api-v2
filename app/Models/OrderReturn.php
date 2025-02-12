@@ -11,7 +11,7 @@ class OrderReturn extends Model
 {
     protected $fillable = [
         'user_id',
-        'order_id',
+        'customer_id',
         'comment',
         'total_sale_price',
         'total_cost_price',
