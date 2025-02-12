@@ -23,7 +23,7 @@ class OrderReturnController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        $data = $query->get();
+        $data = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             "data" => OrderReturnResource::collection($data),
