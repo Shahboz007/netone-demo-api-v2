@@ -17,7 +17,7 @@ class OrderReturnResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => UserResource::make($this->user),
-            'order' => OrderResource::make($this->order),
+            'customer' => CustomerResource::make($this->customer),
             'total_sale_price' => (float) $this->total_sale_price,
             'total_cost_price' => (float) $this->total_cost_price,
             'comment' => $this->comment,

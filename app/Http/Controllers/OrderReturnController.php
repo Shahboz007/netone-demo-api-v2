@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
 
 class OrderReturnController extends Controller
 {
-    public function index(): JsonResponse
+    public function index()
     {
-        $query = OrderReturn::with('user', 'order.customer', 'order.user');
+        $query = OrderReturn::with('user', 'customer');
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
@@ -89,6 +89,7 @@ class OrderReturnController extends Controller
                 'customer_id' => $request->validated('customer_id'),
                 'total_sale_price' => 0,
                 'total_cost_price' => 0,
+                'comment' => $request->validated('comment')
             ]);
 
             $totalSalePrice = 0;
@@ -153,13 +154,14 @@ class OrderReturnController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $query = OrderReturn::with('user', 'orderReturnDetails', 'order');
+        $query = OrderReturn::with('user', 'customer', 'orderReturnDetails');
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
         }
 
         $data = $query->findOrFail($id);
+
         return response()->json([
             "data" => OrderReturnShowResource::make($data),
         ]);

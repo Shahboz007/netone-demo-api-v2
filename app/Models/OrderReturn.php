@@ -22,15 +22,14 @@ class OrderReturn extends Model
         return $this->belongsTo(User::class, 'user_id')->with('roles');
     }
 
-    public function order(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id')
-            ->with(['user', 'customer', 'completedOrder']);
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     public function orderReturnDetails(): HasMany
     {
         return $this->hasMany(OrderReturnDetail::class, 'order_return_id')
-            ->with(['orderDetail.product', 'orderDetail.amountType', 'amountType']);
+            ->with(['amountType']);
     }
 }
