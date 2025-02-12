@@ -5,25 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OrderDetail extends Model
+class ReceiveProductDetail extends Model
 {
-    //
-
     protected $fillable = [
-        'order_id',
+        'receive_product_id',
         'product_id',
         'amount_type_id',
-        'completed_amount',
+        'status_id',
         'amount',
-        'sale_price',
-        'cost_price',
-        'sum_sale_price',
-        'sum_cost_price',
+        'price',
+        'sum_price',
     ];
 
-    public function order(): BelongsTo
+    public function receiveProduct(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(ReceiveProduct::class, 'receive_product_id');
     }
 
     public function product(): BelongsTo

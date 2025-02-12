@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReceiveProductRequest;
 use App\Http\Resources\ReceiveProductResource;
+use App\Http\Resources\ReceiveProductShowResource;
+use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use App\Models\Status;
@@ -22,8 +24,6 @@ class ReceiveProductController extends Controller
         $query = ReceiveProduct::with(
             "user",
             "supplier",
-            "product",
-            "amountType",
             "status"
         );
 
@@ -32,7 +32,6 @@ class ReceiveProductController extends Controller
         }
 
         $data = $query->latest()->get();
-
         return response()->json([
             'data' => ReceiveProductResource::collection($data),
         ]);
@@ -44,19 +43,34 @@ class ReceiveProductController extends Controller
         // Gate
         Gate::authorize('create', ReceiveProduct::class);
 
+        // Req Product Plucked List
+        $reqPolkaArr = array_column($request->validated('product_list'), 'polka_id');
 
-        $productStock = ProductStock::where('product_id', $request->validated('product_id'))
-            ->first();
+        // Stock
+        $stockList = ProductStock::whereIn('id', $reqPolkaArr)->get();
+        $stockAmountArr = $stockList->pluck('amount', 'id')->toArray();
 
-        if (!$productStock) {
-            abort(422, 'Bu mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak');
+        if ($stockList->isEmpty()) {
+            return $this->mainErrRes('Mahsulotlar uchun zaxira polka ochilmagan. Admin zaxira polka yaratishi kerak');
         }
+
+        // Products
+        $products = Product::whereIn('id', array_column($request->validated('product_list'), 'product_id'))->get();
+        $pluckedProductsName = $products->pluck('name', 'id')->toArray();
+        $pluckedProductsPriceAmountType = $products->pluck('price_amount_type_id', 'id')->toArray();
+
+        // Stock Items
+        foreach ($request->validated('product_list') as $item) {
+            if (!isset($stockAmountArr[$item['polka_id']])) {
+                $productName = $pluckedProductsName[$item['product_id']];
+                return $this->mainErrRes("`$productName` mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak");
+            }
+
+        }
+
 
         // Supplier
         $supplier = Supplier::findOrFail($request->validated('supplier_id'));
-
-        // Calc Total Price
-        $totalPrice = $request->validated('price') * $request->validated('amount');
 
         // Status Receive Debt
         $statusReceiveDebt = Status::where('code', 'receiveProductDebt')->firstOrFail();
@@ -68,29 +82,54 @@ class ReceiveProductController extends Controller
             $newReceive = ReceiveProduct::create([
                 'user_id' => auth()->id(),
                 'supplier_id' => $supplier->id,
-                'product_id' => $request->validated('product_id'),
-                'amount_type_id' => $productStock->amount_type_id,
                 'status_id' => $statusReceiveDebt->id,
                 'date_received' => $request->validated('date_received'),
-                'amount' => $request->validated('amount'),
-                'price' => $request->validated('price'),
-                'total_price' => $totalPrice,
+                'total_price' => 0,
                 'comment' => $request->validated('comment'),
             ]);
+            $totalPrice = 0;
+
+            // Attach Details
+            $productList = [];
+
+            foreach ($request->validated('product_list') as $item) {
+                $sum = $item['amount'] * $item['price'];
+
+                $productList[] = [
+                    'receive_product_id' => $newReceive->id,
+                    'product_id' => $item['product_id'],
+                    'amount' => $item['amount'],
+                    'price' => $item['price'],
+
+                    'amount_type_id' => $pluckedProductsPriceAmountType[$item['product_id']],
+                    'status_id' => $statusReceiveDebt->id,
+                    'sum_price' => $sum,
+                ];
+
+                $totalPrice += $sum;
+            }
+
+            $newReceive->receiveProductDetails()->createMany($productList);
+
+            $newReceive->total_price = $totalPrice;
+            $newReceive->save();
 
             // Change Stock Amount
-            $productStock->increment('amount', $request->validated('amount'));
+            foreach ($request->validated('product_list') as $item) {
+                DB::table('product_stocks')
+                    ->where('id', $item['polka_id'])
+                    ->where('product_id', $item['product_id'])
+                    ->increment('amount', $item['amount']);
+            }
 
             // Change of Supplier's balance
             $supplier->increment('balance', $totalPrice);
-
             DB::commit();
 
-            $receivedAmount = $request->validated('amount');
-            $receivedPrice = $request->validated('price');
+            $formatVal = number_format($totalPrice, 2, '.', ',');
 
             return response()->json([
-                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $receivedAmount x $receivedPrice = $totalPrice uzs.",
+                'message' => "Yuk muvaffaqiyatli qabul qilindi. Jami $formatVal uzs.",
                 'data' => $newReceive
             ], 201);
         } catch (\Exception $e) {
@@ -109,8 +148,7 @@ class ReceiveProductController extends Controller
         $query = ReceiveProduct::with(
             "user",
             "supplier",
-            "product",
-            "amountType",
+            "receiveProductDetails",
             "status"
         )->where('id', $receiveId);
 
@@ -119,9 +157,8 @@ class ReceiveProductController extends Controller
         }
 
         $data = $query->firstOrFail();
-
         return response()->json([
-            'data' => ReceiveProductResource::make($data),
+            'data' => ReceiveProductShowResource::make($data),
         ]);
     }
 }

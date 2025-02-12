@@ -4,23 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('order_details', function (Blueprint $table) {
+        Schema::create('receive_product_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('receive_product_id')->constrained('receive_products');
             $table->foreignId('product_id')->constrained('products');
             $table->foreignId('amount_type_id')->constrained('amount_types');
+            $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('amount');
-            $table->decimal('completed_amount')->default(0);
-            $table->decimal('sale_price', 12, 2);
-            $table->decimal('cost_price', 12, 2);
-            $table->decimal('sum_sale_price', 12, 2);
-            $table->decimal('sum_cost_price', 12, 2);
+            $table->decimal('price', 12, 2);
+            $table->decimal('sum_price', 12, 2);
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_details');
+        Schema::dropIfExists('receive_product_details');
     }
 };

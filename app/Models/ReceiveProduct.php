@@ -5,18 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReceiveProduct extends Model
 {
     protected $fillable = [
         "user_id",
         "supplier_id",
-        "product_id",
-        "amount_type_id",
         "status_id",
         "date_received",
-        "amount",
-        "price",
         "total_price",
         "comment",
     ];
@@ -31,14 +28,10 @@ class ReceiveProduct extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
-    public function product(): BelongsTo
+    public function receiveProductDetails(): HasMany
     {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function amountType(): BelongsTo
-    {
-        return $this->belongsTo(AmountType::class, 'amount_type_id');
+        return $this->hasMany(ReceiveProductDetail::class, 'receive_product_id')
+            ->with(['product', 'amountType']);
     }
 
     public function status(): BelongsTo

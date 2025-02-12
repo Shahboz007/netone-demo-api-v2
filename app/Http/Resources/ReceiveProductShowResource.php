@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ReceiveProductResource extends JsonResource
+class ReceiveProductShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,6 +18,7 @@ class ReceiveProductResource extends JsonResource
             "id" => $this->id,
             "user" => UserResource::make($this->user),
             "supplier" => SupplierResource::make($this->supplier),
+            "receive_product_details" => ReceiveProductDetailsResource::collection($this->receiveProductDetails),
             "total_price" => (float)$this->total_price,
             "date_received" => $this->date_received,
             "comment" => $this->comment,

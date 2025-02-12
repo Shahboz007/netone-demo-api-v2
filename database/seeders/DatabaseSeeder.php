@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             // ProductStockSeeder::class,
             // ExpenseSeeder::class,
             // WalletSeeder::class,
+            // OrderSeeder::class,
+            // CompletedOrderSeeder::class,
         ]);
     }
 }
