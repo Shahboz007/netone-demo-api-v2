@@ -121,10 +121,11 @@ class OrderReturnController extends Controller
                 $totalCostPrice += $sumCostPrice;
                 $totalSalePrice += $sumSalePrice;
 
-                // Change Stock
-                DB::table('product_stocks')
-                    ->where('id', $item['polka_id'])
-                    ->increment('amount', $item['amount']);
+                // Change Stock Amount
+                $stockItem = ProductStock::where('id', $item['polka_id'])
+                    ->where('product_id', $item['product_id'])->firstOrFail();
+
+                $stockItem->increment('amount', $item['amount']);
             };
 
             $newReturnOrder->orderReturnDetails()->createMany($list);
