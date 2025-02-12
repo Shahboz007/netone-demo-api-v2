@@ -30,6 +30,6 @@ class OrderReturn extends Model
     public function orderReturnDetails(): HasMany
     {
         return $this->hasMany(OrderReturnDetail::class, 'order_return_id')
-            ->with(['amountType']);
+            ->with(['product', 'productStock', 'amountType']);
     }
 }

@@ -108,6 +108,7 @@ class OrderReturnController extends Controller
 
                 $list[] = [
                     'order_return_id' => $newReturnOrder->id,
+                    'product_id' => $item['product_id'],
                     'polka_id' => $item['polka_id'],
                     'amount_type_id' => $item['amount_type_id'],
                     'amount' => $item['amount'],
