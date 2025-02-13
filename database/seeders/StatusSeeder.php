@@ -26,10 +26,12 @@ class StatusSeeder extends Seeder
         Status::create(['name' => 'Bekor qilindi', 'code' => 'productionCancel']);
         Status::create(['name' => "To'xtatildi", 'code' => 'productionStopped']);
         Status::create(['name' => "Tayyor", 'code' => 'productionCompleted']);
+
         // Payment
         Status::create(['name' => "Mijozdan o'tkazma", 'code' => 'paymentCustomer']);
         Status::create(['name' => "Taminotchiga o'tkazma", 'code' => 'paymentSupplier']);
         Status::create(['name' => "Xarajat", 'code' => 'paymentExpense']);
+
         // Receive Product
         Status::create(['name' => "To'lov qilinmagan", 'code' => 'receiveProductDebt']);
         Status::create(['name' => "To'lov qilingan", 'code' => 'receiveProductPayment']);

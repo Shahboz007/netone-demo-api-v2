@@ -197,8 +197,14 @@ class OrderController extends Controller
         // Product
         $product = Product::findOrFail($request->validated('product_id'));
 
+        // Status
+        $statusOrderInProgress = Status::where('code', 'orderInProgress')->firstOrFail();
+
         // Order
-        $order = Order::where('user_id', auth()->id())->findOrFail($id);
+        $order = Order::where('user_id', auth()->id())
+            ->where('status_id', $statusOrderInProgress->id)
+            ->findOrFail($id);
+
 
         // Create Order Details Item
         $sumCostPrice = $product->cost_price * $request->validated('cost_price');
@@ -217,8 +223,8 @@ class OrderController extends Controller
                 'sum_sale_price' => $sumSalePrice,
             ]);
 
-            $order->increment('sum_cost_price', $sumCostPrice);
-            $order->increment('sum_sale_price', $sumSalePrice);
+            $order->increment('total_cost_price', $sumCostPrice);
+            $order->increment('total_sale_price', $sumSalePrice);
 
             DB::commit();
 
