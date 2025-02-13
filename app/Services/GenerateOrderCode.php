@@ -10,7 +10,7 @@ class GenerateOrderCode
     public static function generate(int $customerId)
     {
         $lastOrder = Order::latest('id')->first();
-        $lastOrderId = $lastOrder ? $lastOrder->order_code : null;
+        $lastOrderId = $lastOrder ? $lastOrder->ord_code : null;
 
         $date = Carbon::now();
         $yy = $date->format('y'); // Last two digits of the year
