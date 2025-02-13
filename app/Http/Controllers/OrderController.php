@@ -229,7 +229,6 @@ class OrderController extends Controller
             ]);
 
 
-            dd($sumSalePrice);
             $order->increment('total_cost_price', $sumCostPrice);
             $order->increment('total_sale_price', $sumSalePrice);
 
