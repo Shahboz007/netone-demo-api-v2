@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Status;
+use App\Services\GenerateOrderCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,9 @@ class OrderController extends Controller
         $pluckedCostPrice = $products->pluck('cost_price', 'id');
         $pluckedSalePrice = $products->pluck('sale_price', 'id');
 
+        // Generate Order Code
+        $orderCode = GenerateOrderCode::generate($request->validated('customer_id'));
+
         DB::beginTransaction();
 
         try {
@@ -93,7 +97,8 @@ class OrderController extends Controller
                 "customer_id" => $request->validated('customer_id'),
                 "status_id" => $newOrderStatus->id,
                 'total_cost_price' => 0,
-                'total_sale_price' => 0
+                'total_sale_price' => 0,
+                'ord_code' => $orderCode
             ]);
 
 
