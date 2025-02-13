@@ -212,8 +212,8 @@ class OrderController extends Controller
 
 
         // Create Order Details Item
-        $sumCostPrice = $product->cost_price * $request->validated('cost_price');
-        $sumSalePrice = $product->sale_price * $request->validated('sale_price');
+        $sumCostPrice = $product->cost_price * $request->validated('amount');
+        $sumSalePrice = $product->sale_price * $request->validated('amount');
 
         DB::beginTransaction();
 
@@ -228,6 +228,8 @@ class OrderController extends Controller
                 'sum_sale_price' => $sumSalePrice,
             ]);
 
+
+            dd($sumSalePrice);
             $order->increment('total_cost_price', $sumCostPrice);
             $order->increment('total_sale_price', $sumSalePrice);
 
