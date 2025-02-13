@@ -31,7 +31,7 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2])->get();
         return !$accessRoles->isEmpty();
     }
 
@@ -45,19 +45,25 @@ class OrderPolicy
 
     public function confirm(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2])->get();
+        return !$accessRoles->isEmpty();
+    }
+
+    public function addProduct(User $user): bool
+    {
+        $accessRoles = $user->roles()->whereIn('id', [2])->get();
         return !$accessRoles->isEmpty();
     }
 
     public function completed(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2])->get();
         return !$accessRoles->isEmpty();
     }
 
     public function submit(User $user): bool
     {
-        $accessRoles = $user->roles()->whereIn('id', [2, 3])->get();
+        $accessRoles = $user->roles()->whereIn('id', [2])->get();
         return !$accessRoles->isEmpty();
     }
 
