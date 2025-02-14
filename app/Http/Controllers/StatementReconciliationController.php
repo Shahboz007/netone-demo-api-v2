@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Statement\StatementReconciliationService;
 use Illuminate\Http\Request;
 
-class StatementReconciliation extends Controller
+class StatementReconciliationController extends Controller
 {
     public function __construct(
         protected StatementReconciliationService $reconciliationService
@@ -14,10 +14,10 @@ class StatementReconciliation extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'customer_id' => 'required|integer|exists:customers,id'
+            'customer_id' => 'nullable|integer|exists:customers,id'
         ]);
 
-        $data = $this->reconciliationService->getAll($validated['customer_id']);
+        $data = $this->reconciliationService->getAll($validated['customer_id'] || 0);
 
         return $data;
     }

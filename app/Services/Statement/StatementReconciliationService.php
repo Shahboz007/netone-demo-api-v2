@@ -56,6 +56,7 @@ class StatementReconciliationService
             ->join('payments', 'orders.customer_id', '=', 'payments.paymentable_id')
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->where('payments.paymentable_type', 'App\Models\Customer')
+            ->where('orders.customer_id', $customerId)
             ->select(
                 DB::raw('COUNT(completed_orders.id) as total_count_orders'),
                 DB::raw('SUM(completed_orders.total_sale_price) as total_amount_orders'),
