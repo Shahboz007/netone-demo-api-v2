@@ -31,4 +31,4 @@ require __DIR__ .'/api/finance/paymentExpense.php';
 require __DIR__ ."/api/finance/paymentSupplier.php";
 
 // Statement
-require __DIR__ .'/api/statement/statementProfitAndLost.php';
+require __DIR__ .'/api/statement/statement.php';
