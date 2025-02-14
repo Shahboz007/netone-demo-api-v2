@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class StatementReconciliationService
 {
-    public function getAll()
+    public function getAll(string $customerId)
     {
         // Status
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
@@ -30,6 +30,7 @@ class StatementReconciliationService
             ->where('completed_orders.status_id', $statusSubmittedOrder->id)
             ->where('payments.paymentable_type', 'App\Models\Customer')
             ->where('payments.status_id', $statusPaymentCustomer->id)
+            ->where('orders.customer_id', $customerId)
             ->groupBy('action_date')
             ->union(
                 DB::table('payments')
@@ -44,6 +45,7 @@ class StatementReconciliationService
                     ->where('payments.paymentable_type', 'App\Models\Customer')
                     ->where('payments.created_at', '!=', null)
                     ->where('payments.status_id', $statusPaymentCustomer->id)
+                    ->where('payments.paymentable_id', $customerId)
                     ->groupBy('action_date')
             )
             ->orderBy('action_date')
