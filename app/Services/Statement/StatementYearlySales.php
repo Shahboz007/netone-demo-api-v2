@@ -251,7 +251,7 @@ class StatementYearlySales
                     $amount = $profitItemSalePrice - $returnedOrderList[$i]->sale_price;
                 }
 
-                $list["month_number_$monthNumber"] = $amount;
+                $list["month_number_$monthNumber"] = (float) $amount;
                 $totalAmount += $amount;
             }
         }
