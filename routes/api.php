@@ -27,9 +27,9 @@ require __DIR__ . "/api/production/checkStock.php";
 require __DIR__ . "/api/finance/currency.php";
 require __DIR__ . "/api/finance/exchangeRate.php";
 require __DIR__ . '/api/finance/paymentCustomer.php';
-require __DIR__ .'/api/finance/userWallet.php';
-require __DIR__ .'/api/finance/paymentExpense.php';
-require __DIR__ ."/api/finance/paymentSupplier.php";
+require __DIR__ . '/api/finance/userWallet.php';
+require __DIR__ . '/api/finance/paymentExpense.php';
+require __DIR__ . "/api/finance/paymentSupplier.php";
 
 // Statement
-require __DIR__ .'/api/statement/statement.php';
+require __DIR__ . '/api/statement/statement.php';
