@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Production;
 
 use App\Http\Controllers\Controller;
 use App\Services\Production\CheckStockService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CheckStockController extends Controller
 {
@@ -11,10 +13,16 @@ class CheckStockController extends Controller
         protected CheckStockService $checkStockService
     ) {}
 
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $stockWithRecipe = $this->checkStockService->getAllByRecipe(1);
+        $validated = $request->validate([
+            'recipe_id' => 'required|integer|exists:production_recipes,id'
+        ]);
 
-        return $stockWithRecipe;
+        $stockWithRecipe = $this->checkStockService->getAllByRecipe($validated['recipe_id']);
+
+        return response()->json([
+            "data" => $stockWithRecipe,
+        ]);
     }
 }
