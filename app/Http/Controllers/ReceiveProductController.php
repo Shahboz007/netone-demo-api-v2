@@ -131,6 +131,11 @@ class ReceiveProductController extends Controller
 
                 $totalPrice += $sum;
 
+                // Change Product Receive Price
+                $productItem = Product::where('id', $item['product_id'])->firstOrFail();
+                $productItem->receive_price = $item['price'];
+                $productItem->save();
+
                 // Change Stock Amount
                 $stockItem = ProductStock::where('id', $item['polka_id'])
                     ->where('product_id', $item['product_id'])->firstOrFail();
