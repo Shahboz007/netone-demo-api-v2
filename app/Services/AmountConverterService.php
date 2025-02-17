@@ -9,16 +9,11 @@ class AmountConverterService
 {
     private AmountSettings|null $settings;
 
-    public function __construct($fromTypeId, $toTypeId)
-    {
-        $this->settings = AmountSettings::where('type_from_id', $fromTypeId)
-            ->where('type_to_id', $toTypeId)
-            ->first();
-    }
+    public function __construct() {}
 
 
 
-    public function convert($amount, int $fromTypeId, int $toTypeId): array | null
+    public function convert(float $amount, int $fromTypeId, int $toTypeId): array | null
     {
         if (!$fromTypeId) {
             abort(500, '`$fromTypeId` is required');
@@ -33,14 +28,14 @@ class AmountConverterService
             ];
         }
 
-        $converter = new AmountConverterService($fromTypeId, $toTypeId);
+        $this->configConverterData($fromTypeId, $toTypeId);
 
-        $result = $converter->convertAmount($amount);
+        $result = $this->convertAmount($amount);
 
 
         if (is_null($result)) {
-            $from_type_name = $converter->getAmountType($fromTypeId);
-            $to_type_name = $converter->getAmountType($toTypeId);
+            $from_type_name = $this->getAmountType($fromTypeId);
+            $to_type_name = $this->getAmountType($toTypeId);
             return [
                 'ok' => false,
                 'msg' => "`{$from_type_name}` va `{$to_type_name}` o'lchov birligi, maxsus sozlamalar ro'yxatida mavjud emas!"
@@ -51,6 +46,13 @@ class AmountConverterService
             'ok' => true,
             'value' => $result,
         ];
+    }
+
+    private function configConverterData(int $fromTypeId, int $toTypeId):AmountSettings
+    {
+        return AmountSettings::where('type_from_id', $fromTypeId)
+            ->where('type_to_id', $toTypeId)
+            ->firstOrFail();
     }
 
     private function convertAmount($amount): float | null
