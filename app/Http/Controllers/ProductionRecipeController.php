@@ -53,7 +53,7 @@ class ProductionRecipeController extends Controller
                     "product_id" => $item['product_id'],
                     "amount" => $item["amount"],
                     "amount_type_id" => $item['amount_type_id'],
-                    'coefficient' => $item['amount'] / $item['out_amount']
+                    'coefficient' => $item['amount'] / $request->validated('out_amount')
                 ];
             }
             $newRecipe->recipeItems()->createMany($list);
