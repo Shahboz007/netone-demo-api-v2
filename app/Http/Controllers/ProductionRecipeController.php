@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductionRecipeRequest;
 use App\Http\Requests\UpdateProductionRecipeRequest;
 use App\Http\Resources\ProductionRecipeResource;
-use App\Http\Resources\ProductResource;
 use App\Models\ProductionRecipe;
 use App\Services\AmountConverterService;
 use Illuminate\Support\Facades\DB;
