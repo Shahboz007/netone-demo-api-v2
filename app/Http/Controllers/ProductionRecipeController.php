@@ -32,9 +32,6 @@ class ProductionRecipeController extends Controller
     public function store(StoreProductionRecipeRequest $request)
     {
 
-        $a = $this->amountConverter->convert($request->validated('out_amount'), $request->validated("out_amount_type_id"), 1);
-        return $a;
-
         DB::beginTransaction();
 
         try {
