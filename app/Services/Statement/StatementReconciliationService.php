@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class StatementReconciliationService
 {
-    public function getAll(string $customerId)
+    public function getByCustomer(string $customerId)
     {
         // Status
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
@@ -29,7 +29,7 @@ class StatementReconciliationService
             )
             ->where('completed_orders.updated_at', '!=', null)
             ->where('payments.created_at', '!=', null)
-            ->where('completed_orders.status_id', $statusSubmittedOrder->id)
+            ->where('completed_orders.status_id', operator: $statusSubmittedOrder->id)
             ->where('payments.paymentable_type', 'App\Models\Customer')
             ->where('payments.status_id', $statusPaymentCustomer->id)
             ->where('orders.customer_id', $customerId)

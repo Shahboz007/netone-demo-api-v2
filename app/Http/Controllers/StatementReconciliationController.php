@@ -16,7 +16,7 @@ class StatementReconciliationController extends Controller
     {
         if(!Customer::findOrFail($customerId)) abort(404);
 
-        $data = $this->reconciliationService->getAll($customerId);
+        $data = $this->reconciliationService->getByCustomer($customerId);
 
         return $data;
     }
