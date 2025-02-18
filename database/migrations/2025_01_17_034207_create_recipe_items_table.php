@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->foreignId('amount_type_id')->constrained('amount_types');
             $table->decimal('amount');
-            $table->decimal('coefficient');
+            $table->decimal('coefficient', 8, 6);
             $table->timestamps();
         });
     }
