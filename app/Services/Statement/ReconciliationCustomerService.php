@@ -60,11 +60,17 @@ class ReconciliationCustomerService
                     ->where('payments.status_id', $statusPaymentCustomer->id);
             })
             ->leftJoin('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->leftJoin('order_returns', 'customers.id', '=', 'order_returns.customer_id')
             ->select(
+                // Order
                 DB::raw('COUNT(DISTINCT completed_orders.id) as total_count_orders'),
                 DB::raw('COALESCE(SUM(completed_orders.total_sale_price), 0) as total_amount_orders'),
+                // Payment
                 DB::raw('COUNT(DISTINCT payments.id) as total_count_payments'),
-                DB::raw('COALESCE(SUM(payment_wallet.sum_price), 0) as total_amount_payments')
+                DB::raw('COALESCE(SUM(payment_wallet.sum_price), 0) as total_amount_payments'),
+                // Return Orders
+                DB::raw('COUNT(DISTINCT order_returns.id) as total_count_returns'),
+                DB::raw('COALESCE(SUM(order_returns.total_sale_price), 0) as total_amount_returns'),
             )
             ->first();
 
@@ -91,7 +97,9 @@ class ReconciliationCustomerService
                 "total_amount_orders" => (float) $totals->total_amount_orders,
                 "total_count_payments" => (int) $totals->total_count_payments,
                 "total_amount_payments" => (float) $totals->total_amount_payments,
-                "total_remaining_debt" => (float) $totals->total_amount_orders - (float) $totals->total_amount_payments
+                "total_count_order_returns" => (int) $totals->total_count_returns,
+                "total_amount_order_returns" => (float) $totals->total_amount_returns,
+                "total_amount_difference" => (float) $totals->total_amount_orders - (float) $totals->total_amount_returns - (float) $totals->total_amount_payments
             ],
         ];
 
