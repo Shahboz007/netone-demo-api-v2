@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReconciliationCustomerService
 {
+    private $orderMsg = "Berilgan yuk";
+    private $returnOrderMsg = "Qaytarilgan yuk";
+    private $paymentMsg = "Olingan pul";
+
     public function getByCustomer(string $customerId)
     {
         // Status
@@ -27,9 +31,17 @@ class ReconciliationCustomerService
             ->fromSub($unionQuery, 'sub')
             ->select([
                 'action_date',
+                // Order
                 DB::raw('SUM(count_orders) as count_orders'),
                 DB::raw('SUM(amount_orders) as amount_orders'),
                 DB::raw('MAX(order_status) as order_status'),
+                // Return Order
+                DB::raw('SUM(count_order_returns) as count_order_returns'),
+                DB::raw('SUM(amount_order_returns) as amount_order_returns'),
+                DB::raw('MAX(order_return_status) as order_return_status'),
+                // Difference
+                DB::raw('SUM(amount_difference) as amount_difference'),
+                // Payment
                 DB::raw('SUM(count_payments) as count_payments'),
                 DB::raw('SUM(amount_payments) as amount_payments'),
                 DB::raw('MAX(payment_status) as payment_status'),
@@ -40,10 +52,8 @@ class ReconciliationCustomerService
 
         $totals = DB::table('customers')
             ->where('customers.id', $customerId)
-            // Mijozning buyurtmalari va ularning yakunlangan ma’lumotlari:
             ->leftJoin('orders', 'customers.id', '=', 'orders.customer_id')
             ->leftJoin('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
-            // Mijozning to‘lovlari:
             ->leftJoin('payments', function ($join) use ($statusPaymentCustomer) {
                 $join->on('customers.id', '=', 'payments.paymentable_id')
                     ->where('payments.paymentable_type', 'App\\Models\\Customer')
@@ -61,8 +71,15 @@ class ReconciliationCustomerService
         // Convert Type
         foreach ($data as $index => $entry) {
             $entry->id = $index + 1;
+            // Order
             $entry->count_orders = (int) $entry->count_orders;
             $entry->amount_orders = (float) $entry->amount_orders;
+            // Return Order
+            $entry->count_order_returns = (int) $entry->count_order_returns;
+            $entry->amount_order_returns = (float) $entry->amount_order_returns;
+            // Difference
+            $entry->amount_difference = (float) $entry->amount_difference;
+            // Payments
             $entry->count_payments = (int) $entry->count_payments;
             $entry->amount_payments = (float) $entry->amount_payments;
         }
@@ -89,9 +106,17 @@ class ReconciliationCustomerService
             ->join('statuses', 'orders.status_id', '=', 'statuses.id')
             ->select([
                 DB::raw('DATE(completed_orders.updated_at) as action_date'),
+                // Order
                 DB::raw('COUNT(completed_orders.id) as count_orders'),
                 DB::raw('SUM(completed_orders.total_sale_price) as amount_orders'),
-                DB::raw("'Mijozga berilgan yuklar' as order_status"),
+                DB::raw("'$this->orderMsg' as order_status"),
+                // Order Return
+                DB::raw('0 as amount_order_returns'),
+                DB::raw('0 as count_order_returns'),
+                DB::raw('NULL as order_return_status'),
+                // Order Diff
+                DB::raw('SUM(completed_orders.total_sale_price) as amount_difference'),
+                // Payment
                 DB::raw('0 as count_payments'),
                 DB::raw('0 as amount_payments'),
                 DB::raw('NULL as payment_status'),
@@ -108,12 +133,20 @@ class ReconciliationCustomerService
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->select([
                 DB::raw('DATE(payments.created_at) as action_date'),
+                // Order
                 DB::raw('0 as count_orders'),
                 DB::raw('0 as amount_orders'),
                 DB::raw('NULL as order_status'),
+                // Return Order
+                DB::raw('0 as count_order_returns'),
+                DB::raw('0 as amount_order_returns'),
+                DB::raw('NULL as order_return_status'),
+                // Order Diff
+                DB::raw('0 as amount_difference'),
+                // Payment
                 DB::raw('COUNT(payments.id) as count_payments'),
                 DB::raw('SUM(payment_wallet.sum_price) as amount_payments'),
-                DB::raw("'Mijozdan olingan pullar' as payment_status"),
+                DB::raw("'$this->paymentMsg' as payment_status"),
             ])
             ->whereNotNull('payments.created_at')
             ->where('payments.paymentable_type', 'App\Models\Customer')
@@ -127,10 +160,17 @@ class ReconciliationCustomerService
         return DB::table('order_returns')
             ->select([
                 DB::raw('DATE(created_at) as action_date'),
+                // Order
                 DB::raw('0 as count_orders'),
-                // Qaytarilgan summa negativ qiymatda olinadi
-                DB::raw('SUM(total_sale_price) * -1 as amount_orders'),
-                DB::raw("'Qaytarilgan yuk' as order_status"),
+                DB::raw('0 as amount_orders'),
+                DB::raw("NULL as order_status"),
+                // Return Order
+                DB::raw('SUM(total_sale_price) as amount_order_returns'),
+                DB::raw('111 as count_order_returns'),
+                DB::raw("'$this->returnOrderMsg' as order_return_status"),
+                // Order Diff
+                DB::raw('SUM(total_sale_price) * -1 as amount_difference'),
+                // Payment
                 DB::raw('0 as count_payments'),
                 DB::raw('0 as amount_payments'),
                 DB::raw('NULL as payment_status'),
