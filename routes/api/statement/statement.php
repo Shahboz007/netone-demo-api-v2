@@ -7,11 +7,13 @@ use App\Http\Middleware\StatementMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], function () {
-    Route::get('/profit-and-lost', [ProfitAndLostController::class, 'index']);
+    // Profit And Lost
+    Route::get('/profit-and-lost', [ProfitAndLostController::class, 'index'])->middleware(StatementMiddleware::class);
 
+    // Reconciliations
     Route::group(['prefix' => '/reconciliations'], function(){
         // Route::get('/customers/', [StatementReconciliationCustomerController::class, 'index']);
         Route::get('/customers/{customerId}', [ReconciliationCustomerController::class, 'show']);
         Route::get('/suppliers/{supplierId}', [ReconciliationSupplierController::class, 'show']);
     });
-})->middleware(StatementMiddleware::class);
+});

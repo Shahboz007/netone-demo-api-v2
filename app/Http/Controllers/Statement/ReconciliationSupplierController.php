@@ -16,10 +16,10 @@ class ReconciliationSupplierController extends Controller
 
     public function show(int $supplierId)
     {
-        if(!Supplier::findOrFail($supplierId)) abort(404);
+        // if(!Supplier::findOrFail($supplierId)) abort(404);
 
-        $data = $this->reconciliationService->getBySupplier($supplierId);
+        // $data = $this->reconciliationService->getBySupplier($supplierId);
 
-        return $data;
+        // return $data;
     }
 }
