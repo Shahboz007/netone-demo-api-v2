@@ -7,6 +7,7 @@ require __DIR__ . "/api/auth/user.php";
 require __DIR__ . "/api/common/role.php";
 require __DIR__ . "/api/common/userControl.php";
 require __DIR__ . "/api/common/amountType.php";
+require __DIR__ . "/api/common/amountSettings.php";
 require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/receiveProduct.php";
 require __DIR__ . "/api/common/customer.php";
