@@ -5,7 +5,7 @@ namespace App\Services\Statement;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
 
-class StatementReconciliationService
+class ReconciliationCustomerService
 {
     public function getByCustomer(string $customerId)
     {

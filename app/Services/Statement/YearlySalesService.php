@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class StatementYearlySales
+class YearlySalesService
 {
     private Collection|null $completedOrderData = null;
     private Collection|null $returnedOrderData = null;

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Statement;
 
 use App\Http\Controllers\Controller;
-use App\Services\Statement\StatementYearlySales;
+use App\Services\Statement\YearlySalesService;
 use Illuminate\Http\Request;
 
-class StatementProfitAndLostController extends Controller
+class ProfitAndLostController extends Controller
 {
     public function index(Request $request)
     {
@@ -21,7 +21,7 @@ class StatementProfitAndLostController extends Controller
 
         $year = $validated['year'];
 
-        $allMonthSales = new StatementYearlySales($year);
+        $allMonthSales = new YearlySalesService($year);
 
         // Profit
         $list[0] = $allMonthSales->yearlyProfit(["title" => "Daromad","is_diff" => true]);
