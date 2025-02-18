@@ -150,7 +150,7 @@ class ReconciliationCustomerService
                 DB::raw('0 as amount_order_returns'),
                 DB::raw('NULL as order_return_status'),
                 // Order Diff
-                DB::raw('0 as amount_difference'),
+                DB::raw('SUM(payment_wallet.sum_price) * -1 as amount_difference'),
                 // Payment
                 DB::raw('COUNT(payments.id) as count_payments'),
                 DB::raw('SUM(payment_wallet.sum_price) as amount_payments'),
