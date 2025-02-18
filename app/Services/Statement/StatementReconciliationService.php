@@ -21,9 +21,11 @@ class StatementReconciliationService
             ->select(
                 DB::raw('COUNT(completed_orders.id) as count_orders'),
                 DB::raw('SUM(completed_orders.total_sale_price) as amount_orders'),
+                DB::raw("'Mijozga berilgan yuklar' as order_status"),
                 DB::raw('0 as count_payments'),
                 DB::raw('0 as amount_payments'),
                 DB::raw('completed_orders.updated_at as action_date'),
+                DB::raw('NULL as payment_status'),
             )
             ->where('completed_orders.updated_at', '!=', null)
             ->where('payments.created_at', '!=', null)
@@ -38,9 +40,11 @@ class StatementReconciliationService
                     ->select(
                         DB::raw('0 as count_orders'),
                         DB::raw('0 as amount_orders'),
+                        DB::raw('NULL as order_status'),
                         DB::raw('COUNT(payments.id) as count_payments'),
                         DB::raw('SUM(payment_wallet.sum_price) as amount_payments'),
                         DB::raw('DATE(payments.created_at) as action_date'),
+                        DB::raw("'Mijozdan olingan pullar' as payment_status"),
                     )
                     ->where('payments.paymentable_type', 'App\Models\Customer')
                     ->where('payments.created_at', '!=', null)
