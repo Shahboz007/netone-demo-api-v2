@@ -7,5 +7,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], function () {
     Route::get('/profit-and-lost', [StatementProfitAndLostController::class, 'index']);
-    Route::get('/reconciliations', [StatementReconciliationController::class, 'index']);
+    Route::get('/reconciliations/{customerId}', [StatementReconciliationController::class, 'show']);
 })->middleware(StatementMiddleware::class);

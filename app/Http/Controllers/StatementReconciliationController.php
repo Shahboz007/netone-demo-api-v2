@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Services\Statement\StatementReconciliationService;
 use Illuminate\Http\Request;
 
@@ -11,13 +12,11 @@ class StatementReconciliationController extends Controller
         protected StatementReconciliationService $reconciliationService
     ) {}
 
-    public function index(Request $request)
+    public function show(int $customerId)
     {
-        $validated = $request->validate([
-            'customer_id' => 'required|integer|exists:customers,id'
-        ]);
+        if(!Customer::findOrFail($customerId)) abort(404);
 
-        $data = $this->reconciliationService->getAll($validated['customer_id']);
+        $data = $this->reconciliationService->getAll($customerId);
 
         return $data;
     }
