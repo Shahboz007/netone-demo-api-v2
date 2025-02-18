@@ -14,7 +14,7 @@ class CheckStockRecipeItemsResource extends JsonResource
             'amount' => (float) $this->amount,
             'amount_type' => $this->amountType,
             'coefficient' => (float) $this->coefficient,
-            'sufficiency' => $this->product->stock->amount / $this->coefficient,
+            'sufficiency' => $this->product->stock->amount > 0 ? $this->product->stock->amount / $this->coefficient : 0,
             "product" => ProductResource::make($this->product),
             "stock" => [
                 "id" => $this->product->stock->id,
