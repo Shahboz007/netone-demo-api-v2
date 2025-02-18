@@ -332,7 +332,7 @@ class OrderController extends Controller
                     // Update Order details item
                     $detail->update(['completed_amount' => $completedAmount]);
 
-                    $stock = ProductStock::findOrFail($detail->product_id);
+                    $stock = ProductStock::where('product_id', $detail->product_id)->firstOrFail();
                     $stock->decrement('amount', $completedAmount);
                 }
             }
