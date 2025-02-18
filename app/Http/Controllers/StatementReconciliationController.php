@@ -14,10 +14,10 @@ class StatementReconciliationController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'customer_id' => 'nullable|integer|exists:customers,id'
+            'customer_id' => 'required|integer|exists:customers,id'
         ]);
 
-        $data = $this->reconciliationService->getAll($validated['customer_id'] || 0);
+        $data = $this->reconciliationService->getAll($validated['customer_id']);
 
         return $data;
     }

@@ -51,17 +51,23 @@ class StatementReconciliationService
             ->orderBy('action_date')
             ->get();
 
-        $totals = DB::table('orders')
-            ->join('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
-            ->join('payments', 'orders.customer_id', '=', 'payments.paymentable_id')
-            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->where('payments.paymentable_type', 'App\Models\Customer')
-            ->where('orders.customer_id', $customerId)
+        $totals = DB::table('customers')
+            ->where('customers.id', $customerId)
+            // Mijozning buyurtmalari va ularning yakunlangan ma’lumotlari:
+            ->leftJoin('orders', 'customers.id', '=', 'orders.customer_id')
+            ->leftJoin('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
+            // Mijozning to‘lovlari:
+            ->leftJoin('payments', function ($join) use ($statusPaymentCustomer) {
+                $join->on('customers.id', '=', 'payments.paymentable_id')
+                    ->where('payments.paymentable_type', 'App\\Models\\Customer')
+                    ->where('payments.status_id', $statusPaymentCustomer->id);
+            })
+            ->leftJoin('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->select(
-                DB::raw('COUNT(completed_orders.id) as total_count_orders'),
-                DB::raw('SUM(completed_orders.total_sale_price) as total_amount_orders'),
-                DB::raw('COUNT(payments.id) as total_count_payments'),
-                DB::raw('SUM(payment_wallet.sum_price) as total_amount_payments'),
+                DB::raw('COUNT(DISTINCT completed_orders.id) as total_count_orders'),
+                DB::raw('COALESCE(SUM(completed_orders.total_sale_price), 0) as total_amount_orders'),
+                DB::raw('COUNT(DISTINCT payments.id) as total_count_payments'),
+                DB::raw('COALESCE(SUM(payment_wallet.sum_price), 0) as total_amount_payments')
             )
             ->first();
 
