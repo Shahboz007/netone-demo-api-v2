@@ -13,11 +13,28 @@ class ReconciliationCustomerService
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
         $statusPaymentCustomer = Status::where('code', 'paymentCustomer')->firstOrFail();
 
-        $completedOrdersQuery = $this->getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId);
-        $paymentsQuery = $this->getPaymentsQuery($statusPaymentCustomer, $customerId);
+        $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId);
+        $payments = $this->getPaymentsQuery($statusPaymentCustomer, $customerId);
+        $returnOrders  = $this->getOrderReturnsQuery($customerId);
 
-        $data = $completedOrdersQuery
-            ->union($paymentsQuery)
+        $unionQuery = $completedOrders
+            ->unionAll($payments)
+            ->unionAll($returnOrders);
+
+
+
+        $data = DB::query()
+            ->fromSub($unionQuery, 'sub')
+            ->select([
+                'action_date',
+                DB::raw('SUM(count_orders) as count_orders'),
+                DB::raw('SUM(amount_orders) as amount_orders'),
+                DB::raw('MAX(order_status) as order_status'),
+                DB::raw('SUM(count_payments) as count_payments'),
+                DB::raw('SUM(amount_payments) as amount_payments'),
+                DB::raw('MAX(payment_status) as payment_status'),
+            ])
+            ->groupBy('action_date')
             ->orderBy('action_date')
             ->get();
 
@@ -66,27 +83,23 @@ class ReconciliationCustomerService
 
     private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId)
     {
+
         return DB::table('orders')
             ->join('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
             ->join('statuses', 'orders.status_id', '=', 'statuses.id')
-            ->leftJoin('payments', 'orders.customer_id', '=', 'payments.paymentable_id')
-            ->leftJoin('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->select([
+                DB::raw('DATE(completed_orders.updated_at) as action_date'),
                 DB::raw('COUNT(completed_orders.id) as count_orders'),
                 DB::raw('SUM(completed_orders.total_sale_price) as amount_orders'),
                 DB::raw("'Mijozga berilgan yuklar' as order_status"),
                 DB::raw('0 as count_payments'),
                 DB::raw('0 as amount_payments'),
-                DB::raw('completed_orders.updated_at as action_date'),
                 DB::raw('NULL as payment_status'),
             ])
             ->whereNotNull('completed_orders.updated_at')
-            ->whereNotNull('payments.created_at')
             ->where('completed_orders.status_id', $statusSubmittedOrder->id)
-            ->where('payments.paymentable_type', 'App\Models\Customer')
-            ->where('payments.status_id', $statusPaymentCustomer->id)
             ->where('orders.customer_id', $customerId)
-            ->groupBy('action_date');
+            ->groupBy(DB::raw('DATE(completed_orders.updated_at)'));
     }
 
     private function getPaymentsQuery($statusPaymentCustomer, $customerId)
@@ -94,18 +107,35 @@ class ReconciliationCustomerService
         return DB::table('payments')
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
             ->select([
+                DB::raw('DATE(payments.created_at) as action_date'),
                 DB::raw('0 as count_orders'),
                 DB::raw('0 as amount_orders'),
                 DB::raw('NULL as order_status'),
                 DB::raw('COUNT(payments.id) as count_payments'),
                 DB::raw('SUM(payment_wallet.sum_price) as amount_payments'),
-                DB::raw('DATE(payments.created_at) as action_date'),
                 DB::raw("'Mijozdan olingan pullar' as payment_status"),
             ])
-            ->where('payments.paymentable_type', 'App\Models\Customer')
             ->whereNotNull('payments.created_at')
+            ->where('payments.paymentable_type', 'App\Models\Customer')
             ->where('payments.status_id', $statusPaymentCustomer->id)
             ->where('payments.paymentable_id', $customerId)
-            ->groupBy('action_date');
+            ->groupBy(DB::raw('DATE(payments.created_at)'));
+    }
+
+    private function getOrderReturnsQuery(int $customerId)
+    {
+        return DB::table('order_returns')
+            ->select([
+                DB::raw('DATE(created_at) as action_date'),
+                DB::raw('0 as count_orders'),
+                // Qaytarilgan summa negativ qiymatda olinadi
+                DB::raw('SUM(total_sale_price) * -1 as amount_orders'),
+                DB::raw("'Qaytarilgan yuk' as order_status"),
+                DB::raw('0 as count_payments'),
+                DB::raw('0 as amount_payments'),
+                DB::raw('NULL as payment_status'),
+            ])
+            ->where('customer_id', $customerId)
+            ->groupBy(DB::raw('DATE(created_at)'));
     }
 }
