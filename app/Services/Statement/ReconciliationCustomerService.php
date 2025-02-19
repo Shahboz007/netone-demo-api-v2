@@ -4,6 +4,7 @@ namespace App\Services\Statement;
 
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Expr\Cast\Object_;
 
 class ReconciliationCustomerService
 {
@@ -50,29 +51,10 @@ class ReconciliationCustomerService
             ->orderBy('action_date')
             ->get();
 
-        $totals = DB::table('customers')
-            ->where('customers.id', $customerId)
-            ->leftJoin('orders', 'customers.id', '=', 'orders.customer_id')
-            ->leftJoin('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
-            ->leftJoin('payments', function ($join) use ($statusPaymentCustomer) {
-                $join->on('customers.id', '=', 'payments.paymentable_id')
-                    ->where('payments.paymentable_type', 'App\\Models\\Customer')
-                    ->where('payments.status_id', $statusPaymentCustomer->id);
-            })
-            ->leftJoin('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->leftJoin('order_returns', 'customers.id', '=', 'order_returns.customer_id')
-            ->select(
-                // Order
-                DB::raw('COUNT(DISTINCT completed_orders.id) as total_count_orders'),
-                DB::raw('COALESCE(SUM(completed_orders.total_sale_price), 0) as total_amount_orders'),
-                // Payment
-                DB::raw('COUNT(DISTINCT payments.id) as total_count_payments'),
-                DB::raw('COALESCE(SUM(payment_wallet.sum_price), 0) as total_amount_payments'),
-                // Return Orders
-                DB::raw('COUNT(DISTINCT order_returns.id) as total_count_returns'),
-                DB::raw('COALESCE(SUM(order_returns.total_sale_price), 0) as total_amount_returns'),
-            )
-            ->first();
+        // Totals
+        $totalOrders  = $this->getTotalCompletedOrders($customerId);
+        $totalPayments = $this->getTotalPayments($customerId);
+        $totalReturns = $this->getTotalReturnOrders($customerId);
 
         // Convert Type
         foreach ($data as $index => $entry) {
@@ -93,13 +75,16 @@ class ReconciliationCustomerService
         $response = [
             'data' => $data,
             "total_list" => [
-                "total_count_orders" => (int) $totals->total_count_orders,
-                "total_amount_orders" => (float) $totals->total_amount_orders,
-                "total_count_payments" => (int) $totals->total_count_payments,
-                "total_amount_payments" => (float) $totals->total_amount_payments,
-                "total_count_order_returns" => (int) $totals->total_count_returns,
-                "total_amount_order_returns" => (float) $totals->total_amount_returns,
-                "total_amount_difference" => (float) $totals->total_amount_orders - (float) $totals->total_amount_returns - (float) $totals->total_amount_payments
+                "total_count_orders" => (int) $totalOrders->total_count_orders,
+                "total_amount_orders" => (float) $totalOrders->total_amount_orders || 0,
+
+                "total_count_payments" => (int) $totalPayments->total_count_payments,
+                "total_amount_payments" => (float) $totalPayments->total_amount_payments || 0,
+
+                "total_count_order_returns" => (int) $totalReturns->total_count_returns,
+                "total_amount_order_returns" => (float) $totalReturns->total_amount_returns || 0,
+
+                "total_amount_difference" => (float) $totalOrders->total_amount_orders - (float) $totalReturns->total_amount_returns - (float) $totalPayments->total_amount_payments
             ],
         ];
 
@@ -185,5 +170,44 @@ class ReconciliationCustomerService
             ])
             ->where('customer_id', $customerId)
             ->groupBy(DB::raw('DATE(created_at)'));
+    }
+
+    private function getTotalCompletedOrders(int $customerId): object
+    {
+        return DB::table('customers')
+            ->join('orders', 'customers.id', '=', 'orders.customer_id')
+            ->join('completed_orders', 'orders.id', '=', 'completed_orders.order_id')
+            ->select([
+                DB::raw('COUNT(completed_orders.id) as total_count_orders'),
+                DB::raw('SUM(completed_orders.total_sale_price) as total_amount_orders')
+            ])
+            ->where('customers.id', $customerId)
+            ->firstOrFail();
+    }
+
+    private function getTotalPayments(int $customerId): object
+    {
+        return DB::table('customers')
+            ->join('payments', 'customers.id', '=', 'payments.paymentable_id')
+            ->join('payment_wallet', 'payments.id', 'payment_wallet.payment_id')
+            ->select([
+                DB::raw('COUNT(payment_wallet.id) as total_count_payments'),
+                DB::raw('SUM(payment_wallet.sum_price) as total_amount_payments')
+            ])
+            ->where('payments.paymentable_type', 'App\Models\Customer')
+            ->where('customers.id', $customerId)
+            ->first();
+    }
+
+    public function getTotalReturnOrders(int $customerId): object
+    {
+        return DB::table('customers')
+            ->join('order_returns', 'customers.id', '=', 'order_returns.customer_id')
+            ->select(
+                DB::raw('COUNT(order_returns.id) as total_count_returns'),
+                DB::raw('SUM(order_returns.total_sale_price) as total_amount_returns')
+            )
+            ->where('customers.id', $customerId)
+            ->first();
     }
 }
