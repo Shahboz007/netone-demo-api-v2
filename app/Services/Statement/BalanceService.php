@@ -18,7 +18,7 @@ class BalanceService
         $totalSumCustomerDebt = $this->getAllCustomerDebt();
         $totalSumSupplierDebt = $this->getAllSupplierDebt();
 
-        $totalSumDiff = $totalSumStockPrice + $totalSumCustomerDebt - $totalSumSupplierDebt;
+        $totalSumDiff = $totalSumStockPrice + $totalSumCustomerDebt - abs($totalSumSupplierDebt);
 
         return [
             "total_sum_stock" => $totalSumStockPrice,
@@ -39,12 +39,13 @@ class BalanceService
     }
     private function getAllCustomerDebt(): float
     {
-        return (float) Customer::sum('balance');
+        $amount = (float) Customer::sum('balance');
+        return min($amount, 0);
     }
 
     private function getAllSupplierDebt(): float
     {
-        $amount = (float) Supplier::sum('balance');
-        return $amount;
+        $amount = (float) Supplier::sum('balance') * -1;
+        return min($amount, 0);
     }
 }
