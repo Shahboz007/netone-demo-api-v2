@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Statement\BalanceController;
 use App\Http\Controllers\Statement\ProfitAndLostController;
 use App\Http\Controllers\Statement\ReconciliationCustomerController;
 use App\Http\Controllers\Statement\ReconciliationSupplierController;
@@ -11,9 +12,12 @@ Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], funct
     Route::get('/profit-and-lost', [ProfitAndLostController::class, 'index'])->middleware(StatementMiddleware::class);
 
     // Reconciliations
-    Route::group(['prefix' => '/reconciliations'], function(){
+    Route::group(['prefix' => '/reconciliations'], function () {
         // Route::get('/customers/', [StatementReconciliationCustomerController::class, 'index']);
         Route::get('/customers/{customerId}', [ReconciliationCustomerController::class, 'show']);
         Route::get('/suppliers/{supplierId}', [ReconciliationSupplierController::class, 'show']);
     });
+
+    // Balance
+    Route::get('/balance', [BalanceController::class, 'index']);
 });
