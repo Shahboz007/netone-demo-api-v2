@@ -76,13 +76,13 @@ class ReconciliationCustomerService
             'data' => $data,
             "total_list" => [
                 "total_count_orders" => (int) $totalOrders->total_count_orders,
-                "total_amount_orders" => (float) $totalOrders->total_amount_orders || 0,
+                "total_amount_orders" => (float) $totalOrders->total_amount_orders ?? 0,
 
                 "total_count_payments" => (int) $totalPayments->total_count_payments,
-                "total_amount_payments" => (float) $totalPayments->total_amount_payments || 0,
+                "total_amount_payments" => (float) $totalPayments->total_amount_payments ?? 0,
 
                 "total_count_order_returns" => (int) $totalReturns->total_count_returns,
-                "total_amount_order_returns" => (float) $totalReturns->total_amount_returns || 0,
+                "total_amount_order_returns" => (float) $totalReturns->total_amount_returns ?? 0,
 
                 "total_amount_difference" => (float) $totalOrders->total_amount_orders - (float) $totalReturns->total_amount_returns - (float) $totalPayments->total_amount_payments
             ],
