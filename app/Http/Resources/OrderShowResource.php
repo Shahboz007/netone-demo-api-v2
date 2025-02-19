@@ -7,16 +7,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderShowResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
             "id" => $this->id,
             "user" => $this->user,
+            'ord_code' => $this->ord_code,
             "customer" => CustomerResource::make($this->customer),
             "order_details" => OrderDetailResource::collection($this->orderDetails),
             "total_sale_price" => (float) $this->total_sale_price,

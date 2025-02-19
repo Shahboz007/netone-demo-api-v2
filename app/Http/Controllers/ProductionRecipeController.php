@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductionRecipeRequest;
 use App\Http\Requests\UpdateProductionRecipeRequest;
 use App\Http\Resources\ProductionRecipeResource;
-use App\Http\Resources\ProductResource;
 use App\Models\ProductionRecipe;
+use App\Services\AmountConverterService;
 use Illuminate\Support\Facades\DB;
 
 class ProductionRecipeController extends Controller
 {
+    public function __construct(
+        protected AmountConverterService $amountConverter
+    ) {}
+
     public function index()
     {
         $data = ProductionRecipe::with(
@@ -31,6 +35,7 @@ class ProductionRecipeController extends Controller
 
         try {
 
+            // New Recipe
             $newRecipe = ProductionRecipe::create([
                 "name" => $request->validated('name'),
                 'out_product_id' => $request->validated('out_product_id'),
@@ -38,7 +43,19 @@ class ProductionRecipeController extends Controller
                 'out_amount' => $request->validated('out_amount')
             ]);
 
-            $newRecipe->recipeItems()->createMany($request->validated('items_list'));
+
+            // Create Recipe Items
+            $list = [];
+            foreach ($request->validated('items_list') as $item) {
+                $list[] = [
+                    'production_recipe_id' => $newRecipe->id,
+                    "product_id" => $item['product_id'],
+                    "amount" => $item["amount"],
+                    "amount_type_id" => $item['amount_type_id'],
+                    'coefficient' => $item['amount'] / $request->validated('out_amount')
+                ];
+            }
+            $newRecipe->recipeItems()->createMany($list);
 
             DB::commit();
             return response()->json([

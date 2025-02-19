@@ -13,6 +13,7 @@ class Product extends Model
         'name',
         'cost_price',
         'sale_price',
+        'receive_price'
     ];
 
 

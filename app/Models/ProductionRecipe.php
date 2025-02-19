@@ -31,6 +31,7 @@ class ProductionRecipe extends Model
 
     public function recipeItems(): HasMany
     {
-        return $this->hasMany(RecipeItems::class, 'production_recipe_id')->with('product');
+        return $this->hasMany(RecipeItems::class, 'production_recipe_id')
+            ->with('product');
     }
 }

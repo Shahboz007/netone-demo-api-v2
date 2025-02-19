@@ -14,6 +14,7 @@ class RecipeItems extends Model
         'product_id',
         'amount_type_id',
         'amount',
+        'coefficient'
     ];
 
     public function productionRecipe(): BelongsTo
@@ -23,7 +24,7 @@ class RecipeItems extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id')->with(['priceAmountType']);
     }
 
     public function amountType(): BelongsTo

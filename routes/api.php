@@ -7,6 +7,7 @@ require __DIR__ . "/api/auth/user.php";
 require __DIR__ . "/api/common/role.php";
 require __DIR__ . "/api/common/userControl.php";
 require __DIR__ . "/api/common/amountType.php";
+require __DIR__ . "/api/common/amountSettings.php";
 require __DIR__ . "/api/common/product.php";
 require __DIR__ . "/api/common/receiveProduct.php";
 require __DIR__ . "/api/common/customer.php";
@@ -21,14 +22,15 @@ require __DIR__ . "/api/common/orderReturn.php";
 // Production
 require __DIR__ . "/api/production/recipe.php";
 require __DIR__ . "/api/production/process.php";
+require __DIR__ . "/api/production/checkStock.php";
 
 // Finance
 require __DIR__ . "/api/finance/currency.php";
 require __DIR__ . "/api/finance/exchangeRate.php";
 require __DIR__ . '/api/finance/paymentCustomer.php';
-require __DIR__ .'/api/finance/userWallet.php';
-require __DIR__ .'/api/finance/paymentExpense.php';
-require __DIR__ ."/api/finance/paymentSupplier.php";
+require __DIR__ . '/api/finance/userWallet.php';
+require __DIR__ . '/api/finance/paymentExpense.php';
+require __DIR__ . "/api/finance/paymentSupplier.php";
 
 // Statement
-require __DIR__ .'/api/statement/statementProfitAndLost.php';
+require __DIR__ . '/api/statement/statement.php';

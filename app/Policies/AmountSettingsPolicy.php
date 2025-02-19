@@ -21,7 +21,7 @@ class AmountSettingsPolicy
      */
     public function view(): bool
     {
-        return false;
+        return true;
     }
 
     /**

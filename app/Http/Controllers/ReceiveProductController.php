@@ -31,7 +31,7 @@ class ReceiveProductController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        $data = $query->latest()->get();
+        $data = $query->orderByDesc('id')->get();
         return response()->json([
             'data' => ReceiveProductResource::collection($data),
         ]);
@@ -48,7 +48,9 @@ class ReceiveProductController extends Controller
 
         // Stock
         $stockList = ProductStock::whereIn('id', $reqPolkaArr)->get();
-        $stockAmountArr = $stockList->pluck('amount', 'id')->toArray();
+        $pluckStockAmount = $stockList->pluck('amount', 'id')->toArray();
+        $pluckStockName = $stockList->pluck('name', 'id');
+        $pluckStockProductId = $stockList->pluck('product_id', 'id');
 
         if ($stockList->isEmpty()) {
             return $this->mainErrRes('Mahsulotlar uchun zaxira polka ochilmagan. Admin zaxira polka yaratishi kerak');
@@ -56,16 +58,37 @@ class ReceiveProductController extends Controller
 
         // Products
         $products = Product::whereIn('id', array_column($request->validated('product_list'), 'product_id'))->get();
-        $pluckedProductsName = $products->pluck('name', 'id')->toArray();
-        $pluckedProductsPriceAmountType = $products->pluck('price_amount_type_id', 'id')->toArray();
+        $pluckProductsName = $products->pluck('name', 'id')->toArray();
+        $pluckProductsPriceAmountType = $products->pluck('price_amount_type_id', 'id')->toArray();
 
         // Stock Items
         foreach ($request->validated('product_list') as $item) {
-            if (!isset($stockAmountArr[$item['polka_id']])) {
-                $productName = $pluckedProductsName[$item['product_id']];
-                return $this->mainErrRes("`$productName` mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak");
-            }
+            if (isset($pluckStockProductId[$item['polka_id']])) {
+                // Check match
+                if ($pluckStockProductId[$item['polka_id']] !== $item['product_id']) {
 
+
+                    $stockName = $pluckStockName[$item['polka_id']];
+                    $productName = $pluckProductsName[$item['product_id']];
+
+                    return $this->mainErrRes("`$productName` mahsulot uchun `$stockName` nomli polka tegishli emas. Polkani to'g'ri tanlang");
+                }
+
+                if (!isset($pluckStockAmount[$item['polka_id']])) {
+                    $productName = $pluckProductsName[$item['product_id']];
+                    return $this->mainErrRes("`$productName` mahsulot uchun zaxira polka ochilmagan. Adminka zaxira polka yaratishi kerak");
+                }
+
+                // Check match stock product_id with request product_id
+                if ($pluckStockProductId[$item['polka_id']] !== $item['product_id']) {
+                    $stockName = $pluckStockName[$item['polka_id']];
+                    $productName = $pluckProductsName[$item['product_id']];
+
+                    return $this->mainErrRes("`$stockName` polka `$productName` mahsulotga tegishli emas!");
+                }
+            } else {
+                return $this->mainErrRes("Polka topilmadi");
+            }
         }
 
 
@@ -101,26 +124,29 @@ class ReceiveProductController extends Controller
                     'amount' => $item['amount'],
                     'price' => $item['price'],
 
-                    'amount_type_id' => $pluckedProductsPriceAmountType[$item['product_id']],
+                    'amount_type_id' => $pluckProductsPriceAmountType[$item['product_id']],
                     'status_id' => $statusReceiveDebt->id,
                     'sum_price' => $sum,
                 ];
 
                 $totalPrice += $sum;
+
+                // Change Product Receive Price
+                $productItem = Product::where('id', $item['product_id'])->firstOrFail();
+                $productItem->receive_price = $item['price'];
+                $productItem->save();
+
+                // Change Stock Amount
+                $stockItem = ProductStock::where('id', $item['polka_id'])
+                    ->where('product_id', $item['product_id'])->firstOrFail();
+
+                $stockItem->increment('amount', $item['amount']);
             }
 
             $newReceive->receiveProductDetails()->createMany($productList);
 
             $newReceive->total_price = $totalPrice;
             $newReceive->save();
-
-            // Change Stock Amount
-            foreach ($request->validated('product_list') as $item) {
-                DB::table('product_stocks')
-                    ->where('id', $item['polka_id'])
-                    ->where('product_id', $item['product_id'])
-                    ->increment('amount', $item['amount']);
-            }
 
             // Change of Supplier's balance
             $supplier->increment('balance', $totalPrice);

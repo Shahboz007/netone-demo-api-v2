@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class StatementYearlySales
+class YearlySalesService
 {
     private Collection|null $completedOrderData = null;
     private Collection|null $returnedOrderData = null;
@@ -251,7 +251,7 @@ class StatementYearlySales
                     $amount = $profitItemSalePrice - $returnedOrderList[$i]->sale_price;
                 }
 
-                $list["month_number_$monthNumber"] = $amount;
+                $list["month_number_$monthNumber"] = (float) $amount;
                 $totalAmount += $amount;
             }
         }

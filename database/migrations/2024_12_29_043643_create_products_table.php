@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->decimal('cost_price', 12, 2);
             $table->decimal('sale_price', 12, 2);
+            $table->decimal('receive_price', 12,2)->default(0);
             $table->timestamps();
         });
     }

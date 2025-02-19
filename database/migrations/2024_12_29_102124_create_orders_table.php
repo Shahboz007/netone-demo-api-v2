@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('total_cost_price', 12, 2);
             $table->decimal('total_sale_price', 12, 2);
+            $table->string('ord_code')->unique();
             $table->timestamps();
         });
     }

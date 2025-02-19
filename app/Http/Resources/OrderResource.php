@@ -7,15 +7,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
+
     public function toArray(Request $request): array
     {
         return [
             "id" => $this->id,
+            'ord_code' => $this->ord_code,
             "user" => $this->user,
             "customer" => CustomerResource::make($this->customer),
             "total_cost_price" => auth()->user()->isAdmin() ? (float) $this->total_cost_price : 0,

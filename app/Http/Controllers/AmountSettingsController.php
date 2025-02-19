@@ -6,11 +6,12 @@ use App\Http\Requests\StoreAmountSettingsRequest;
 use App\Http\Requests\UpdateAmountSettingsRequest;
 use App\Http\Resources\AmountSettingsResource;
 use App\Models\AmountSettings;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 
 class AmountSettingsController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         // gate
         Gate::authorize('viewAny', AmountSettings::class);
@@ -23,7 +24,7 @@ class AmountSettingsController extends Controller
     }
 
 
-    public function store(StoreAmountSettingsRequest $request)
+    public function store(StoreAmountSettingsRequest $request): JsonResponse
     {
         // gate
         Gate::authorize('create', AmountSettings::class);
@@ -50,7 +51,7 @@ class AmountSettingsController extends Controller
     }
 
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         // gate
         Gate::authorize('view', AmountSettings::class);
@@ -62,9 +63,23 @@ class AmountSettingsController extends Controller
         ]);
     }
 
+    public function showByAmountTypes(int $fromId, int $toId): JsonResponse
+    {
+        Gate::authorize('view', AmountSettings::class);
+
+        $data = AmountSettings::with('typeFrom', 'typeTo')
+            ->where('type_from_id', $fromId)
+            ->where('type_to_id', $toId)
+            ->firstOrFail();
+
+        return response()->json([
+            'data' => AmountSettingsResource::make($data)
+        ]);
+    }
 
 
-    public function update(UpdateAmountSettingsRequest $request, string $id)
+
+    public function update(UpdateAmountSettingsRequest $request, string $id): JsonResponse
     {
         // gate
         Gate::authorize('update', AmountSettings::class);
@@ -79,7 +94,7 @@ class AmountSettingsController extends Controller
         ]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         // gate
         Gate::authorize('delete', AmountSettings::class);
