@@ -12,7 +12,12 @@ class ProducerDashboardController extends Controller
         protected ProducerDashboardService $producerDashboardService
     ) {}
 
-    public function index() {
-        return $this->producerDashboardService->get();
+    public function index()
+    {
+        $data = $this->producerDashboardService->get();
+
+        return response()->json([
+            "data" => $data,
+        ]);
     }
 }
