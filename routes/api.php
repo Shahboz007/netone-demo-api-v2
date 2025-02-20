@@ -34,3 +34,6 @@ require __DIR__ . "/api/finance/paymentSupplier.php";
 
 // Statement
 require __DIR__ . '/api/statement/statement.php';
+
+// Chart
+require __DIR__ . '/api/chart/producer.php';
