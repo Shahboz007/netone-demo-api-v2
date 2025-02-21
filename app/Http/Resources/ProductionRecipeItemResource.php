@@ -20,7 +20,7 @@ class ProductionRecipeItemResource extends JsonResource
             'amount_type' => $this->amountType,
             'coefficient' => (float) $this->coefficient,
             'product' => ProductResource::make($this->product),
-            "stock" => $this->product->stock,
+            "stock" => ProductionRecipeItemStockResource::make($this->product->stock),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

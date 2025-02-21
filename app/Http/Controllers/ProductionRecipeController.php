@@ -19,7 +19,7 @@ class ProductionRecipeController extends Controller
     {
         $data = ProductionRecipe::with(
             'outProduct',
-            'recipeItems.product.stock'
+            'recipeItems.product'
         )->get();
 
         return response()->json([
