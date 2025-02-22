@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReturnReceive extends Model
 {
@@ -27,5 +28,10 @@ class ReturnReceive extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
+    public function returnReceiveDetails(): HasMany
+    {
+        return $this->hasMany(ReturnReceiveDetail::class, 'return_receive_id');
     }
 }
