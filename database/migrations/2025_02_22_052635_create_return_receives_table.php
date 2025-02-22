@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('supplier_id')->constrained('suppliers');
             $table->dateTime('date_received');
+            $table->decimal('old_balance', 12, 2);
             $table->decimal('total_sale_price', 12, 2);
             $table->decimal('total_cost_price', 12, 2);
             $table->string('comment')->nullable();

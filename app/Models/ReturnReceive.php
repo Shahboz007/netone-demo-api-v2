@@ -13,6 +13,7 @@ class ReturnReceive extends Model
         'user_id',
         'supplier_id',
         'date_received',
+        'old_balance',
         'total_sale_price',
         'total_cost_price',
         'comment',
@@ -30,6 +31,7 @@ class ReturnReceive extends Model
 
     public function returnReceiveDetails(): HasMany
     {
-        return $this->hasMany(ReturnReceiveDetail::class, 'return_receive_id');
+        return $this->hasMany(ReturnReceiveDetail::class, 'return_receive_id')
+            ->with(['product.priceAmountType', 'amountType']);
     }
 }

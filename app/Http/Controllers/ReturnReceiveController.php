@@ -3,20 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReturnReceiveRequest;
+use App\Http\Resources\ReturnReceiveResource;
+use App\Http\Resources\ReturnReceiveShowResource;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\ReturnReceive;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReturnReceiveController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', ReturnReceive::class);
-        //
+
+        $data = ReturnReceive::with([
+            'user',
+            'supplier',
+        ])
+            ->get();
+
+        return response()->json([
+            "data" => ReturnReceiveResource::collection($data),
+        ]);
     }
 
 
@@ -76,6 +88,7 @@ class ReturnReceiveController extends Controller
             $newReturn = ReturnReceive::create([
                 "user_id" => auth()->id(),
                 "supplier_id" => $request->validated('supplier_id'),
+                "old_balance" => $supplier->balance,
                 "date_received" => $request->validated('date_received'),
                 "comment" => $request->validated('comment'),
                 "total_sale_price" => 0,
@@ -127,7 +140,7 @@ class ReturnReceiveController extends Controller
 
             return response()->json([
                 "message" => "$supplier->first_name $supplier->last_name taminotchiga $formatVal uzs miqdorida yuk muvaffaqiyatli qaytarildi"
-            ],201);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->serverError($e);
@@ -135,9 +148,21 @@ class ReturnReceiveController extends Controller
     }
 
 
-    public function show(ReturnReceive $returnReceive)
+    public function show(int $id)
     {
         // Gate
         Gate::authorize('view', ReturnReceive::class);
+
+        $data = ReturnReceive::with([
+            'user',
+            'supplier',
+            'returnReceiveDetails',
+        ])
+            ->findOrFail($id);
+
+
+        return response()->json([
+            "data" => ReturnReceiveShowResource::make($data),
+        ]);
     }
 }

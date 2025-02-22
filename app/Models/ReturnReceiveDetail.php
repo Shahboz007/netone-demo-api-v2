@@ -30,7 +30,7 @@ class ReturnReceiveDetail extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function amountTypeId(): BelongsTo
+    public function amountType(): BelongsTo
     {
         return $this->belongsTo(AmountType::class, 'amount_type_id');
     }
