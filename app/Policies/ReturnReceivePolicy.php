@@ -13,15 +13,17 @@ class ReturnReceivePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
+        return !$accessRoles->isEmpty();
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, ReturnReceive $returnReceive): bool
+    public function view(User $user): bool
     {
-        return false;
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
+        return !$accessRoles->isEmpty();
     }
 
     /**
@@ -29,13 +31,14 @@ class ReturnReceivePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        $accessRoles = $user->roles()->whereIn('id', [1, 2])->get();
+        return !$accessRoles->isEmpty();
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, ReturnReceive $returnReceive): bool
+    public function update(User $user): bool
     {
         return false;
     }
@@ -43,7 +46,7 @@ class ReturnReceivePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ReturnReceive $returnReceive): bool
+    public function delete(User $user): bool
     {
         return false;
     }
@@ -51,7 +54,7 @@ class ReturnReceivePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, ReturnReceive $returnReceive): bool
+    public function restore(User $user): bool
     {
         return false;
     }
@@ -59,7 +62,7 @@ class ReturnReceivePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, ReturnReceive $returnReceive): bool
+    public function forceDelete(User $user): bool
     {
         return false;
     }

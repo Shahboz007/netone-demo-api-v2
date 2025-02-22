@@ -8,17 +8,23 @@ use App\Models\ProductStock;
 use App\Models\ReturnReceive;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ReturnReceiveController extends Controller
 {
     public function index()
     {
+        // Gate
+        Gate::authorize('viewAny', ReturnReceive::class);
         //
     }
 
 
     public function store(StoreReturnReceiveRequest $request)
     {
+        // Gate
+        Gate::authorize('create', ReturnReceive::class);
+
         // Products
         $products = Product::whereIn('id', array_column($request->validated('product_list'), 'product_id'))
             ->get();
@@ -131,6 +137,7 @@ class ReturnReceiveController extends Controller
 
     public function show(ReturnReceive $returnReceive)
     {
-        //
+        // Gate
+        Gate::authorize('view', ReturnReceive::class);
     }
 }
