@@ -14,8 +14,10 @@ class ReturnReceiveDetail extends Model
         'product_id',
         'amount_type_id',
         'amount',
-        'price',
-        'sum_price',
+        'sale_price',
+        'cost_price',
+        'sum_sale_price',
+        'sum_cost_price',
     ];
 
     public function returnReceive(): BelongsTo

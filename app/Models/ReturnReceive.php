@@ -16,7 +16,8 @@ class ReturnReceive extends Model
         'user_id',
         'supplier_id',
         'date_received',
-        'total_price',
+        'total_sale_price',
+        'total_cost_price',
         'comment',
     ];
 

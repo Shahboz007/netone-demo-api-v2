@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('return_receives', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('supplier_id')->constrained('suppleirs');
+            $table->foreignId('supplier_id')->constrained('suppliers');
             $table->dateTime('date_received');
-            $table->decimal('total_price', 12, 2);
+            $table->decimal('total_sale_price', 12, 2);
+            $table->decimal('total_cost_price', 12, 2);
             $table->string('comment')->nullable();
             $table->timestamps();
         });
