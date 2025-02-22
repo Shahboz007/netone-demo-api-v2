@@ -38,6 +38,8 @@ class ProducerDashboardService
         $diffPercent = 100;
         if ($yesterdayAmount != 0) {
             $diffPercent = ($todayAmount ?? 1) * 100 / $yesterdayAmount - 100;
+        }else if($todayAmount == 0){
+            $diffPercent = 0;
         }
 
 
@@ -79,6 +81,8 @@ class ProducerDashboardService
         $diffPercent = 100;
         if ($yesterdayAmount != 0) {
             $diffPercent = ($todayAmount ?? 1) * 100 / $yesterdayAmount - 100;
+        }else if($todayAmount == 0){
+            $diffPercent = 0;
         }
 
         return [
