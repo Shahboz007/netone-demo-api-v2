@@ -132,7 +132,7 @@ class ReturnReceiveController extends Controller
             $newReturn->save();
 
             // Change Supplier Balance
-            $supplier->increment('balance', $totalSalePrice);
+            $supplier->decrement('balance', $totalSalePrice);
 
             DB::commit();
 
