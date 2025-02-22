@@ -24,6 +24,7 @@ class ReturnReceiveController extends Controller
             'user',
             'supplier',
         ])
+            ->orderBy('id', 'desc')
             ->get();
 
         return response()->json([
