@@ -9,9 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReturnReceive extends Model
 {
-    /** @use HasFactory<\Database\Factories\ReturnReceiveFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'supplier_id',
