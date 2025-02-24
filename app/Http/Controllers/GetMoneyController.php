@@ -77,7 +77,7 @@ class GetMoneyController extends Controller
         $this->getMoneyService->delete($id);
 
         return response()->json([
-            "message" => "Xarajat turi o'chirildi",
+            "message" => "Muvaffaqiyatli o'chirildi",
         ]);
     }
 }
