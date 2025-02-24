@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateExpenseRequest extends FormRequest
 {
@@ -23,7 +24,13 @@ class UpdateExpenseRequest extends FormRequest
     {
         return [
             'parent_id' => 'nullable|exists:expenses,id',
-            'name' => 'nullable|string|min:1|max:255|unique:expenses,name',
+            'name' => [
+                'nullable',
+                'string',
+                'min:1',
+                'max:255',
+                Rule::unique('expenses', 'name')->ignore($this->route('expense')),
+            ],
             'amount' => 'nullable|numeric|min:0',
             'comment' => 'nullable|string|min:6|max:255',
         ];

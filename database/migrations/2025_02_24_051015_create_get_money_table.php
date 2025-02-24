@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('get_money', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parent_id')->constrained('get_money')->cascadeOnUpdate();
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('expenses')->nullOnDelete();
             $table->string('name');
             $table->decimal('amount', 12, 2);
             $table->string('comment');

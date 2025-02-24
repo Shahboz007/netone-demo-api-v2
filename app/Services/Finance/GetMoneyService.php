@@ -38,7 +38,7 @@ class GetMoneyService
         }
 
         // Check Parent And Children
-        if ($data['parent_id']) {
+        if (!empty($data['parent_id'])) {
             $pluckChildren = $getMoney->children->pluck('name', 'id');
 
             if ($getMoney->id === $data['parent_id'] || !empty($pluckChildren[$data['parent_id']])) {
