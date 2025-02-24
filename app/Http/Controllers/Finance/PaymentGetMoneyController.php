@@ -13,7 +13,8 @@ class PaymentGetMoneyController extends Controller
         protected PaymentGetMoneyService $paymentGetMoneyService,
     ) {}
 
-    public function index() {
+    public function index()
+    {
         $data = $this->paymentGetMoneyService->findAll();
 
         // return ($data);
@@ -31,5 +32,12 @@ class PaymentGetMoneyController extends Controller
         ]);
     }
 
-    public function show(string $id) {}
+    public function show(string $id)
+    {
+        $data = $this->paymentGetMoneyService->findOne((int) $id);
+
+        return response()->json([
+            "data" => PaymentGetMoneyResource::make($data),
+        ]);
+    }
 }

@@ -35,7 +35,17 @@ class PaymentGetMoneyService
 
     public function findOne($id)
     {
-        return GetMoney::findOrFail($id);
+        $query = Payment::with([
+            'paymentable.userWallet',
+            'paymentable.getMoney',
+            'user',
+            'wallets',
+            'status'
+        ])
+            ->where('paymentable_type', 'App\Models\GetMoneyAction');
+
+
+        return $query->findOrFail($id);
     }
 
     public function create(array $data): string
