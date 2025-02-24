@@ -6,16 +6,21 @@ use App\Http\Requests\StoreGetMoneyRequest;
 use App\Http\Requests\UpdateGetMoneyRequest;
 use App\Http\Resources\GetMoneyResource;
 use App\Models\GetMoney;
+use App\Services\Finance\GetMoneyService;
 use Illuminate\Support\Facades\Gate;
 
 class GetMoneyController extends Controller
 {
+    public function __construct(
+        protected readonly GetMoneyService $getMoneyService,
+    ) {}
+
     public function index()
     {
         // Gate
         Gate::authorize('viewAny', GetMoney::class);
 
-        $data = GetMoney::with('children')->get();
+        $data = $this->getMoneyService->findAll();
 
         return response()->json([
             "data" => GetMoneyResource::collection($data),
@@ -42,7 +47,7 @@ class GetMoneyController extends Controller
         // Gate
         Gate::authorize('view', GetMoney::class);
 
-        $data = GetMoney::with('children')->findOrFail($id);
+        $data = $this->getMoneyService->findOne((int) $id);
 
         return response()->json([
             "data" => GetMoneyResource::make($data),
