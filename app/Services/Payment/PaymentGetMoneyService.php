@@ -8,7 +8,6 @@ use App\Models\GetMoney;
 use App\Models\Payment;
 use App\Models\Status;
 use App\Models\UserWallet;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PaymentGetMoneyService
