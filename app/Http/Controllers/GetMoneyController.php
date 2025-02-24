@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Gate;
 class GetMoneyController extends Controller
 {
     public function __construct(
-        protected readonly GetMoneyService $getMoneyService,
+        protected GetMoneyService $getMoneyService,
     ) {}
 
     public function index()
@@ -33,7 +33,7 @@ class GetMoneyController extends Controller
         // Gate
         Gate::authorize('create', GetMoney::class);
 
-        $newGetMoney = GetMoney::create($request->validated());
+        $newGetMoney = $this->getMoneyService->create($request->validated());
 
         return response()->json([
             "message" => "Muvaffaqiyatli qo'shildi!",
@@ -60,44 +60,24 @@ class GetMoneyController extends Controller
         // Gate
         Gate::authorize('update', GetMoney::class);
 
-        $getMoney = GetMoney::with('children')->find($id);
-        if (!$getMoney) return $this->mainErrRes("Bu ma'lumot topilmadi!");
-
-        // validate exist
-        if ($request->validated('name')) {
-            $isExist = GetMoney::where('name', $request->validated('name'))
-                ->where('id', "<>", $getMoney->id)->exists();
-            if ($isExist) return $this->mainErrRes('Bu allaqachon mavjud!');
-        }
-
-        // Check Parent And Children
-        if ($request->validated('parent_id')) {
-            $pluckChildren = $getMoney->children->pluck('name', 'id');
-
-            if ($getMoney->id === $request->validated('parent_id') || !empty($pluckChildren[$request->validated('parent_id')])) {
-                return $this->mainErrRes("Ma'lumotni noto'g'ri kiritdingiz!");
-            }
-        }
-
-        $getMoney->update($request->validated());
+        $updateMoney = $this->getMoneyService->update($request->validated(), (int) $id,);
 
         return response()->json([
             "message" => "Muvaffaqiyatli yangilandi",
-            "data" => GetMoneyResource::make($getMoney),
+            "data" => GetMoneyResource::make($updateMoney),
         ]);
     }
 
 
-    public function destroy(GetMoney $getMoney)
+    public function destroy(string $id)
     {
         // Gate
         Gate::authorize('delete', GetMoney::class);
 
-        $getMoney->delete();
+        $this->getMoneyService->delete($id);
 
         return response()->json([
             "message" => "Xarajat turi o'chirildi",
-            "data" => GetMoneyResource::make($getMoney),
         ]);
     }
 }
