@@ -12,7 +12,7 @@ class GetMoneyResource extends JsonResource
         return [
             "id" => $this->id,
             "name" => $this->name,
-            "amount" => (float) $this->amount,
+            // "amount" => (float) $this->amount,
             "comment" => $this->comment,
             "parent_id" => $this->parent_id,
             "children" => self::collection($this->children),

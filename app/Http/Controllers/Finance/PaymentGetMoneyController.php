@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentGetMoneyRequest;
+use App\Http\Resources\PaymentGetMoneyResource;
 use App\Services\Payment\PaymentGetMoneyService;
-use Illuminate\Http\Request;
 
 class PaymentGetMoneyController extends Controller
 {
@@ -13,7 +13,14 @@ class PaymentGetMoneyController extends Controller
         protected PaymentGetMoneyService $paymentGetMoneyService,
     ) {}
 
-    public function index() {}
+    public function index() {
+        $data = $this->paymentGetMoneyService->findAll();
+
+        // return ($data);
+        return response()->json([
+            "data" => PaymentGetMoneyResource::collection($data),
+        ]);
+    }
 
     public function store(StorePaymentGetMoneyRequest $request)
     {

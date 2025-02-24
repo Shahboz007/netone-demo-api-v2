@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\GetMoney;
+use App\Models\GetMoneyAction;
 use App\Models\Payment;
 use App\Models\Status;
 use App\Models\UserWallet;
@@ -19,7 +20,17 @@ class PaymentGetMoneyService
 
     public function findAll()
     {
-        // ...
+        $query = Payment::with([
+            'paymentable.userWallet',
+            'paymentable.getMoney',
+            'user',
+            'wallets',
+            'status'
+        ])
+            ->where('paymentable_type', 'App\Models\GetMoneyAction')
+            ->orderBy('id', 'desc');
+
+        return $query->get();
     }
 
     public function findOne($id)
@@ -29,6 +40,7 @@ class PaymentGetMoneyService
 
     public function create(array $data): string
     {
+
         // Data
         $getMoneyId = $data['get_money_id'];
         $userWalletId = $data['user_wallet_id'];
@@ -55,13 +67,22 @@ class PaymentGetMoneyService
         DB::beginTransaction();
 
         try {
+            // New Action
+            $newGetMoneyAction = GetMoneyAction::create([
+                'get_money_id' => $getMoney->id,
+                'user_wallet_id' => $userWalletId,
+                'user_id' => auth()->id(),
+                'sum_amount' => 0,
+            ]);
+
             // New Payment
             $newPayment = new Payment([
                 'user_id' => auth()->id(),
                 'status_id' => $status->id,
                 'comment' => $comment
             ]);
-            $getMoney->payments()->save($newPayment);
+
+            $newGetMoneyAction->payments()->save($newPayment);
 
             // Attach Wallet
             $sumPrice = $amount * $rateAmount;
@@ -75,6 +96,10 @@ class PaymentGetMoneyService
 
             // Decrement From User Wallet
             $userWallet->decrement('amount', $amount);
+
+            // Change New Money Action
+            $newGetMoneyAction->sum_amount = $sumPrice;
+            $newGetMoneyAction->save();
 
 
             DB::commit();
