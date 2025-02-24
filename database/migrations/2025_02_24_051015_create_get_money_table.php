@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('parent_id')->references('id')->on('expenses')->nullOnDelete();
             $table->string('name');
             $table->decimal('amount', 12, 2);
-            $table->string('comment');
+            $table->string('comment')->nullable();
             $table->timestamps();
         });
     }
