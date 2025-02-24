@@ -131,7 +131,7 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $stock = ProductStock::findOrFail($productionProcess->productionRecipe->out_product_id);
+        $stock = ProductStock::where('product_id',$productionProcess->productionRecipe->out_product_id)->firstOrFail();
         $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
         DB::beginTransaction();
