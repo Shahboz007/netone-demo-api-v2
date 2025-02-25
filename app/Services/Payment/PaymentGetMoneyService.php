@@ -4,7 +4,6 @@ namespace App\Services\Payment;
 
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
-use App\Models\GetMoney;
 use App\Models\GetMoneyAction;
 use App\Models\Payment;
 use App\Models\Status;
@@ -62,9 +61,6 @@ class PaymentGetMoneyService
         // Status
         $status = PaymentGetMoneyService::getStatus();
 
-        // Find
-        $getMoney = $this->findOne($getMoneyId);
-
         // User Wallet
         $userWallet = UserWallet::with(['user', 'wallet'])->findOrFail($userWalletId);
         $userName = $userWallet->user->name;
@@ -79,7 +75,7 @@ class PaymentGetMoneyService
         try {
             // New Action
             $newGetMoneyAction = GetMoneyAction::create([
-                'get_money_id' => $getMoney->id,
+                'get_money_id' => $getMoneyId,
                 'user_wallet_id' => $userWalletId,
                 'user_id' => auth()->id(),
                 'sum_amount' => 0,
