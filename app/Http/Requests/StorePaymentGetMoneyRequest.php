@@ -20,7 +20,7 @@ class StorePaymentGetMoneyRequest extends FormRequest
             'user_wallet_id' => [
                 'required',
                 'integer',
-                'exists:user_wallet,wallet_id',
+                'exists:user_wallet,id',
             ],
             'amount' => 'required|numeric|min:0',
             'rate_amount' => 'required|numeric|min:1',
