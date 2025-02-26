@@ -34,6 +34,7 @@ require __DIR__ . '/api/finance/paymentExpense.php';
 require __DIR__ . "/api/finance/paymentSupplier.php";
 require __DIR__ . "/api/finance/getMoney.php";
 require __DIR__ . "/api/finance/paymentGetMoney.php";
+require __DIR__ . "/api/finance/paymentSetMoney.php";
 
 // Statement
 require __DIR__ . '/api/statement/statement.php';
