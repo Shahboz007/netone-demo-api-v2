@@ -149,7 +149,7 @@ class ProductionProcessController extends Controller
             $costPrice = 0;
 
             foreach ($productionProcess->processItems as $item) {
-                $costPrice += $item->amount * $item->product->sale_price;
+                $costPrice += $item->product->cost_price;
             }
 
             $outProduct->update(['cost_price' => $costPrice]);
