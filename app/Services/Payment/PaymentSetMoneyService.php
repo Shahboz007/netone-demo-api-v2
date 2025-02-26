@@ -19,12 +19,29 @@ class PaymentSetMoneyService
 
     public function findAll()
     {
-        return Payment::where('status_id', self::getStatus()->id)->orderBy('created_at', 'desc')->get();
+        return Payment::with([
+            'user',
+            'status',
+            'paymentable.user',
+            'paymentable.wallet.currency',
+            'wallets'
+        ])
+            ->where('status_id', self::getStatus()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function findOne(int $id)
     {
-        return Payment::where('id', $id)->where('status_id', self::getStatus()->id)->firstOrFail();
+        return Payment::with([
+            'user',
+            'status',
+            'paymentable.user',
+            'paymentable.wallet.currency',
+            'wallets'
+        ])
+            ->where('status_id', self::getStatus()->id)
+            ->findOrFail($id);
     }
 
     /**

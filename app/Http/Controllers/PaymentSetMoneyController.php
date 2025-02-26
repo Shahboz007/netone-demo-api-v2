@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ServerErrorException;
 use App\Http\Requests\StorePaymentSetMoneyRequest;
+use App\Http\Resources\PaymentSetMoneyResource;
 use App\Services\Payment\PaymentSetMoneyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,14 +18,12 @@ class PaymentSetMoneyController extends Controller
 
     }
 
-    public function index()
+    public function index(): JsonResponse
     {
         $data = $this->paymentSetMoneyService->findAll();
 
-        return $data;
-
         return response()->json([
-            'data' => $data
+            'data' => PaymentSetMoneyResource::collection($data),
         ]);
     }
 
@@ -37,7 +36,7 @@ class PaymentSetMoneyController extends Controller
 
         return response()->json([
             'message' => $message,
-        ]);
+        ],201);
     }
 
     public function show(string $id): JsonResponse
@@ -45,7 +44,7 @@ class PaymentSetMoneyController extends Controller
         $data = $this->paymentSetMoneyService->findOne((int)$id);
 
         return response()->json([
-            'data' => $data,
+            'data' => PaymentSetMoneyResource::make($data),
         ]);
     }
 }
