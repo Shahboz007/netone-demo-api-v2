@@ -12,7 +12,7 @@ class ReconciliationCustomerService
     private $returnOrderMsg = "Qaytarilgan yuk";
     private $paymentMsg = "Olingan pul";
 
-    public function getByCustomer(string $customerId)
+    public function getByCustomer(string $customerId): array
     {
         // Status
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
@@ -72,7 +72,7 @@ class ReconciliationCustomerService
             $entry->amount_payments = (float) $entry->amount_payments;
         }
 
-        $response = [
+        return [
             'data' => $data,
             "total_list" => [
                 "total_count_orders" => (int) $totalOrders->total_count_orders,
@@ -87,8 +87,6 @@ class ReconciliationCustomerService
                 "total_amount_difference" => (float) $totalOrders->total_amount_orders - (float) $totalReturns->total_amount_returns - (float) $totalPayments->total_amount_payments
             ],
         ];
-
-        return $response;
     }
 
     private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId)
