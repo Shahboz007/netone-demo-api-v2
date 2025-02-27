@@ -3,6 +3,8 @@
 namespace App\Services\Statement;
 
 use App\Models\Status;
+use App\Services\Utils\DateFormater;
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Expr\Cast\Object_;
@@ -13,20 +15,36 @@ class ReconciliationCustomerService
     private string $returnOrderMsg = "Qaytarilgan yuk";
     private string $paymentMsg = "Olingan pul";
 
+    private Carbon|null $startDate = null;
+    private Carbon|null $endDate = null;
+
+    public function __construct()
+    {
+        $this->startDate = Carbon::yesterday();
+        $this->endDate = Carbon::today();
+    }
+
+    public function setDateInterVal($start, $end): void
+    {
+        $this->startDate = DateFormater::format($start);
+        $this->endDate = DateFormater::format($end);
+    }
+
     public function getByCustomer(string $customerId): array
     {
         // Status
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
         $statusPaymentCustomer = Status::where('code', 'paymentCustomer')->firstOrFail();
 
-        $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId);
+
+
+        $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $customerId);
         $payments = $this->getPaymentsQuery($statusPaymentCustomer, $customerId);
         $returnOrders = $this->getOrderReturnsQuery($customerId);
 
         $unionQuery = $completedOrders
             ->unionAll($payments)
             ->unionAll($returnOrders);
-
 
         $data = DB::query()
             ->fromSub($unionQuery, 'sub')
@@ -49,6 +67,7 @@ class ReconciliationCustomerService
             ])
             ->groupBy('action_date')
             ->orderBy('action_date')
+            ->whereBetween('action_date', [$this->startDate, $this->endDate])
             ->get();
 
         // Totals
@@ -89,7 +108,7 @@ class ReconciliationCustomerService
         ];
     }
 
-    private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId): Builder
+    private function getCompletedOrdersQuery($statusSubmittedOrder, $customerId): Builder
     {
 
         return DB::table('orders')
@@ -181,6 +200,7 @@ class ReconciliationCustomerService
             ])
             ->where('customers.id', $customerId)
             ->where('completed_orders.status_id', $statusId)
+            ->whereBetween('completed_orders.updated_at', [$this->startDate, $this->endDate])
             ->firstOrFail();
     }
 
@@ -195,6 +215,7 @@ class ReconciliationCustomerService
             ])
             ->where('payments.paymentable_type', 'App\Models\Customer')
             ->where('customers.id', $customerId)
+            ->whereBetween('payments.created_at', [$this->startDate, $this->endDate])
             ->first();
     }
 
@@ -207,6 +228,7 @@ class ReconciliationCustomerService
                 DB::raw('SUM(order_returns.total_sale_price) as total_amount_returns')
             )
             ->where('customers.id', $customerId)
+            ->whereBetween('order_returns.created_at', [$this->startDate, $this->endDate])
             ->first();
     }
 }
