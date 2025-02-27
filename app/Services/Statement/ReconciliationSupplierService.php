@@ -5,6 +5,7 @@ namespace App\Services\Statement;
 use App\Services\Utils\DateFormater;
 use Illuminate\Database\Query\Builder;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ReconciliationSupplierService
@@ -27,10 +28,37 @@ class ReconciliationSupplierService
         $this->endDate = DateFormater::format($end);
     }
 
-    public function getBySupplier(string $supplierId)
+    public function getBySupplier(string $supplierId): array
     {
-        $supplierId = 1;
 
+        // All Data Items
+        $data = $this->allData($supplierId);
+
+        // Totals
+        $totalsReceives = $this->totalReceiveProducts($supplierId);
+        $totalsReturns = $this->totalReturnReceiveProducts($supplierId);
+        $totalsPayments = $this->totalPayments($supplierId);
+
+
+        return [
+            'data' => $data,
+            "total_list" => [
+                // Receives
+                'total_count_receives' =>(int) $totalsReceives->total_count_receives,
+                'total_amount_receives' => (float) $totalsReceives->total_amount_receives??0,
+                // Returns
+                'total_count_returns' => (int) $totalsReturns->total_count_returns,
+                'total_amount_returns' => (float) $totalsReturns->total_amount_returns??0,
+                // Payment
+                'total_count_payments' => (int) $totalsPayments->total_count_payments,
+                'total_amount_payments' => (float) $totalsPayments->total_amount_payments??0,
+            ]
+        ];
+    }
+
+
+    private function allData(int $supplierId): Collection
+    {
         // Receive
         $receiveProducts = $this->receiveProductsQuery($supplierId);
         // Return Receive
@@ -158,5 +186,46 @@ class ReconciliationSupplierService
             ->where('payments.paymentable_id', $supplierId)
             ->groupBy(DB::raw('DATE(payments.created_at)'));
 
+    }
+
+    /* -------------------------------
+    /       TOTALS
+    /---------- */
+    private function totalReceiveProducts(int $supplierId)
+    {
+        return DB::table('receive_products')
+            ->select([
+                DB::raw('SUM(total_price) as total_amount_receives'),
+                DB::raw('COUNT(id) as total_count_receives'),
+            ])
+            ->where('supplier_id', $supplierId)
+            ->whereBetween('created_at', [$this->startDate, $this->endDate])
+            ->first();
+    }
+
+    private function totalReturnReceiveProducts(int $supplierId)
+    {
+        return DB::table('return_receives')
+            ->select([
+                DB::raw('SUM(total_sale_price) as total_amount_returns'),
+                DB::raw('COUNT(id) as total_count_returns'),
+            ])
+            ->where('supplier_id', $supplierId)
+            ->whereBetween('created_at', [$this->startDate, $this->endDate])
+            ->first();
+    }
+
+    private function totalPayments(int $supplierId)
+    {
+        return DB::table('payments')
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->select([
+                DB::raw('SUM(payment_wallet.sum_price) as total_amount_payments'),
+                DB::raw('COUNT(payments.id) as total_count_payments'),
+            ])
+            ->where('payments.paymentable_id', $supplierId)
+            ->where('payments.paymentable_type', 'App\Models\Supplier')
+            ->whereBetween('payments.created_at', [$this->startDate, $this->endDate])
+            ->first();
     }
 }
