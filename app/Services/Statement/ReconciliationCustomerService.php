@@ -3,6 +3,7 @@
 namespace App\Services\Statement;
 
 use App\Models\Status;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Expr\Cast\Object_;
 
@@ -52,7 +53,7 @@ class ReconciliationCustomerService
             ->get();
 
         // Totals
-        $totalOrders  = $this->getTotalCompletedOrders($customerId);
+        $totalOrders  = $this->getTotalCompletedOrders($customerId, $statusSubmittedOrder->id);
         $totalPayments = $this->getTotalPayments($customerId);
         $totalReturns = $this->getTotalReturnOrders($customerId);
 
@@ -89,7 +90,7 @@ class ReconciliationCustomerService
         ];
     }
 
-    private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId)
+    private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId): Builder
     {
 
         return DB::table('orders')
@@ -118,7 +119,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(completed_orders.updated_at)'));
     }
 
-    private function getPaymentsQuery($statusPaymentCustomer, $customerId)
+    private function getPaymentsQuery($statusPaymentCustomer, $customerId): Builder
     {
         return DB::table('payments')
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
@@ -146,7 +147,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(payments.created_at)'));
     }
 
-    private function getOrderReturnsQuery(int $customerId)
+    private function getOrderReturnsQuery(int $customerId): Builder
     {
         return DB::table('order_returns')
             ->select([
@@ -170,7 +171,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(created_at)'));
     }
 
-    private function getTotalCompletedOrders(int $customerId): object
+    private function getTotalCompletedOrders(int $customerId, int $statusId): object
     {
         return DB::table('customers')
             ->join('orders', 'customers.id', '=', 'orders.customer_id')
@@ -180,6 +181,7 @@ class ReconciliationCustomerService
                 DB::raw('SUM(completed_orders.total_sale_price) as total_amount_orders')
             ])
             ->where('customers.id', $customerId)
+            ->where('completed_orders.status_id', $statusId)
             ->firstOrFail();
     }
 
