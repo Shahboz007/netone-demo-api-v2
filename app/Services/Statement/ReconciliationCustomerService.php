@@ -175,7 +175,7 @@ class ReconciliationCustomerService
                 DB::raw("NULL as order_status"),
                 // Return Order
                 DB::raw('SUM(total_sale_price) as amount_order_returns'),
-                DB::raw('111 as count_order_returns'),
+                DB::raw('COUNT(id) as count_order_returns'),
                 DB::raw("'$this->returnOrderMsg' as order_return_status"),
                 // Order Diff
                 DB::raw('SUM(total_sale_price) * -1 as amount_difference'),

@@ -7,6 +7,8 @@ use App\Models\Customer;
 use App\Models\Supplier;
 use App\Services\Statement\ReconciliationCustomerService;
 use App\Services\Statement\ReconciliationSupplierService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ReconciliationSupplierController extends Controller
 {
@@ -14,12 +16,18 @@ class ReconciliationSupplierController extends Controller
         protected ReconciliationSupplierService $reconciliationService
     ) {}
 
-    public function show(int $supplierId)
+    public function show(Request $request, int $supplierId): JsonResponse
     {
-        // if(!Supplier::findOrFail($supplierId)) abort(404);
+        $validated = $request->validate([
+            'startDate' => 'required|date|date_format:d-m-Y|before_or_equal:endDate',
+            'endDate' => 'required|date|date_format:d-m-Y|after_or_equal:startDate',
+        ]);
 
-        // $data = $this->reconciliationService->getBySupplier($supplierId);
+        if (!Customer::findOrFail($supplierId)) abort(404);
 
-        // return $data;
+        $this->reconciliationService->setDateInterVal($validated['startDate'], $validated['endDate']);
+        $data = $this->reconciliationService->getBySupplier($supplierId);
+
+        return response()->json($data);
     }
 }
