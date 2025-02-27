@@ -9,9 +9,9 @@ use PhpParser\Node\Expr\Cast\Object_;
 
 class ReconciliationCustomerService
 {
-    private $orderMsg = "Berilgan yuk";
-    private $returnOrderMsg = "Qaytarilgan yuk";
-    private $paymentMsg = "Olingan pul";
+    private string $orderMsg = "Berilgan yuk";
+    private string $returnOrderMsg = "Qaytarilgan yuk";
+    private string $paymentMsg = "Olingan pul";
 
     public function getByCustomer(string $customerId): array
     {
@@ -21,12 +21,11 @@ class ReconciliationCustomerService
 
         $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId);
         $payments = $this->getPaymentsQuery($statusPaymentCustomer, $customerId);
-        $returnOrders  = $this->getOrderReturnsQuery($customerId);
+        $returnOrders = $this->getOrderReturnsQuery($customerId);
 
         $unionQuery = $completedOrders
             ->unionAll($payments)
             ->unionAll($returnOrders);
-
 
 
         $data = DB::query()
@@ -53,7 +52,7 @@ class ReconciliationCustomerService
             ->get();
 
         // Totals
-        $totalOrders  = $this->getTotalCompletedOrders($customerId, $statusSubmittedOrder->id);
+        $totalOrders = $this->getTotalCompletedOrders($customerId, $statusSubmittedOrder->id);
         $totalPayments = $this->getTotalPayments($customerId);
         $totalReturns = $this->getTotalReturnOrders($customerId);
 
@@ -61,31 +60,31 @@ class ReconciliationCustomerService
         foreach ($data as $index => $entry) {
             $entry->id = $index + 1;
             // Order
-            $entry->count_orders = (int) $entry->count_orders;
-            $entry->amount_orders = (float) $entry->amount_orders;
+            $entry->count_orders = (int)$entry->count_orders;
+            $entry->amount_orders = (float)$entry->amount_orders;
             // Return Order
-            $entry->count_order_returns = (int) $entry->count_order_returns;
-            $entry->amount_order_returns = (float) $entry->amount_order_returns;
+            $entry->count_order_returns = (int)$entry->count_order_returns;
+            $entry->amount_order_returns = (float)$entry->amount_order_returns;
             // Difference
-            $entry->amount_difference = (float) $entry->amount_difference;
+            $entry->amount_difference = (float)$entry->amount_difference;
             // Payments
-            $entry->count_payments = (int) $entry->count_payments;
-            $entry->amount_payments = (float) $entry->amount_payments;
+            $entry->count_payments = (int)$entry->count_payments;
+            $entry->amount_payments = (float)$entry->amount_payments;
         }
 
         return [
             'data' => $data,
             "total_list" => [
-                "total_count_orders" => (int) $totalOrders->total_count_orders,
-                "total_amount_orders" => (float) $totalOrders->total_amount_orders ?? 0,
+                "total_count_orders" => (int)$totalOrders->total_count_orders,
+                "total_amount_orders" => (float)$totalOrders->total_amount_orders ?? 0,
 
-                "total_count_payments" => (int) $totalPayments->total_count_payments,
-                "total_amount_payments" => (float) $totalPayments->total_amount_payments ?? 0,
+                "total_count_payments" => (int)$totalPayments->total_count_payments,
+                "total_amount_payments" => (float)$totalPayments->total_amount_payments ?? 0,
 
-                "total_count_order_returns" => (int) $totalReturns->total_count_returns,
-                "total_amount_order_returns" => (float) $totalReturns->total_amount_returns ?? 0,
+                "total_count_order_returns" => (int)$totalReturns->total_count_returns,
+                "total_amount_order_returns" => (float)$totalReturns->total_amount_returns ?? 0,
 
-                "total_amount_difference" => (float) $totalOrders->total_amount_orders - (float) $totalReturns->total_amount_returns - (float) $totalPayments->total_amount_payments
+                "total_amount_difference" => (float)$totalOrders->total_amount_orders - (float)$totalReturns->total_amount_returns - (float)$totalPayments->total_amount_payments
             ],
         ];
     }
