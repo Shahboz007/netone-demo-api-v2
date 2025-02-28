@@ -3,6 +3,7 @@
 namespace App\Services\Statement;
 
 use App\Services\Utils\DateFormater;
+use App\Services\Utils\DateFormatter;
 use Illuminate\Database\Query\Builder;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -13,19 +14,19 @@ class ReconciliationSupplierService
     private string $receiveMsg = "Qabul qilindi";
     private string $returnReceiveMsg = "Qaytarildi";
     private string $paymentMsg = 'O\`tkazma';
-    private Carbon|null $startDate = null;
-    private Carbon|null $endDate = null;
+    private string|null $startDate = null;
+    private string|null $endDate = null;
 
     public function __construct()
     {
-        $this->startDate = Carbon::yesterday();
-        $this->endDate = Carbon::today();
+        $this->startDate = Carbon::yesterday()->format('Y-m-d');
+        $this->endDate = Carbon::today()->format('Y-m-d');
     }
 
     public function setDateInterVal($start, $end): void
     {
-        $this->startDate = DateFormater::format($start);
-        $this->endDate = DateFormater::format($end);
+        $this->startDate = DateFormatter::format($start);
+        $this->endDate = DateFormatter::format($end);
     }
 
     public function getBySupplier(string $supplierId): array
@@ -40,19 +41,21 @@ class ReconciliationSupplierService
         $totalsPayments = $this->totalPayments($supplierId);
 
 
+        // Receives
+        $totalList['total_count_receives'] = (int) $totalsReceives->total_count_receives;
+        $totalList['total_amount_receives'] = (float) $totalsReceives->total_amount_receives;
+        // Returns
+        $totalList['total_count_returns'] = (int) $totalsReturns->total_count_returns;
+        $totalList['total_amount_returns'] = (float) $totalsReturns->total_amount_returns;
+        // Payment
+        $totalList['total_count_payments'] = (int) $totalsPayments->total_count_payments;
+        $totalList['total_amount_payments'] = (float) $totalsPayments->total_amount_payments;
+        // Diff
+        $totalList['total_amount_diff'] = $totalList['total_amount_receives'] - $totalList['total_amount_returns'] - $totalList['total_amount_payments'];
+
         return [
             'data' => $data,
-            "total_list" => [
-                // Receives
-                'total_count_receives' =>(int) $totalsReceives->total_count_receives,
-                'total_amount_receives' => (float) $totalsReceives->total_amount_receives??0,
-                // Returns
-                'total_count_returns' => (int) $totalsReturns->total_count_returns,
-                'total_amount_returns' => (float) $totalsReturns->total_amount_returns??0,
-                // Payment
-                'total_count_payments' => (int) $totalsPayments->total_count_payments,
-                'total_amount_payments' => (float) $totalsPayments->total_amount_payments??0,
-            ]
+            "total_list" => $totalList
         ];
     }
 
@@ -185,7 +188,6 @@ class ReconciliationSupplierService
             ->where('payments.paymentable_type', 'App\Models\Supplier')
             ->where('payments.paymentable_id', $supplierId)
             ->groupBy(DB::raw('DATE(payments.created_at)'));
-
     }
 
     /* -------------------------------
