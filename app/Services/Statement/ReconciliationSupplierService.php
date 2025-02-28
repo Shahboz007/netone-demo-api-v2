@@ -2,7 +2,6 @@
 
 namespace App\Services\Statement;
 
-use App\Services\Utils\DateFormater;
 use App\Services\Utils\DateFormatter;
 use Illuminate\Database\Query\Builder;
 use Carbon\Carbon;
@@ -19,14 +18,14 @@ class ReconciliationSupplierService
 
     public function __construct()
     {
-        $this->startDate = Carbon::yesterday()->format('Y-m-d');
-        $this->endDate = Carbon::today()->format('Y-m-d');
+        $this->startDate = Carbon::yesterday()->format('Y-m-d').' 00:00:00';
+        $this->endDate = Carbon::today()->format('Y-m-d').' 23:59:59';
     }
 
     public function setDateInterVal($start, $end): void
     {
-        $this->startDate = DateFormatter::format($start);
-        $this->endDate = DateFormatter::format($end);
+        $this->startDate = DateFormatter::format($start).' 00:00:00';
+        $this->endDate = DateFormatter::format($end).' 23:59:59';
     }
 
     public function getBySupplier(string $supplierId): array
