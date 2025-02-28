@@ -3,7 +3,7 @@
 namespace App\Services\Statement;
 
 use App\Models\Status;
-use App\Services\Utils\DateFormater;
+use App\Services\Utils\DateFormatter;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -14,19 +14,19 @@ class ReconciliationCustomerService
     private string $returnOrderMsg = "Qaytarilgan yuk";
     private string $paymentMsg = "Olingan pul";
 
-    private Carbon|null $startDate = null;
-    private Carbon|null $endDate = null;
+    private string|null $startDate = null;
+    private string|null $endDate = null;
 
     public function __construct()
     {
-        $this->startDate = Carbon::yesterday();
-        $this->endDate = Carbon::today();
+        $this->startDate = Carbon::yesterday()->format('Y-m-d');
+        $this->endDate = Carbon::today()->format('Y-m-d');
     }
 
     public function setDateInterVal($start, $end): void
     {
-        $this->startDate = DateFormater::format($start);
-        $this->endDate = DateFormater::format($end);
+        $this->startDate = DateFormatter::format($start);
+        $this->endDate = DateFormatter::format($end);
     }
 
     public function getByCustomer(string $customerId): array
