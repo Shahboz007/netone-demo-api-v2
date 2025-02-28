@@ -19,14 +19,14 @@ class ReconciliationCustomerService
 
     public function __construct()
     {
-        $this->startDate = Carbon::yesterday()->format('Y-m-d') . ' 00:00:00';
-        $this->endDate = Carbon::today()->format('Y-m-d') . ' 23:59:59';
+        $this->startDate = DateFormatter::today('start');
+        $this->endDate = DateFormatter::today('end');
     }
 
     public function setDateInterVal($start, $end): void
     {
-        $this->startDate = DateFormatter::format($start) . ' 00:00:00';
-        $this->endDate = DateFormatter::format($end) . ' 23:59:59';
+        $this->startDate = DateFormatter::format($start, 'start');
+        $this->endDate = DateFormatter::format($end, 'end');
     }
 
     public function getByCustomer(string $customerId): array
