@@ -92,6 +92,7 @@ class ReconciliationSupplierService
             ])
             ->groupBy('action_date')
             ->orderBy('action_date')
+            ->whereBetween('action_date', [$this->startDate, $this->endDate])
             ->get();
 
         foreach ($data as $item) {
