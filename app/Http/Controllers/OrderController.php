@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Status;
+use App\Service\Order\OrderService;
 use App\Services\GenerateOrderCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,16 +23,14 @@ use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        protected OrderService $orderService
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', Order::class);
-
-        $query = Order::with(
-            'user',
-            'customer',
-            'status'
-        );
 
         // Status
         $allowedStatuses = [
@@ -43,27 +42,19 @@ class OrderController extends Controller
         ];
         $validated = $request->validate([
             'status' => ['nullable', 'string', 'in:' . implode(',', $allowedStatuses)],
+            'startDate' => 'required|date|date_format:d-m-Y|before_or_equal:endDate',
+            'endDate' => 'required|date|date_format:d-m-Y|after_or_equal:startDate',
         ]);
 
-        if (!empty($validated)) {
-            $status = Status::where('code', $validated['status'])->firstOrFail();
+        $status = $validated['status'] ?? null;
 
-            // Submitted
-            if ($validated['status'] === 'orderSubmitted') {
-                $query->with('completedOrder');
-            } else if ($validated['status'] === 'orderCancel') {
-                $query->with('cancelOrder');
-            }
+        // Date
+        $this->orderService->setDate($validated['startDate'], $validated['endDate']);
 
-            $query->where('status_id', $status->id);
-        }
+        // Fetch Date
+        $data = $this->orderService->findAll($status);
 
-        if (!$request->user()->isAdmin()) {
-            $query->where('user_id', $request->user()->id);
-        }
-
-        $data = $query->orderByDesc('created_at')->get();
-
+        // Response
         return response()->json([
             'data' => OrderResource::collection($data)
         ]);
