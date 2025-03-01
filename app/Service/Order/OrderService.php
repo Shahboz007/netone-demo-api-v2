@@ -130,7 +130,7 @@ class OrderService
         }
     }
 
-    public function findOne(int $id)
+    public function findOne(int $id): array
     {
         $query = Order::with(
             'user',
@@ -152,8 +152,26 @@ class OrderService
         ];
     }
 
-    public function confirm()
+    public function confirm(int $id): array
     {
+        $newOrderStatus = StatusService::findByCode('orderNew');
+
+        $order = Order::where('user_id', auth()->id())
+            ->where('status_id', $newOrderStatus->id)
+            ->findOrFail($id);
+
+        // Status Code
+        $statusInProgress = StatusService::findByCode('orderInProgress');
+
+        $order->status_id = $statusInProgress->id;
+        $order->save();
+
+        return [
+            'message' => "Buyurtma tasdiqlandi va hozir jarayonda",
+            'data' => [
+                'status' => $statusInProgress
+            ]
+        ];
     }
 
     public function addProduct()

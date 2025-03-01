@@ -96,21 +96,11 @@ class OrderController extends Controller
         // Gate
         Gate::authorize('confirm', Order::class);
 
-        $order = Order::where('user_id', auth()->id())->findOrFail($id);
-
-        // Status Code
-        $statusCode = 'orderInProgress';
-
-        $StatusInProgress = Status::where('code', $statusCode)->firstOrFail();
-
-        $order->status_id = $StatusInProgress->id;
-        $order->save();
+        $result = $this->orderService->confirm($id);
 
         return response()->json([
-            'message' => "Buyurtma tasdiqlandi va hozir jarayonda",
-            'data' => [
-                'status' => $StatusInProgress
-            ]
+            'message' => $result['message'],
+            'data' => $result['data']
         ]);
     }
 
