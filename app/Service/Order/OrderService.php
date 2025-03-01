@@ -27,7 +27,7 @@ class OrderService
         $this->endDate = DateFormatter::format($end, 'end');
     }
 
-    public function findAll($statusCode): Collection
+    public function findAll($statusCode): array
     {
         $query = Order::with(
             'user',
@@ -53,10 +53,14 @@ class OrderService
             $query->where('user_id', auth()->id());
         }
 
-        return $query
+        $data = $query
             ->orderByDesc('created_at')
             ->whereBetween('updated_at', [$this->startDate, $this->endDate])
             ->get();
+        return [
+            'data' => $data,
+            'total_sale_price' => $data->sum('total_sale_price'),
+        ];
     }
 
     /**

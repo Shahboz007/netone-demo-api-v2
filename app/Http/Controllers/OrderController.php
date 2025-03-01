@@ -9,17 +9,10 @@ use App\Http\Requests\UpdateOrderCompletedRequest;
 use App\Http\Requests\UpdateOrderSubmittedRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderShowResource;
-use App\Models\CompletedOrder;
-use App\Models\Customer;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductStock;
-use App\Models\Status;
 use App\Service\Order\OrderService;
-use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
@@ -53,11 +46,12 @@ class OrderController extends Controller
         $this->orderService->setDate($validated['startDate'], $validated['endDate']);
 
         // Fetch Date
-        $data = $this->orderService->findAll($status);
+        $result = $this->orderService->findAll($status);
 
         // Response
         return response()->json([
-            'data' => OrderResource::collection($data)
+            'data' => OrderResource::collection($result['data']),
+            'total_sale_price' => $result['total_sale_price'],
         ]);
     }
 
