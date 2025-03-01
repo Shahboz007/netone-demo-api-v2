@@ -6,13 +6,13 @@ use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Services\GenerateOrderCode;
 use App\Services\Status\StatusService;
 use App\Services\Utils\DateFormatter;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -179,6 +179,7 @@ class OrderService
 
     /**
      * @throws ServerErrorException
+     * @throws InvalidDataException
      */
     public function addProduct(array $data, int $id): array
     {
@@ -197,6 +198,14 @@ class OrderService
         $order = Order::where('user_id', auth()->id())
             ->where('status_id', $statusOrderInProgress->id)
             ->findOrFail($id);
+
+        // Validate Order Details
+        $detailItemExists = OrderDetail::where('order_id', $order->id)
+            ->where('product_id', $productId)
+            ->exists();
+        if ($detailItemExists) {
+            throw new InvalidDataException("Bu mahsulot allaqachon mavjud");
+        }
 
 
         // Create Order Details Item
@@ -254,9 +263,7 @@ class OrderService
             ->whereIn('status_id', [$orderNewStatus->id, $orderInProgressStatus->id])
             ->findOrFail($id);
 
-        /***********************************
-         / Validation Order Details Item
-         /************* */
+        /************* */
 
         // Length
         $orderItemLength = $order->orderDetails->count();
@@ -347,7 +354,7 @@ class OrderService
                     // Change Stock
                     $stock = ProductStock::where('product_id', $detail->product_id)->firstOrFail();
                     $stock->decrement('amount', $completedAmount);
-                }else {
+                } else {
                     throw new InvalidDataException("Siz buyurtma mahsulotlarni tanlang!");
                 }
             }
