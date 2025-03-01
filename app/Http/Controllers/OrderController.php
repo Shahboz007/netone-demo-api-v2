@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ServerErrorException;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderAddProductRequest;
 use App\Http\Requests\UpdateOrderCompletedRequest;
@@ -15,7 +16,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Status;
 use App\Service\Order\OrderService;
-use App\Services\GenerateOrderCode;
+use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,80 +62,20 @@ class OrderController extends Controller
     }
 
 
-    public function store(StoreOrderRequest $request)
+    /**
+     * @throws ServerErrorException
+     */
+    public function store(StoreOrderRequest $request): JsonResponse
     {
         // Gate
         Gate::authorize('create', Order::class);
 
-        // New Order status
-        $newOrderStatus = Status::where('code', 'orderNew')->firstOrFail();
+        $result = $this->orderService->create([
+            'customer_id' => $request->validated('customer_id'),
+            'product_list' => $request->validated('product_list'),
+        ]);
 
-        // Get Request Products
-        $productsId = array_column($request->validated('product_list'), 'product_id');
-        $products = Product::whereIn('id', $productsId)
-            ->get();
-
-        $pluckedCostPrice = $products->pluck('cost_price', 'id');
-        $pluckedSalePrice = $products->pluck('sale_price', 'id');
-
-        // Generate Order Code
-        $orderCode = GenerateOrderCode::generate($request->validated('customer_id'));
-
-        DB::beginTransaction();
-
-        try {
-            $newOrder = Order::create([
-                "user_id" => auth()->id(),
-                "customer_id" => $request->validated('customer_id'),
-                "status_id" => $newOrderStatus->id,
-                'total_cost_price' => 0,
-                'total_sale_price' => 0,
-                'ord_code' => $orderCode
-            ]);
-
-
-            $totalCostPrice = 0;
-            $totalSalePrice = 0;
-
-            // Create Order Details
-            $detailItemList = [];
-            foreach ($request->validated('product_list') as $item) {
-                $costPrice = $pluckedCostPrice[$item['product_id']];
-                $salePrice = $pluckedSalePrice[$item['product_id']];
-                $sumCostPrice = $costPrice * $item['amount'];
-                $sumSalePrice = $salePrice * $item['amount'];
-
-                $detailItemList[] = [
-                    'product_id' => $item['product_id'],
-                    'amount' => $item['amount'],
-                    'amount_type_id' => $item['amount_type_id'],
-                    'cost_price' => $costPrice,
-                    'sale_price' => $salePrice,
-                    'sum_cost_price' => $sumCostPrice,
-                    'sum_sale_price' => $sumSalePrice,
-                ];
-
-                $totalCostPrice += $sumCostPrice;
-                $totalSalePrice += $sumSalePrice;
-            }
-
-            $newOrder->orderDetails()->createMany($detailItemList);
-
-
-            $newOrder->total_cost_price = $totalCostPrice;
-            $newOrder->total_sale_price = $totalSalePrice;
-
-            $newOrder->save();
-
-            DB::commit();
-
-            return response()->json([
-                "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->serverError($e);
-        }
+        return response()->json($result);
     }
 
 
