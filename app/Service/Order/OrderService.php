@@ -39,7 +39,7 @@ class OrderService
             $status = StatusService::findByCode($statusCode);
 
             // Submitted
-            if ($statusCode === 'orderSubmitted') {
+            if ($statusCode === 'orderSubmitted' || $statusCode === 'orderCompleted') {
                 $query->with('completedOrder');
             } else if ($statusCode === 'orderCancel') {
                 $query->with('cancelOrder');
@@ -56,10 +56,14 @@ class OrderService
             ->orderByDesc('created_at')
             ->whereBetween('updated_at', [$this->startDate, $this->endDate])
             ->get();
+
+        // Totals
+        $totals = $this->getTotalSumByStatusCode($statusCode);
+
         return [
             'data' => $data,
-            'total_sale_price' => $data->sum('total_sale_price'),
-            'total_count' => $data->count(),
+            'total_sale_price' => $totals['total_amount'],
+            'total_count' => $totals['total_count'],
         ];
     }
 
@@ -438,5 +442,61 @@ class OrderService
             DB::rollBack();
             throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    private function getTotalSumByStatusCode(?string $statusCode): array
+    {
+        switch ($statusCode) {
+            case 'orderCompleted':
+            case 'orderSubmitted':
+                return $this->getTotalsOrderCompleted($statusCode);
+            default:
+                return $this->getTotalsOrderOther($statusCode);
+        }
+    }
+
+    private function getTotalsOrderCompleted(string $statusCode): array
+    {
+        $status = StatusService::findByCode($statusCode);
+
+        $result = DB::table('completed_orders')
+            ->select(
+                DB::raw('SUM(completed_orders.total_sale_price) as total_amount'),
+                DB::raw('COUNT(completed_orders.id) as total_count')
+            )
+            ->whereBetween('completed_orders.updated_at', [$this->startDate, $this->endDate])
+            ->where('completed_orders.status_id', $status->id)
+            ->first();
+
+        return [
+            'total_amount' => (float) $result->total_amount,
+            'total_count' => $result->total_count,
+        ];
+    }
+
+    private function getTotalsOrderOther(?string $statusCode): array
+    {
+        if (!$statusCode) {
+            return [
+                'total_amount' => 0,
+                'total_count' => 0,
+            ];
+        }
+
+        $statusesIdList = StatusService::findByCode($statusCode);
+
+        $result = DB::table('orders')
+            ->select(
+                DB::raw('SUM(orders.total_sale_price) as total_amount'),
+                DB::raw('COUNT(orders.id) as total_count')
+            )
+            ->where('orders.status_id', $statusesIdList)
+            ->whereBetween('orders.updated_at', [$this->startDate, $this->endDate])
+        ->first();
+
+        return [
+            'total_amount' => (float) $result->total_amount,
+            'total_count' => $result->total_count,
+        ];
     }
 }
