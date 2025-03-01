@@ -274,7 +274,7 @@ class OrderService
         }
 
         foreach ($order->orderDetails as $item) {
-            if (!$pluckItemsList[$item->id]) {
+            if (!isset($pluckItemsList[$item->id])) {
                 throw new InvalidDataException("Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
             }
         }
