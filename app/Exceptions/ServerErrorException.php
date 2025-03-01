@@ -3,10 +3,11 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class ServerErrorException extends Exception
 {
-    public function render($request)
+    public function render($request): JsonResponse
     {
         if (app()->environment('local') && config('app.debug')) {
             return response()->json([
