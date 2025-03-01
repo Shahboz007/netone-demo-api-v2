@@ -10,30 +10,38 @@ use App\Models\ProductStock;
 use App\Models\ReceiveProduct;
 use App\Models\Status;
 use App\Models\Supplier;
+use App\Services\Receive\ReceiveProductService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReceiveProductController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(
+        protected ReceiveProductService $receiveProductService,
+    )
+    {
+    }
+
+    public function index(Request $request): JsonResponse
     {
         // Gate
         Gate::authorize('viewAny', ReceiveProduct::class);
 
-        $query = ReceiveProduct::with(
-            "user",
-            "supplier",
-            "status"
-        );
+        $validated = $request->validate([
+            'startDate' => 'required|date|date_format:d-m-Y|before_or_equal:endDate',
+            'endDate' => 'required|date|date_format:d-m-Y|after_or_equal:startDate',
+        ]);
+        // Date
+        $this->receiveProductService->setDate($validated['startDate'], $validated['endDate']);
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
+        $result = $this->receiveProductService->findAll();
 
-        $data = $query->orderByDesc('id')->get();
         return response()->json([
-            'data' => ReceiveProductResource::collection($data),
+            'data' => ReceiveProductResource::collection($result['data']),
+            'total_price' => $result['total_price'],
+            'total_count' => $result['total_count'],
         ]);
     }
 
@@ -166,25 +174,15 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function show($receiveId): JsonResponse
+    public function show(string $id): JsonResponse
     {
         // Gate
         Gate::authorize('view', ReceiveProduct::class);
 
-        $query = ReceiveProduct::with(
-            "user",
-            "supplier",
-            "receiveProductDetails",
-            "status"
-        )->where('id', $receiveId);
+        $result = $this->receiveProductService->findOne((int) $id);
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->firstOrFail();
         return response()->json([
-            'data' => ReceiveProductShowResource::make($data),
+            'data' => ReceiveProductShowResource::make($result['data']),
         ]);
     }
 }
