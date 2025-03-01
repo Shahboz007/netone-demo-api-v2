@@ -485,7 +485,7 @@ class OrderService
                 DB::raw('SUM(IF(completed_orders.order_id IS NULL, orders.total_sale_price, completed_orders.total_sale_price)) as total_amount'),
                 DB::raw('COUNT(orders.id) as total_count')
             )
-            ->whereBetween('orders.created_at', [$this->startDate, $this->endDate]);
+            ->whereBetween('orders.updated_at', [$this->startDate, $this->endDate]);
 
         // Status When Exist
         if ($statusCode) {
