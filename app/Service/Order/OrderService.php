@@ -59,6 +59,7 @@ class OrderService
         return [
             'data' => $data,
             'total_sale_price' => $data->sum('total_sale_price'),
+            'total_count' => $data->count(),
         ];
     }
 

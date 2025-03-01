@@ -52,6 +52,7 @@ class OrderController extends Controller
         return response()->json([
             'data' => OrderResource::collection($result['data']),
             'total_sale_price' => $result['total_sale_price'],
+            'total_count' => $result['total_count'],
         ]);
     }
 
