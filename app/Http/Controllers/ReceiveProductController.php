@@ -46,7 +46,7 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function store(StoreReceiveProductRequest $request)
+    public function store(StoreReceiveProductRequest $request): JsonResponse
     {
         // Gate
         Gate::authorize('create', ReceiveProduct::class);

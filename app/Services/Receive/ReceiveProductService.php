@@ -46,7 +46,7 @@ class ReceiveProductService
         ];
     }
 
-    public function create(array $data)
+    public function create(array $data): array
     {
         // Data
         $supplierId = $data['supplier_id'];
