@@ -5,6 +5,7 @@ namespace App\Service\Order;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -318,7 +319,7 @@ class OrderService
         }
 
         // Status Code
-        $statusCompleted = StatusService::findByCode('completed');
+        $statusCompleted = StatusService::findByCode('orderCompleted');
 
         DB::beginTransaction();
 
@@ -381,7 +382,57 @@ class OrderService
         }
     }
 
-    public function submit()
+    /**
+     * @throws ServerErrorException
+     */
+    public function submit(array $data, int $id)
     {
+        // Data
+        $comment = $data['comment'] ?? null;
+
+        $statusCompleted = StatusService::findByCode('orderCompleted');
+
+        // Order
+        $order = Order::with('orderDetails')
+            ->where('status_id', $statusCompleted->id)
+            ->findOrFail($id);
+
+        // Status Code
+        $statusSubmitted = StatusService::findByCode('orderSubmitted');
+
+        // Customer
+        $customer = Customer::findOrFail($order->customer_id);
+
+        // Completed Order
+        $completedOrder = CompletedOrder::where('order_id', $order->id)->firstOrFail();
+
+        DB::beginTransaction();
+
+        try {
+
+            // Order
+            $order->status_id = $statusSubmitted->id;
+            $order->save();
+
+            // Completed Order
+            $completedOrder->submitted_comment = $comment;
+            $completedOrder->status_id = $statusSubmitted->id;
+            $completedOrder->customer_old_balance = $order->customer->balance;
+            $completedOrder->save();
+
+            // Customer
+            $customer->decrement('balance', $completedOrder->total_sale_price);
+
+            DB::commit();
+            return [
+                'message' => "Buyurtma muvaffaqiyatli topshirildi! Mijoz balansini tekshiring",
+                'data' => [
+                    'status' => $statusSubmitted
+                ]
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

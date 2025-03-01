@@ -123,56 +123,16 @@ class OrderController extends Controller
         return response()->json($result);
     }
 
+    /**
+     * @throws ServerErrorException
+     */
     public function submitted(UpdateOrderSubmittedRequest $request, string $id): JsonResponse
     {
         // Gate
         Gate::authorize('submit', Order::class);
 
-        $order = Order::with('orderDetails')->findOrFail($id);
+        $result = $this->orderService->submit($request->validated(), (int) $id);
 
-        // Validation Order Status
-        $statusCompleted = Status::where('code', 'orderCompleted')->firstOrFail();
-        if ($order->status_id !== $statusCompleted->id) {
-            return $this->mainErrRes("Bu buyurtma topshirish uchun tayyor emas! Buyurtma egasiga topshirilishi uchun tayyorlandi holatida bo'lishi kerak!");
-        }
-
-        // Status Code
-        $statusSubmitted = Status::where('code', 'orderSubmitted')->firstOrFail();
-
-        // Customer
-        $customer = Customer::findOrFail($order->customer_id);
-
-        // Completed Order
-        $completedOrder = CompletedOrder::where('order_id', $order->id)->firstOrFail();
-
-        DB::beginTransaction();
-
-        try {
-
-            // Order
-            $order->status_id = $statusSubmitted->id;
-            $order->save();
-
-            // Completed Order
-            $completedOrder->submitted_comment = $request->validated('comment');
-            $completedOrder->status_id = $statusSubmitted->id;
-            $completedOrder->customer_old_balance = $order->customer->balance;
-            $completedOrder->save();
-
-
-            // Customer
-            $customer->decrement('balance', $completedOrder->total_sale_price);
-
-            DB::commit();
-            return response()->json([
-                'message' => "Buyurtma muvaffaqiyatli topshirildi! Mijoz balansini tekshiring",
-                'data' => [
-                    'status' => $statusSubmitted
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->serverError($e);
-        }
+        return response()->json($result);
     }
 }
