@@ -174,8 +174,58 @@ class OrderService
         ];
     }
 
-    public function addProduct()
+    /**
+     * @throws ServerErrorException
+     */
+    public function addProduct(array $data, int $id): array
     {
+        $productId= $data['product_id'];
+        $amount = $data['amount'];
+        $amountTypeId = $data['amount_type_id'];
+
+
+        // Product
+        $product = Product::findOrFail($productId);
+
+        // Status
+        $statusOrderInProgress = StatusService::findByCode('orderInProgress');
+
+        // Order
+        $order = Order::where('user_id', auth()->id())
+            ->where('status_id', $statusOrderInProgress->id)
+            ->findOrFail($id);
+
+
+        // Create Order Details Item
+        $sumCostPrice = $product->cost_price * $amount;
+        $sumSalePrice = $product->sale_price * $amount;
+
+        DB::beginTransaction();
+
+        try {
+            $order->orderDetails()->create([
+                'product_id' => $productId,
+                'amount' => $amount,
+                'amount_type_id' => $amountTypeId,
+                'cost_price' => $product->cost_price,
+                'sale_price' => $product->sale_price,
+                'sum_cost_price' => $sumCostPrice,
+                'sum_sale_price' => $sumSalePrice,
+            ]);
+
+
+            $order->increment('total_cost_price', $sumCostPrice);
+            $order->increment('total_sale_price', $sumSalePrice);
+
+            DB::commit();
+
+            return [
+                'message' => "#$order->id buyurtmaga `$product->name` nomli mahsulot muvaffaqiyatli qo'shildi"
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     public function completed()

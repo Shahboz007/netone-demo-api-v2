@@ -84,7 +84,7 @@ class OrderController extends Controller
         // Gate
         Gate::authorize('view', Order::class);
 
-        $result = $this->orderService->findOne($id);
+        $result = $this->orderService->findOne((int) $id);
 
         return response()->json([
             'data' => OrderShowResource::make($result['data'])
@@ -104,51 +104,16 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * @throws ServerErrorException
+     */
     public function addProduct(UpdateOrderAddProductRequest $request, string $id): JsonResponse
     {
         Gate::authorize('addProduct', Order::class);
 
-        // Product
-        $product = Product::findOrFail($request->validated('product_id'));
+        $result = $this->orderService->addProduct($request->validated(), (int) $id);
 
-        // Status
-        $statusOrderInProgress = Status::where('code', 'orderInProgress')->firstOrFail();
-
-        // Order
-        $order = Order::where('user_id', auth()->id())
-            ->where('status_id', $statusOrderInProgress->id)
-            ->findOrFail($id);
-
-
-        // Create Order Details Item
-        $sumCostPrice = $product->cost_price * $request->validated('amount');
-        $sumSalePrice = $product->sale_price * $request->validated('amount');
-
-        DB::beginTransaction();
-
-        try {
-            $order->orderDetails()->create([
-                'product_id' => $request->validated('product_id'),
-                'amount' => $request->validated('amount'),
-                'amount_type_id' => $request->validated('amount_type_id'),
-                'cost_price' => $product->cost_price,
-                'sale_price' => $product->sale_price,
-                'sum_cost_price' => $sumCostPrice,
-                'sum_sale_price' => $sumSalePrice,
-            ]);
-
-
-            $order->increment('total_cost_price', $sumCostPrice);
-            $order->increment('total_sale_price', $sumSalePrice);
-
-            DB::commit();
-
-            return response()->json([
-                'message' => "#$order->id buyurtmaga `$product->name` nomli mahsulot muvaffaqiyatli qo'shildi"
-            ]);
-        } catch (\Exception $e) {
-            return $this->serverError($e);
-        }
+        return response()->json($result);
     }
 
     public function completed(UpdateOrderCompletedRequest $request, string $id)
