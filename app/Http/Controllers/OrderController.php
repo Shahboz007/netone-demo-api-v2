@@ -84,23 +84,10 @@ class OrderController extends Controller
         // Gate
         Gate::authorize('view', Order::class);
 
-        $query = Order::with(
-            'user',
-            'customer',
-            'status',
-            'orderDetails',
-            'cancelOrder',
-            'completedOrder'
-        )->where('id', $id);
-
-        if (!$request->user()->isAdmin()) {
-            $query->where('user_id', $request->user()->id);
-        }
-
-        $data = $query->firstOrFail();
+        $result = $this->orderService->findOne($id);
 
         return response()->json([
-            'data' => OrderShowResource::make($data)
+            'data' => OrderShowResource::make($result['data'])
         ]);
     }
 

@@ -130,8 +130,26 @@ class OrderService
         }
     }
 
-    public function findOne()
+    public function findOne(int $id)
     {
+        $query = Order::with(
+            'user',
+            'customer',
+            'status',
+            'orderDetails',
+            'cancelOrder',
+            'completedOrder'
+        )->where('id', $id);
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->firstOrFail();
+
+        return [
+            "data" => $data,
+        ];
     }
 
     public function confirm()
