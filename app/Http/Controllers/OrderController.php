@@ -98,10 +98,7 @@ class OrderController extends Controller
 
         $result = $this->orderService->confirm($id);
 
-        return response()->json([
-            'message' => $result['message'],
-            'data' => $result['data']
-        ]);
+        return response()->json($result);
     }
 
     /**
@@ -116,121 +113,14 @@ class OrderController extends Controller
         return response()->json($result);
     }
 
-    public function completed(UpdateOrderCompletedRequest $request, string $id)
+    public function completed(UpdateOrderCompletedRequest $request, string $id): JsonResponse
     {
         // Gate
         Gate::authorize('completed', Order::class);
 
-        $order = Order::with('orderDetails')->findOrFail($id);
+        $result = $this->orderService->completed($request->validated(), $id);
 
-        // Validation Order Status
-        $allowedCodes = ['orderNew', 'orderInProgress'];
-        $allowedStatuses = Status::whereIn('code', $allowedCodes)->get();
-        if (empty($allowedStatuses)) return $this->mainErrRes("Ichki xatolik yuz berdi, iltimos biz bilan bog'laning!");
-        if (!$allowedStatuses->contains('id', $order->status_id)) return $this->mainErrRes("Bu buyurtmani tayyorlandi holatiga o'tkazish mumkin emas!");
-
-        //*******--start-- Validation Order Details Item *******//
-        $updates = collect($request->validated('product_list'))
-            ->pluck('completed_amount', 'product_id');
-
-        // Length
-        $orderItemLength = $order->orderDetails()->count();
-        $prodItemLength = count($updates);
-
-        if ($orderItemLength > $prodItemLength || $orderItemLength < $prodItemLength) {
-            return $this->mainErrRes("Siz buyurtma mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
-        }
-
-        foreach ($order->orderDetails as $detail) {
-            if (!$updates->has($detail->product_id)) {
-                return $this->mainErrRes("Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
-            }
-        }
-        //*******--end-- Validation Order Details Item *******//
-        $reqProductsId = array_column($request->validated('product_list'), 'product_id');
-
-        // Validate Product Stock
-        $stockList = ProductStock::with('product')->whereIn('product_id', $reqProductsId)
-            ->get();
-
-        if ($stockList->isEmpty()) {
-            return $this->mainErrRes("Buyurtmani tayyorlab bo'lmadi. Zaxirani tekshiring!");
-        }
-
-        $productPluckList = Product::whereIn('id', $reqProductsId)->select('id', 'name')->get()->pluck('name', 'id');
-        $stockAmountPluckList = $stockList->pluck('amount', 'product_id');
-
-        foreach ($request->validated('product_list') as $item) {
-            if (!$stockAmountPluckList->has($item['product_id'])) {
-                $productName = $productPluckList->get($item['product_id']);
-                return $this->mainErrRes("`$productName` mahsuloti bo'yicha zaxira mavjud emas!");
-            }
-
-            if ($stockAmountPluckList->get($item['product_id']) < $item['completed_amount']) {
-                $productName = $productPluckList->get($item['product_id']);
-                return $this->mainErrRes("`$productName` mahsuloti bo'yicha zaxira yetarli emas!");
-            }
-        }
-
-        // Status Code
-        $statusCode = 'orderCompleted';
-        $statusCompleted = Status::where('code', $statusCode)->firstOrFail();
-
-        DB::beginTransaction();
-
-        try {
-            // Create New Completed Order
-            $newCompletedOrder = CompletedOrder::create([
-                'user_id' => auth()->id(),
-                'order_id' => $order->id,
-                'status_id' => $statusCompleted->id,
-                'comment' => $request->validated('comment'),
-                'total_cost_price' => 0,
-                'total_sale_price' => 0,
-                'customer_old_balance' => 0,
-            ]);
-
-            $totalCostPrice = 0;
-            $totalSalePrice = 0;
-
-            // Add Order Details completed amounts
-            foreach ($order->orderDetails as $detail) {
-                if ($updates->has($detail->product_id)) {
-                    $completedAmount = $updates->get($detail->product_id);
-
-                    // Calc Total Prices
-                    $totalCostPrice += $completedAmount * $detail->product->cost_price;
-                    $totalSalePrice += $completedAmount * $detail->product->sale_price;
-
-
-                    // Update Order details item
-                    $detail->update(['completed_amount' => $completedAmount]);
-
-                    $stock = ProductStock::where('product_id', $detail->product_id)->firstOrFail();
-                    $stock->decrement('amount', $completedAmount);
-                }
-            }
-
-            // Change Total Price Of Completed Order
-            $newCompletedOrder->total_cost_price = $totalCostPrice;
-            $newCompletedOrder->total_sale_price = $totalSalePrice;
-            $newCompletedOrder->save();
-
-            // Change Order Status
-            $order->status_id = $statusCompleted->id;
-            $order->save();
-
-            DB::commit();
-            return response()->json([
-                'message' => "Buyurtma topshirishga tayyor, hozirgi holati tayyorlandi",
-                'data' => [
-                    'status' => $statusCompleted
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->serverError($e);
-        }
+        return response()->json($result);
     }
 
     public function submitted(UpdateOrderSubmittedRequest $request, string $id): JsonResponse

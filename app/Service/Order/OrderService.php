@@ -2,9 +2,12 @@
 
 namespace App\Service\Order;
 
+use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
+use App\Models\CompletedOrder;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductStock;
 use App\Services\GenerateOrderCode;
 use App\Services\Status\StatusService;
 use App\Services\Utils\DateFormatter;
@@ -179,7 +182,7 @@ class OrderService
      */
     public function addProduct(array $data, int $id): array
     {
-        $productId= $data['product_id'];
+        $productId = $data['product_id'];
         $amount = $data['amount'];
         $amountTypeId = $data['amount_type_id'];
 
@@ -228,8 +231,147 @@ class OrderService
         }
     }
 
-    public function completed()
+    /**
+     * @throws InvalidDataException
+     * @throws ServerErrorException
+     */
+    public function completed(array $data, int $id): array
     {
+        $itemsList = $data['items_list'];
+        $comment = $data['comment'] ?? null;
+
+        $pluckItemsList = [];
+        foreach ($itemsList as $item) {
+            $pluckItemsList[$item['item_id']] = $item['completed_amount'];
+        }
+
+        // Status
+        $orderNewStatus = StatusService::findByCode('orderNew');
+        $orderInProgressStatus = StatusService::findByCode('orderInProgress');
+
+        // Order
+        $order = Order::with('orderDetails')
+            ->whereIn('status_id', [$orderNewStatus->id, $orderInProgressStatus->id])
+            ->findOrFail($id);
+
+        /***********************************
+         / Validation Order Details Item
+         /************* */
+
+        // Length
+        $orderItemLength = $order->orderDetails->count();
+        $prodItemLength = count($pluckItemsList);
+
+        if ($orderItemLength !== $prodItemLength) {
+            throw new InvalidDataException("Siz buyurtma mahsulotlarni noto'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+        }
+
+        foreach ($order->orderDetails as $item) {
+            if (!$pluckItemsList[$item->id]) {
+                throw new InvalidDataException("Siz buyurtma mahsulotlarni not'g'ri kiritmoqdasiz, iltimos etiborli bo'ling.");
+            }
+        }
+
+        // Plucked Order Details Products ID
+        $pluckProductsIdList = $order->orderDetails->pluck('product_id')->toArray();
+
+        // Validate Product Stock
+        $stockList = ProductStock::with('product')
+            ->whereIn('product_id', $pluckProductsIdList)
+            ->get();
+
+        if ($stockList->isEmpty()) {
+            throw new InvalidDataException("Buyurtmani tayyorlab bo'lmadi. Zaxirani tekshiring!");
+        }
+
+        // Products
+        $productPluckList = Product::whereIn('id', $pluckProductsIdList)
+            ->select('id', 'name')
+            ->get()
+            ->pluck('name', 'id');
+
+        // Stock Amount Pluck List
+        $stockAmountPluckList = $stockList->pluck('amount', 'product_id');
+
+        foreach ($order->orderDetails as $item) {
+            // Check Exists
+            if (!$stockAmountPluckList->has($item->product_id)) {
+                $productName = $productPluckList->get($item->product_id);
+                throw new InvalidDataException("`$productName` mahsuloti bo'yicha zaxira mavjud emas!");
+            }
+
+            $completedAmount = $pluckItemsList[$item->id];
+            $stockAmount = $stockAmountPluckList->get($item->product_id);
+
+            // Check Amounts
+            if ($stockAmount < $completedAmount) {
+                $productName = $productPluckList->get($item->product_id);
+                throw new InvalidDataException("`$productName` mahsuloti bo'yicha zaxira yetarli emas!");
+            }
+        }
+
+        // Status Code
+        $statusCompleted = StatusService::findByCode('completed');
+
+        DB::beginTransaction();
+
+        try {
+            // Create New Completed Order
+            $newCompletedOrder = CompletedOrder::create([
+                'user_id' => auth()->id(),
+                'order_id' => $order->id,
+                'status_id' => $statusCompleted->id,
+                'comment' => $comment,
+                'total_cost_price' => 0,
+                'total_sale_price' => 0,
+                'customer_old_balance' => 0,
+            ]);
+
+            $totalCostPrice = 0;
+            $totalSalePrice = 0;
+
+            // Add Order Details completed amounts
+            foreach ($order->orderDetails as $detail) {
+                if (isset($pluckItemsList[$detail->id])) {
+                    // Completed Amount
+                    $completedAmount = $pluckItemsList[$detail->id];
+
+                    // Calc Total Prices
+                    $totalCostPrice += $completedAmount * $detail->product->cost_price;
+                    $totalSalePrice += $completedAmount * $detail->product->sale_price;
+
+
+                    // Update Order details item
+                    $detail->update(['completed_amount' => $completedAmount]);
+
+                    // Change Stock
+                    $stock = ProductStock::where('product_id', $detail->product_id)->firstOrFail();
+                    $stock->decrement('amount', $completedAmount);
+                }else {
+                    throw new InvalidDataException("Siz buyurtma mahsulotlarni tanlang!");
+                }
+            }
+
+            // Change Total Price Of Completed Order
+            $newCompletedOrder->total_cost_price = $totalCostPrice;
+            $newCompletedOrder->total_sale_price = $totalSalePrice;
+            $newCompletedOrder->save();
+
+            // Change Order Status
+            $order->status_id = $statusCompleted->id;
+            $order->save();
+
+            DB::commit();
+            return [
+                'message' => "Buyurtma topshirishga tayyor, hozirgi holati tayyorlandi",
+                'data' => [
+                    'status' => $statusCompleted
+                ]
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     public function submit()
