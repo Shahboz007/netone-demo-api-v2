@@ -25,7 +25,10 @@ class PaymentSupplierController extends Controller
     {
         $result = $this->paymentSupplierService->findAll($request->validated());
 
-       return response()->json($result);
+        return response()->json([
+            'data' => PaymentSupplierResource::collection($result['data']),
+            'totals' => $result['totals'],
+        ]);
     }
 
     public function store(StorePaymentSupplierRequest $request)
@@ -106,22 +109,11 @@ class PaymentSupplierController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
-            ->select('payments.*', DB::raw("SUM(payment_wallet.sum_price) as total_price"))
-            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->where('paymentable_type', 'App\Models\Supplier')
-            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
-            ->orderBy('payments.created_at', 'desc');
 
-
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->findOrFail($id);
+        $result = $this->paymentSupplierService->fineOne((int)$id);
 
         return response()->json([
-            'data' => PaymentSupplierResource::make($data),
+            'data' => PaymentSupplierResource::make($result['data']),
         ]);
     }
 }

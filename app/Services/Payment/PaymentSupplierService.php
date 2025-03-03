@@ -47,9 +47,25 @@ class PaymentSupplierService
 
     }
 
-    public function fineOne()
+    public function fineOne(int $supplierId): array
     {
+        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
+            ->select('payments.*', DB::raw("SUM(payment_wallet.sum_price) as total_price"))
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->where('paymentable_type', 'App\Models\Supplier')
+            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
+            ->orderBy('payments.created_at', 'desc');
 
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $data = $query->findOrFail($supplierId);
+
+        return [
+            'data' => $data,
+        ];
     }
 
     private function getTotals(string|null $supplierId, array $date): array
@@ -72,8 +88,8 @@ class PaymentSupplierService
         $data = $query->first();
 
         return [
-            "total_amount" => (float) $data->total_amount,
-            "total_count" => (int) $data->total_count,
+            "total_amount" => (float)$data->total_amount,
+            "total_count" => (int)$data->total_count,
         ];
     }
 }
