@@ -119,7 +119,7 @@ class PaymentSupplierService
             $formatSum = number_format($sumAmount, 2, '.', ',');
 
             return [
-                'message' => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
+                'message' => "$supplier->first_name $supplier->last_name taminotchiga $formatSum uzs  muvaffaqiyatli o'tkazildi",
             ];
         } catch (\Exception $e) {
             DB::rollBack();
