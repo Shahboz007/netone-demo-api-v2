@@ -173,13 +173,13 @@ class PaymentSupplierService
         ];
     }
 
-     private function decrementUserWallet($walletId, $amount): void
+    private function decrementUserWallet($walletId, $amount): void
     {
         $userId = auth()->id();
-        $userWallet =DB::table('user_wallet')
-            ->where('user_id', $userId)
+        $userWallet = UserWallet::where('user_id', $userId)
             ->where('wallet_id', $walletId)
             ->firstOrFail();
-        $userWallet->decrement($amount);
+
+        $userWallet->decrement('amount', $amount);
     }
 }
