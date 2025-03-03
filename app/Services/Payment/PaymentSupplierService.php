@@ -121,8 +121,6 @@ class PaymentSupplierService
             return [
                 'message' => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
             ];
-
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
