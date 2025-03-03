@@ -2,36 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentSupplierRequest;
 use App\Http\Resources\PaymentSupplierResource;
 use App\Models\Payment;
 use App\Models\Status;
 use App\Models\Supplier;
 use App\Models\UserWallet;
+use App\Services\Payment\PaymentSupplierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class PaymentSupplierController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(
+        protected PaymentSupplierService $paymentSupplierService
+    )
     {
-        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
-            ->select('payments.*', DB::raw("SUM(payment_wallet.sum_price) as total_price"))
-            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->where('paymentable_type', 'App\Models\Supplier')
-            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
-            ->orderBy('payments.created_at', 'desc');
+    }
 
+    public function index(QueryParameterRequest $request): JsonResponse
+    {
+        $result = $this->paymentSupplierService->findAll($request->validated());
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->get();
-
-        return response()->json([
-            'data' => PaymentSupplierResource::collection($data),
-        ]);
+       return response()->json($result);
     }
 
     public function store(StorePaymentSupplierRequest $request)
@@ -102,7 +96,7 @@ class PaymentSupplierController extends Controller
 
             return response()->json([
                 "message" => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
-            ],201);
+            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
