@@ -2,7 +2,12 @@
 
 namespace App\Services\Payment;
 
+use App\Exceptions\InvalidDataException;
+use App\Exceptions\ServerErrorException;
 use App\Models\Payment;
+use App\Models\Supplier;
+use App\Models\UserWallet;
+use App\Services\Status\StatusService;
 use App\Services\Utils\DateFormatter;
 use Illuminate\Support\Facades\DB;
 
@@ -42,9 +47,90 @@ class PaymentSupplierService
         ];
     }
 
-    public function create()
+    /**
+     * @throws ServerErrorException
+     * @throws InvalidDataException
+     */
+    public function create(array $data): array
     {
+        // Data
+        $supplierId = $data['supplier_id'];
+        $reqWalletList = $data['wallet_list'];
+        $comment = $data['comment'] ?? null;
 
+        // Supplier
+        $supplier = Supplier::findOrFail($supplierId);
+
+        // Validation User Wallet
+        $userAllWallets = UserWallet::where('user_id', auth()->id())->get();
+        $pluckWalletAmount = $userAllWallets->pluck('amount', 'wallet_id')->toArray();
+        $pluckWalletName = $userAllWallets->pluck('wallet', 'wallet_id')->toArray();
+        foreach ($reqWalletList as $item) {
+            if ($pluckWalletAmount[$item['wallet_id']] && $pluckWalletAmount[$item['wallet_id']] < $item['amount']) {
+                $walletName = $pluckWalletName[$item['wallet_id']]['name'];
+                throw new InvalidDataException("`$walletName` bu hisobingizda mablag' yetarli emas! Hisobingizni tekshiring");
+            }
+        }
+
+        // Status Supplier Payment
+        $statusSupplierPayment = StatusService::findByCode('paymentSupplier');
+
+        DB::beginTransaction();
+
+        try {
+            // New Payment
+            $newPayment = new Payment([
+                'user_id' => auth()->id(),
+                'status_id' => $statusSupplierPayment->id,
+                'comment' => $comment,
+            ]);
+
+            $supplier->payments()->save($newPayment);
+
+            // Attach to Wallet
+            $walletAttachList = [];
+            foreach ($reqWalletList as $wallet) {
+                $walletAttachList[$wallet['wallet_id']] = [
+                    'amount' => $wallet['amount'],
+                    'rate_amount' => $wallet['rate_amount'],
+                    'sum_price' => $wallet['amount'] * $wallet['rate_amount'],
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ];
+            }
+
+            $newPayment->wallets()->attach($walletAttachList);
+
+            // Convert To uzs
+            $sum = 0;
+            foreach ($walletAttachList as $wallet) {
+                $sum += $wallet['amount'] * $wallet['rate_amount'];
+            }
+
+            // Change User Wallet Amount
+            foreach ($reqWalletList as $item) {
+                DB::table('user_wallet')
+                    ->where('user_id', auth()->id())
+                    ->where('wallet_id', $item['wallet_id'])
+                    ->update(['amount' => DB::raw("amount - {$item['amount']}")]);
+            }
+
+            // Change Supplier Balance
+            $supplier->decrement('balance', $sum);
+
+            DB::commit();
+
+            $formatSum = number_format($sum, 2, '.', ',');
+
+            return [
+                'message' => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
+            ];
+
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new ServerErrorException($e);
+        }
     }
 
     public function fineOne(int $supplierId): array
