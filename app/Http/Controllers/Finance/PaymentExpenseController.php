@@ -3,31 +3,32 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentExpenseRequest;
 use App\Http\Resources\PaymentExpenseResource;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Status;
+use App\Services\Payment\PaymentExpenseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PaymentExpenseController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(
+        protected PaymentExpenseService $paymentExpenseService
+    )
     {
-        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
-            ->where('paymentable_type', 'App\Models\Expense')
-            ->orderBy('created_at', 'desc');
+    }
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->get();
+    public function index(QueryParameterRequest $request): JsonResponse
+    {
+        $result = $this->paymentExpenseService->findAll($request->validated());
 
         return response()->json([
-            'data' => PaymentExpenseResource::collection($data),
+            'data' => PaymentExpenseResource::collection($result['data']),
+            'totals' => $result['totals']
         ]);
     }
 

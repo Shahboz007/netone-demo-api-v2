@@ -20,6 +20,7 @@ class QueryParameterRequest extends FormRequest
             'endDate' => 'required|date|date_format:d-m-Y|after_or_equal:startDate',
             'supplier_id' => 'nullable|integer|exists:suppliers,id',
             'customer_id' => 'nullable|integer|exists:customers,id',
+            'expense_id' => 'nullable|integer|exists:expenses,id',
         ];
     }
 }
