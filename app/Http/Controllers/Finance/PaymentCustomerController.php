@@ -3,34 +3,32 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentCustomerRequest;
 use App\Http\Resources\PaymentCustomerResource;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Status;
 use App\Models\User;
+use App\Services\Payment\PaymentCustomerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class PaymentCustomerController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(
+        protected PaymentCustomerService $paymentCustomerService
+    )
     {
-        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
-            ->select('payments.*', DB::raw('SUM(payment_wallet.sum_price) as total_price'))
-            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->where('paymentable_type', 'App\Models\Customer')
-            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
-            ->orderBy('payments.created_at', 'desc');
+    }
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->get();
+    public function index(QueryParameterRequest $request): JsonResponse
+    {
+        $result = $this->paymentCustomerService->findAll($request->validated());
 
         return response()->json([
-            'data' => PaymentCustomerResource::collection($data),
+            'data' => PaymentCustomerResource::collection($result['data']),
+            'totals' => $result['totals'],
         ]);
     }
 
