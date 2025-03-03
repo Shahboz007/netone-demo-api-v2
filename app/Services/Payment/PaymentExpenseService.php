@@ -54,7 +54,8 @@ class PaymentExpenseService
         $comment = $data['comment'] ?? null;
 
         // Validation User Wallet
-        $userWallet = UserWallet::with('wallet.currency')->where('user_id', auth()->id())
+        $userWallet = UserWallet::with('wallet.currency')
+            ->where('user_id', auth()->id())
             ->where('wallet_id', $walletId)
             ->firstOrFail();
 
