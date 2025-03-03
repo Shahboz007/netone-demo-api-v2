@@ -7,13 +7,8 @@ use App\Exceptions\ServerErrorException;
 use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentSupplierRequest;
 use App\Http\Resources\PaymentSupplierResource;
-use App\Models\Payment;
-use App\Models\Status;
-use App\Models\Supplier;
-use App\Models\UserWallet;
 use App\Services\Payment\PaymentSupplierService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class PaymentSupplierController extends Controller
 {
