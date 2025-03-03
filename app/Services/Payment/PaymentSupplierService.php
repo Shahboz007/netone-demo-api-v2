@@ -87,40 +87,36 @@ class PaymentSupplierService
 
             $supplier->payments()->save($newPayment);
 
+            // Sum Amount
+            $sumAmount = 0;
+
             // Attach to Wallet
             $walletAttachList = [];
             foreach ($reqWalletList as $wallet) {
+                $sumPrice = $wallet['amount'] * $wallet['rate_amount'];
                 $walletAttachList[$wallet['wallet_id']] = [
                     'amount' => $wallet['amount'],
                     'rate_amount' => $wallet['rate_amount'],
-                    'sum_price' => $wallet['amount'] * $wallet['rate_amount'],
+                    'sum_price' => $sumPrice,
                     'updated_at' => now(),
                     'created_at' => now(),
                 ];
+
+                // Decrement User Wallet
+                $this->decrementUserWallet($wallet['wallet_id'], $wallet['amount']);
+
+                // Increment Sum Amount
+                $sumAmount += $sumPrice;
             }
 
             $newPayment->wallets()->attach($walletAttachList);
 
-            // Convert To uzs
-            $sum = 0;
-            foreach ($walletAttachList as $wallet) {
-                $sum += $wallet['amount'] * $wallet['rate_amount'];
-            }
-
-            // Change User Wallet Amount
-            foreach ($reqWalletList as $item) {
-                DB::table('user_wallet')
-                    ->where('user_id', auth()->id())
-                    ->where('wallet_id', $item['wallet_id'])
-                    ->update(['amount' => DB::raw("amount - {$item['amount']}")]);
-            }
-
             // Change Supplier Balance
-            $supplier->decrement('balance', $sum);
+            $supplier->decrement('balance', $sumAmount);
 
             DB::commit();
 
-            $formatSum = number_format($sum, 2, '.', ',');
+            $formatSum = number_format($sumAmount, 2, '.', ',');
 
             return [
                 'message' => "Taminotchiga $formatSum so'm  muvaffaqiyatli o'tkazildi",
@@ -129,7 +125,7 @@ class PaymentSupplierService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new ServerErrorException($e);
+            throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -177,5 +173,15 @@ class PaymentSupplierService
             "total_amount" => (float)$data->total_amount,
             "total_count" => (int)$data->total_count,
         ];
+    }
+
+     private function decrementUserWallet($walletId, $amount): void
+    {
+        $userId = auth()->id();
+        $userWallet =DB::table('user_wallet')
+            ->where('user_id', $userId)
+            ->where('wallet_id', $walletId)
+            ->firstOrFail();
+        $userWallet->decrement($amount);
     }
 }
