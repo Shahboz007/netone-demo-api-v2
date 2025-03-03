@@ -93,21 +93,10 @@ class PaymentCustomerController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $query = Payment::with(['paymentable', 'user', 'wallets', 'status'])
-            ->select('payments.*', DB::raw('SUM(payment_wallet.sum_price) as total_price'))
-            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
-            ->where('paymentable_type', 'App\Models\Customer')
-            ->groupBy('payments.id', 'payments.paymentable_type', 'payments.created_at')
-            ->orderBy('payments.created_at', 'desc');
-
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->findOrFail($id);
+        $result = $this->paymentCustomerService->findOne((int)$id);
 
         return response()->json([
-            'data' => PaymentCustomerResource::make($data),
+            'data' => PaymentCustomerResource::make($result['data']),
         ]);
     }
 
