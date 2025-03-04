@@ -131,7 +131,7 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $stock = ProductStock::findOrFail($productionProcess->productionRecipe->out_product_id);
+        $stock = ProductStock::where('product_id',$productionProcess->productionRecipe->out_product_id)->firstOrFail();
         $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
         DB::beginTransaction();
@@ -149,7 +149,7 @@ class ProductionProcessController extends Controller
             $costPrice = 0;
 
             foreach ($productionProcess->processItems as $item) {
-                $costPrice += $item->amount * $item->product->sale_price;
+                $costPrice += $item->product->cost_price;
             }
 
             $outProduct->update(['cost_price' => $costPrice]);

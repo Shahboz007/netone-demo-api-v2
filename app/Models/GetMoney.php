@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class GetMoney extends Model
 {
@@ -19,10 +17,5 @@ class GetMoney extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Expense::class, 'parent_id');
-    }
-
-    public function payments(): MorphMany
-    {
-        return $this->morphMany(Payment::class, 'paymentable');
     }
 }

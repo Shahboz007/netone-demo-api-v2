@@ -22,9 +22,9 @@ class UpdateOrderCompletedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_list' => 'required|array',
-            'product_list.*.product_id' => 'required|integer|exists:products,id',
-            'product_list.*.completed_amount' => 'required|numeric|min:0',
+            'items_list' => 'required|array',
+            'items_list.*.item_id' => 'required|integer|exists:order_details,id',
+            'items_list.*.completed_amount' => 'required|numeric|min:0',
             'comment' => 'nullable|string|min:6|max:255',
         ];
     }

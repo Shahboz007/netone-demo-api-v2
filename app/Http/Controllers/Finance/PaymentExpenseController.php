@@ -2,111 +2,56 @@
 
 namespace App\Http\Controllers\Finance;
 
+use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentExpenseRequest;
 use App\Http\Resources\PaymentExpenseResource;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Status;
+use App\Services\Payment\PaymentExpenseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PaymentExpenseController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(
+        protected PaymentExpenseService $paymentExpenseService
+    )
     {
-        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
-            ->where('paymentable_type', 'App\Models\Expense')
-            ->orderBy('created_at', 'desc');
+    }
 
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->get();
+    public function index(QueryParameterRequest $request): JsonResponse
+    {
+        $result = $this->paymentExpenseService->findAll($request->validated());
 
         return response()->json([
-            'data' => PaymentExpenseResource::collection($data),
+            'data' => PaymentExpenseResource::collection($result['data']),
+            'totals' => $result['totals']
         ]);
     }
 
-    public function store(StorePaymentExpenseRequest $request): ?JsonResponse
+    /**
+     * @throws ServerErrorException
+     */
+    public function store(StorePaymentExpenseRequest $request): JsonResponse
     {
-        $reqAmount = $request->validated('amount');
 
-        // Validation User Wallet
-        $userWallet = auth()->user()->wallets()->wherePivot('wallet_id', $request->validated('wallet_id'))->firstOrFail();
+        $result = $this->paymentExpenseService->create($request->validated());
 
-        if ($userWallet->pivot->amount < $reqAmount) {
-            abort(422, "`$userWallet->name` bu hisobingizda mablag' yetarli emas! Hisobingizni tekshiring");
-        }
-
-        // Expense
-        $expense = Expense::findOrFail($request->validated('expense_id'));
-
-        // Status Payment Expense
-        $statusPaymentExpense = Status::where('code', 'paymentExpense')->firstOrFail();
-
-        DB::beginTransaction();
-
-        try {
-            // New Payment For Expense
-            $payment = new Payment([
-                'user_id' => auth()->id(),
-                'status_id' => $statusPaymentExpense->id,
-                'comment' => $request->validated('comment')
-            ]);
-            $expense->payments()->save($payment);
-
-            // Attach Amount To Wallet
-            $payment->wallets()->attach($request->validated('wallet_id'), [
-                'amount' => $reqAmount,
-                'rate_amount' => $request->validated('rate_amount'),
-                'sum_price' => $reqAmount * $request->validated('rate_amount'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Decrement from User Wallet
-            DB::table('user_wallet')
-                ->where('user_id', auth()->id())
-                ->where('wallet_id', $request->validated('wallet_id'))
-                ->update(['amount' => DB::raw("amount - {$reqAmount}")]);
-
-            // Finish
-            DB::commit();
-
-            // Amount Currency
-            $currency = $userWallet->currency->symbol;
-
-            $formatNum = number_format($reqAmount, 2, '.', ',');
-
-            return response()->json([
-                'message' => "`$expense->name` xarajat uchun $formatNum $currency  muvaffaqiyatli o'tkazildi!",
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->serverError($e);
-        }
-
+        return response()->json([
+            'message' => $result['message'],
+        ], 201);
     }
 
     public function show(string $id): JsonResponse
     {
-        $query = Payment::with('paymentable', 'user', 'wallets', 'status')
-            ->where('paymentable_type', 'App\Models\Expense')
-            ->orderBy('created_at', 'desc');
-
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        $data = $query->findOrFail($id);
+        $result = $this->paymentExpenseService->findOne($id);
 
         return response()->json([
-            'data' => PaymentExpenseResource::make($data),
+            'data' => PaymentExpenseResource::make($result['data']),
         ]);
     }
 }

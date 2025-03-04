@@ -3,30 +3,47 @@
 namespace App\Services\Statement;
 
 use App\Models\Status;
+use App\Services\Utils\DateFormatter;
+use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use PhpParser\Node\Expr\Cast\Object_;
 
 class ReconciliationCustomerService
 {
-    private $orderMsg = "Berilgan yuk";
-    private $returnOrderMsg = "Qaytarilgan yuk";
-    private $paymentMsg = "Olingan pul";
+    private string $orderMsg = "Berilgan yuk";
+    private string $returnOrderMsg = "Qaytarilgan yuk";
+    private string $paymentMsg = "Olingan pul";
 
-    public function getByCustomer(string $customerId)
+    private string|null $startDate = null;
+    private string|null $endDate = null;
+
+    public function __construct()
+    {
+        $this->startDate = DateFormatter::today('start');
+        $this->endDate = DateFormatter::today('end');
+    }
+
+    public function setDateInterVal($start, $end): void
+    {
+        $this->startDate = DateFormatter::format($start, 'start');
+        $this->endDate = DateFormatter::format($end, 'end');
+    }
+
+    public function getByCustomer(string $customerId): array
     {
         // Status
         $statusSubmittedOrder = Status::where('code', "orderSubmitted")->firstOrFail();
         $statusPaymentCustomer = Status::where('code', 'paymentCustomer')->firstOrFail();
 
-        $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId);
+
+
+        $completedOrders = $this->getCompletedOrdersQuery($statusSubmittedOrder, $customerId);
         $payments = $this->getPaymentsQuery($statusPaymentCustomer, $customerId);
-        $returnOrders  = $this->getOrderReturnsQuery($customerId);
+        $returnOrders = $this->getOrderReturnsQuery($customerId);
 
         $unionQuery = $completedOrders
             ->unionAll($payments)
             ->unionAll($returnOrders);
-
-
 
         $data = DB::query()
             ->fromSub($unionQuery, 'sub')
@@ -49,10 +66,11 @@ class ReconciliationCustomerService
             ])
             ->groupBy('action_date')
             ->orderBy('action_date')
+            ->whereBetween('action_date', [$this->startDate, $this->endDate])
             ->get();
 
         // Totals
-        $totalOrders  = $this->getTotalCompletedOrders($customerId);
+        $totalOrders = $this->getTotalCompletedOrders($customerId, $statusSubmittedOrder->id);
         $totalPayments = $this->getTotalPayments($customerId);
         $totalReturns = $this->getTotalReturnOrders($customerId);
 
@@ -60,38 +78,36 @@ class ReconciliationCustomerService
         foreach ($data as $index => $entry) {
             $entry->id = $index + 1;
             // Order
-            $entry->count_orders = (int) $entry->count_orders;
-            $entry->amount_orders = (float) $entry->amount_orders;
+            $entry->count_orders = (int)$entry->count_orders;
+            $entry->amount_orders = (float)$entry->amount_orders;
             // Return Order
-            $entry->count_order_returns = (int) $entry->count_order_returns;
-            $entry->amount_order_returns = (float) $entry->amount_order_returns;
+            $entry->count_order_returns = (int)$entry->count_order_returns;
+            $entry->amount_order_returns = (float)$entry->amount_order_returns;
             // Difference
-            $entry->amount_difference = (float) $entry->amount_difference;
+            $entry->amount_difference = (float)$entry->amount_difference;
             // Payments
-            $entry->count_payments = (int) $entry->count_payments;
-            $entry->amount_payments = (float) $entry->amount_payments;
+            $entry->count_payments = (int)$entry->count_payments;
+            $entry->amount_payments = (float)$entry->amount_payments;
         }
 
-        $response = [
+        return [
             'data' => $data,
             "total_list" => [
-                "total_count_orders" => (int) $totalOrders->total_count_orders,
-                "total_amount_orders" => (float) $totalOrders->total_amount_orders ?? 0,
+                "total_count_orders" => (int)$totalOrders->total_count_orders,
+                "total_amount_orders" => (float)$totalOrders->total_amount_orders ?? 0,
 
-                "total_count_payments" => (int) $totalPayments->total_count_payments,
-                "total_amount_payments" => (float) $totalPayments->total_amount_payments ?? 0,
+                "total_count_payments" => (int)$totalPayments->total_count_payments,
+                "total_amount_payments" => (float)$totalPayments->total_amount_payments ?? 0,
 
-                "total_count_order_returns" => (int) $totalReturns->total_count_returns,
-                "total_amount_order_returns" => (float) $totalReturns->total_amount_returns ?? 0,
+                "total_count_order_returns" => (int)$totalReturns->total_count_returns,
+                "total_amount_order_returns" => (float)$totalReturns->total_amount_returns ?? 0,
 
-                "total_amount_difference" => (float) $totalOrders->total_amount_orders - (float) $totalReturns->total_amount_returns - (float) $totalPayments->total_amount_payments
+                "total_amount_difference" => (float)$totalOrders->total_amount_orders - (float)$totalReturns->total_amount_returns - (float)$totalPayments->total_amount_payments
             ],
         ];
-
-        return $response;
     }
 
-    private function getCompletedOrdersQuery($statusSubmittedOrder, $statusPaymentCustomer, $customerId)
+    private function getCompletedOrdersQuery($statusSubmittedOrder, $customerId): Builder
     {
 
         return DB::table('orders')
@@ -120,7 +136,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(completed_orders.updated_at)'));
     }
 
-    private function getPaymentsQuery($statusPaymentCustomer, $customerId)
+    private function getPaymentsQuery($statusPaymentCustomer, $customerId): Builder
     {
         return DB::table('payments')
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
@@ -148,7 +164,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(payments.created_at)'));
     }
 
-    private function getOrderReturnsQuery(int $customerId)
+    private function getOrderReturnsQuery(int $customerId): Builder
     {
         return DB::table('order_returns')
             ->select([
@@ -159,7 +175,7 @@ class ReconciliationCustomerService
                 DB::raw("NULL as order_status"),
                 // Return Order
                 DB::raw('SUM(total_sale_price) as amount_order_returns'),
-                DB::raw('111 as count_order_returns'),
+                DB::raw('COUNT(id) as count_order_returns'),
                 DB::raw("'$this->returnOrderMsg' as order_return_status"),
                 // Order Diff
                 DB::raw('SUM(total_sale_price) * -1 as amount_difference'),
@@ -172,7 +188,7 @@ class ReconciliationCustomerService
             ->groupBy(DB::raw('DATE(created_at)'));
     }
 
-    private function getTotalCompletedOrders(int $customerId): object
+    private function getTotalCompletedOrders(int $customerId, int $statusId): object
     {
         return DB::table('customers')
             ->join('orders', 'customers.id', '=', 'orders.customer_id')
@@ -182,6 +198,8 @@ class ReconciliationCustomerService
                 DB::raw('SUM(completed_orders.total_sale_price) as total_amount_orders')
             ])
             ->where('customers.id', $customerId)
+            ->where('completed_orders.status_id', $statusId)
+            ->whereBetween('completed_orders.updated_at', [$this->startDate, $this->endDate])
             ->firstOrFail();
     }
 
@@ -196,6 +214,7 @@ class ReconciliationCustomerService
             ])
             ->where('payments.paymentable_type', 'App\Models\Customer')
             ->where('customers.id', $customerId)
+            ->whereBetween('payments.created_at', [$this->startDate, $this->endDate])
             ->first();
     }
 
@@ -208,6 +227,7 @@ class ReconciliationCustomerService
                 DB::raw('SUM(order_returns.total_sale_price) as total_amount_returns')
             )
             ->where('customers.id', $customerId)
+            ->whereBetween('order_returns.created_at', [$this->startDate, $this->endDate])
             ->first();
     }
 }

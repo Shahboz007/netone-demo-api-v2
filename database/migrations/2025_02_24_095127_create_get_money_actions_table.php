@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('get_money', function (Blueprint $table) {
+        Schema::create('get_money_actions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->foreign('parent_id')->references('id')->on('expenses')->nullOnDelete();
-            $table->string('name');
-            $table->decimal('amount', 12, 2);
-            $table->string('comment')->nullable();
+            $table->foreignId('get_money_id')->constrained('get_money');
+            $table->foreignId('user_wallet_id')->constrained('user_wallet');
+            $table->foreignId('user_id')->constrained('users');
+            $table->decimal('sum_amount', 12, 2);
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('get_money');
+        Schema::dropIfExists('get_money_actions');
     }
 };
