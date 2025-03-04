@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderAddProductRequest;
@@ -108,6 +109,10 @@ class OrderController extends Controller
         return response()->json($result);
     }
 
+    /**
+     * @throws ServerErrorException
+     * @throws InvalidDataException
+     */
     public function completed(UpdateOrderCompletedRequest $request, string $id): JsonResponse
     {
         // Gate
