@@ -13,7 +13,9 @@ class ProductionRecipeController extends Controller
 {
     public function __construct(
         protected AmountConverterService $amountConverter
-    ) {}
+    )
+    {
+    }
 
     public function index()
     {
@@ -53,7 +55,7 @@ class ProductionRecipeController extends Controller
                     "amount" => $item["amount"],
                     "amount_type_id" => $item['amount_type_id'],
                     'coefficient' => $item['amount'] / $request->validated('out_amount'),
-                    'is_change' => $request->validated('is_change'),
+                    'is_change' => $request->validated('is_change') ?? false,
                 ];
             }
             $newRecipe->recipeItems()->createMany($list);
