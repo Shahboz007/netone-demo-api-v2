@@ -32,7 +32,6 @@ class ProductionRecipeController extends Controller
 
     public function store(StoreProductionRecipeRequest $request)
     {
-
         DB::beginTransaction();
 
         try {
@@ -55,7 +54,7 @@ class ProductionRecipeController extends Controller
                     "amount" => $item["amount"],
                     "amount_type_id" => $item['amount_type_id'],
                     'coefficient' => $item['amount'] / $request->validated('out_amount'),
-                    'is_change' => $request->validated('is_change') ?? false,
+                    'is_change' => (bool) $item['is_change'],
                 ];
             }
             $newRecipe->recipeItems()->createMany($list);

@@ -22,7 +22,7 @@ class StoreProductionRecipeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:production_recipes,name',
             'out_product_id' => 'required|integer|exists:products,id',
             'out_amount_type_id' => 'required|integer|exists:amount_types,id',
             'out_amount' => 'required|numeric|min:0.01',
