@@ -9,10 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductionProcess extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductionProcessFactory> */
-    use HasFactory;
-
-    protected $fillable = [
+     protected $fillable = [
         'production_recipe_id',
         'status_id',
         'out_amount',
