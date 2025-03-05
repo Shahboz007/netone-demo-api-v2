@@ -9,6 +9,8 @@ use App\Http\Resources\ProductionProcessShowResource;
 use App\Models\Product;
 use App\Models\ProductionProcess;
 use App\Models\ProductStock;
+use App\Models\ReceiveProduct;
+use App\Models\ReceiveProductDetail;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -76,11 +78,27 @@ class ProductionProcessController extends Controller
 
             $newProcess->processItems()->createMany($request->validated('items_list'));
 
+            // Cost Price
+            $costPrice = 0;
+
+            // Decrement From Stock
             foreach ($stockItems as $item) {
+                // Request Amount
                 $amount = $pluckReqProducts->get($item->product_id);
 
+                // Decrement
                 $item->decrement('amount', $amount);
+
+                // Get Last Receive Product
+                $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
+                if($lastReceive){
+                    $costPrice += $lastReceive->price;
+                }
             }
+
+            // Change Cost Price
+            $newProcess->cost_price = $costPrice;
+            $newProcess->save();
 
             DB::commit();
 
@@ -131,7 +149,7 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $stock = ProductStock::where('product_id',$productionProcess->productionRecipe->out_product_id)->firstOrFail();
+        $stock = ProductStock::where('product_id', $productionProcess->productionRecipe->out_product_id)->firstOrFail();
         $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
         DB::beginTransaction();
@@ -146,14 +164,7 @@ class ProductionProcessController extends Controller
             $productionProcess->save();
 
             // Set cost price
-            $costPrice = 0;
-
-            foreach ($productionProcess->processItems as $item) {
-                $costPrice += $item->product->cost_price;
-            }
-
-            $outProduct->update(['cost_price' => $costPrice]);
-
+            $outProduct->update(['cost_price' => $productionProcess->cost_price]);
             $outProduct->save();
 
             DB::commit();

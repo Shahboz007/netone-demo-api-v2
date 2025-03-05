@@ -15,7 +15,8 @@ class ProductionProcess extends Model
     protected $fillable = [
         'production_recipe_id',
         'status_id',
-        'out_amount'
+        'out_amount',
+        'cost_price'
     ];
 
     public function productionRecipe(): BelongsTo
