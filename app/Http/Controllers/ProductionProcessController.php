@@ -74,12 +74,11 @@ class ProductionProcessController extends Controller
                 'status_id' => $processStatus->id,
                 'production_recipe_id' => $request->validated('production_recipe_id'),
                 'out_amount' => 0,
+                'cost_price' => 0,
             ]);
 
             $newProcess->processItems()->createMany($request->validated('items_list'));
 
-            // Cost Price
-            $costPrice = 0;
 
             // Decrement From Stock
             foreach ($stockItems as $item) {
@@ -89,16 +88,8 @@ class ProductionProcessController extends Controller
                 // Decrement
                 $item->decrement('amount', $amount);
 
-                // Get Last Receive Product
-                $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
-                if($lastReceive){
-                    $costPrice += $lastReceive->price;
-                }
-            }
 
-            // Change Cost Price
-            $newProcess->cost_price = $costPrice;
-            $newProcess->save();
+            }
 
             DB::commit();
 
@@ -163,8 +154,25 @@ class ProductionProcessController extends Controller
 
             $productionProcess->save();
 
-            // Set cost price
-            $outProduct->update(['cost_price' => $productionProcess->cost_price]);
+            // Cost Price
+            $costPrice = 0;
+
+            foreach ($productionProcess->processItems as $item) {
+                // Get Last Receive Product
+                $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
+                if ($lastReceive) {
+                    $costPrice += $lastReceive->price * $item->amount;
+                }
+            }
+
+            $costPrice /= $request->validated('total_amount');
+
+            // Set Cost Price
+            $productionProcess->cost_price = $costPrice;
+            $productionProcess->save();
+
+            // Set Cost Price
+            $outProduct->update(['cost_price' => $costPrice]);
             $outProduct->save();
 
             DB::commit();
