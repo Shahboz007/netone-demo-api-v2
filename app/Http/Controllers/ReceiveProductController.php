@@ -63,7 +63,6 @@ class ReceiveProductController extends Controller
 
         $result = $this->receiveProductService->findOne((int) $id);
 
-        return $result;
         return response()->json([
             'data' => ReceiveProductShowResource::make($result['data']),
         ]);
