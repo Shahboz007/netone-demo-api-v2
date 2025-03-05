@@ -9,6 +9,8 @@ use App\Http\Resources\ProductionProcessShowResource;
 use App\Models\Product;
 use App\Models\ProductionProcess;
 use App\Models\ProductStock;
+use App\Models\ReceiveProduct;
+use App\Models\ReceiveProductDetail;
 use App\Models\Status;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -72,14 +74,21 @@ class ProductionProcessController extends Controller
                 'status_id' => $processStatus->id,
                 'production_recipe_id' => $request->validated('production_recipe_id'),
                 'out_amount' => 0,
+                'cost_price' => 0,
             ]);
 
             $newProcess->processItems()->createMany($request->validated('items_list'));
 
+
+            // Decrement From Stock
             foreach ($stockItems as $item) {
+                // Request Amount
                 $amount = $pluckReqProducts->get($item->product_id);
 
+                // Decrement
                 $item->decrement('amount', $amount);
+
+
             }
 
             DB::commit();
@@ -131,7 +140,7 @@ class ProductionProcessController extends Controller
         // Status productionCompleted
         $statusProductionCompleted = Status::where('code', 'productionCompleted')->firstOrFail();
 
-        $stock = ProductStock::where('product_id',$productionProcess->productionRecipe->out_product_id)->firstOrFail();
+        $stock = ProductStock::where('product_id', $productionProcess->productionRecipe->out_product_id)->firstOrFail();
         $outProduct = Product::findOrFail($productionProcess->productionRecipe->out_product_id);
 
         DB::beginTransaction();
@@ -145,15 +154,25 @@ class ProductionProcessController extends Controller
 
             $productionProcess->save();
 
-            // Set cost price
+            // Cost Price
             $costPrice = 0;
 
             foreach ($productionProcess->processItems as $item) {
-                $costPrice += $item->product->cost_price;
+                // Get Last Receive Product
+                $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
+                if ($lastReceive) {
+                    $costPrice += $lastReceive->price * $item->amount;
+                }
             }
 
-            $outProduct->update(['cost_price' => $costPrice]);
+            $costPrice /= $request->validated('total_amount');
 
+            // Set Cost Price
+            $productionProcess->cost_price = $costPrice;
+            $productionProcess->save();
+
+            // Set Cost Price
+            $outProduct->update(['cost_price' => $costPrice]);
             $outProduct->save();
 
             DB::commit();

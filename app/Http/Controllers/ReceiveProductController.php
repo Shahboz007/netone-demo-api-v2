@@ -56,7 +56,7 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function show(string $id): JsonResponse
+    public function show(string $id)
     {
         // Gate
         Gate::authorize('view', ReceiveProduct::class);

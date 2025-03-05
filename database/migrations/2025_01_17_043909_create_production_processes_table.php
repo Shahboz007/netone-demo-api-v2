@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('production_recipe_id')->constrained('production_recipes');
             $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('out_amount')->default(0); // 999 999.00
+            $table->decimal('cost_price', 12, 2);
             $table->timestamps();
         });
     }
