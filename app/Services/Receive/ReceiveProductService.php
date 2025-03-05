@@ -183,13 +183,13 @@ class ReceiveProductService
             "supplier",
             "receiveProductDetails",
             "status"
-        )->findOrFail($id);
+        );
 
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
         }
 
-        $data = $query->firstOrFail();
+        $data = $query->findOrFail($id);
 
         return [
             'data' => $data,

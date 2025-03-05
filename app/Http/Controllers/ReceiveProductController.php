@@ -56,13 +56,14 @@ class ReceiveProductController extends Controller
     }
 
 
-    public function show(string $id): JsonResponse
+    public function show(string $id)
     {
         // Gate
         Gate::authorize('view', ReceiveProduct::class);
 
         $result = $this->receiveProductService->findOne((int) $id);
 
+        return $result;
         return response()->json([
             'data' => ReceiveProductShowResource::make($result['data']),
         ]);
