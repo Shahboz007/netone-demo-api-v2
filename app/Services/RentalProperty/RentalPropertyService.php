@@ -70,7 +70,7 @@ class RentalPropertyService
 
     public function delete(int $id): array
     {
-        $result = RentalProperty::findOrFail($id)->delete();
+        RentalProperty::findOrFail($id)->delete();
 
         return [
             'message' => "Tijorat obyekti muvaffaqiyatli o'chirildi",
