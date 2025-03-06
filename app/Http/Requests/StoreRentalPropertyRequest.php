@@ -16,9 +16,16 @@ class StoreRentalPropertyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'name' => 'required|string|max:255|unique:rental_properties,name',
+            'price' => 'required|numeric|min:0',
             'comment' => 'nullable|string|max:255',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.unique' => 'Bu tijorat oyekti allaqachon mavjud'
         ];
     }
 }

@@ -22,7 +22,7 @@ class RentalPropertyController extends Controller
 
         return response()->json([
             'data' => RentalPropertyResource::collection($result['data']),
-            'total_count' => $result['total_count'],
+            'totals' => $result['totals'],
         ]);
     }
 
@@ -34,23 +34,23 @@ class RentalPropertyController extends Controller
         return response()->json([
             'message' => $result['message'],
             'data' => RentalPropertyResource::make($result['data']),
-        ]);
+        ], 201);
     }
 
 
     public function show(string $id): JsonResponse
     {
-        $result = $this->rentalPropertyService->findOne((int) $id);
+        $result = $this->rentalPropertyService->findOne((int)$id);
 
         return response()->json([
-            'data' => RentalPropertyResource::collection($result['data']),
+            'data' => RentalPropertyResource::make($result['data']),
         ]);
     }
 
 
     public function update(UpdateRentalPropertyRequest $request, string $id): JsonResponse
     {
-        $result = $this->rentalPropertyService->update($request->validated(), (int) $id);
+        $result = $this->rentalPropertyService->update($request->validated(), (int)$id);
 
         return response()->json([
             'message' => $result['message'],
@@ -65,7 +65,6 @@ class RentalPropertyController extends Controller
 
         return response()->json([
             'message' => $result['message'],
-            'data' => RentalPropertyResource::make($result['data']),
         ]);
     }
 }

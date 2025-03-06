@@ -4,16 +4,22 @@ namespace App\Services\RentalProperty;
 
 use App\Models\RentalProperty;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use staabm\SideEffectsDetector\SideEffect;
 
 class RentalPropertyService
 {
     public function findAll(): array
     {
+        // Data
         $data = RentalProperty::all();
+
+        // Totals
+        $totals = $this->getTotals();
+
         return [
             'data' => $data,
-            'total_count' => $data->count(),
+            'totals' => $totals,
         ];
     }
 
@@ -21,13 +27,13 @@ class RentalPropertyService
     {
         // Data
         $reqName = $data['name'];
-        $reqAmount = $data['amount'];
+        $reqPrice = $data['price'];
         $reqComment = $data['comment'] ?? null;
 
         // Create
         $newRentalProperty = RentalProperty::create([
             'name' => $reqName,
-            'amount' => $reqAmount,
+            'price' => $reqPrice,
             'comment' => $reqComment,
         ]);
 
@@ -48,22 +54,40 @@ class RentalPropertyService
 
     public function update(array $data, int $id): array
     {
-        $rental = $this->findOne($id);
-        $updateRental = $rental->update($data);
+        $rental = RentalProperty::findOrFail($id);
+
+        $rental->name = $data['name'] ?? $rental->name;
+        $rental->price = $data['price'] ?? $rental->price;
+        $rental->comment = $data['comment'] ?? $rental->comment;
+
+        $rental->save();
 
         return [
             'message' => "Tijorat obyekti yangilandi",
-            'data' => $updateRental,
+            'data' => $rental,
         ];
     }
 
     public function delete(int $id): array
     {
-        $result = $this->findOne($id)->delete();
+        $result = RentalProperty::findOrFail($id)->delete();
 
         return [
-            'message' => $result['message'],
-            'data'
+            'message' => "Tijorat obyekti muvaffaqiyatli o'chirildi",
+        ];
+    }
+
+    private function getTotals(): array
+    {
+        $result = RentalProperty::select([
+            DB::raw('SUM(price) as total_price'),
+            DB::raw('COUNT(id) as total_count')
+        ])
+            ->first();
+
+        return [
+            'total_price' => (float)$result->total_price,
+            'total_count' => (int)$result->total_count,
         ];
     }
 }
