@@ -41,3 +41,6 @@ require __DIR__ . '/api/statement/statement.php';
 
 // Chart
 require __DIR__ . '/api/chart/producer.php';
+
+// Rental Property
+require __DIR__ . '/api/rentalProperty/rentalProperty.php';
