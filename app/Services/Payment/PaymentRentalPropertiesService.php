@@ -6,15 +6,36 @@ use App\Exceptions\ServerErrorException;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\RentalProperty;
+use App\Models\RentalPropertyAction;
 use App\Models\UserWallet;
 use App\Services\Status\StatusService;
 use Illuminate\Support\Facades\DB;
 
 class PaymentRentalPropertiesService
 {
-    public function findAll()
+    public function getStatus()
     {
+        return StatusService::findByCode('paymentRentalProperty');
+    }
 
+    public function findAll(): array
+    {
+        $data = Payment::with([
+            'paymentable.user',
+            'paymentable.rentalProperty',
+            'paymentable.customer',
+            'paymentable.userWallet',
+        ])
+            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
+            ->where('status_id', 18)
+//            ->orderBy('created_at', 'desc')
+            ->get();
+
+        dd($data->toArray());
+
+        return [
+            'data' => $data,
+        ];
     }
 
     /**
@@ -30,9 +51,6 @@ class PaymentRentalPropertiesService
         $reqRateAmount = $data['rate_amount'];
         $reqComment = $data['comment'] ?? null;
 
-        // Rental Property
-        $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
-
         // Customer
         $customer = Customer::findOrFail($reqCustomerId);
 
@@ -44,13 +62,22 @@ class PaymentRentalPropertiesService
 
         DB::beginTransaction();
         try {
+            // New Rental Property Action
+            $newRentalProperty = RentalPropertyAction::create([
+                'rental_property_id' => $reqRentalPropertyId,
+                'price' => $reqAmount,
+                'user_id' => auth()->id(),
+                'customer_id' => $reqCustomerId,
+                'user_wallet_id' => $userWallet->id,
+            ]);
+
             // New Payment
             $newPayment = new Payment([
                 'user_id' => auth()->id(),
                 'comment' => $reqComment,
                 'status_id' => $status->id,
             ]);
-            $rentalProperty->payments()->save($newPayment);
+            $newRentalProperty->payments()->save($newPayment);
 
             // Attach Wallet
             $newPayment->wallets()->attach($userWalletId, [

@@ -19,7 +19,11 @@ class PaymentRentalPropertyController extends Controller
 
     public function index()
     {
+        $result = $this->paymentRentalPropertiesService->findAll();
 
+        return response()->json([
+            'data' => $result['data'],
+        ]);
     }
 
     /**
