@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCustomerRentalPropertyRequest;
+use App\Http\Resources\CustomerRentalPropertyResource;
 use App\Models\CustomerRentalProperty;
 use App\Services\RentalProperty\CustomerRentalPropertyService;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class CustomerRentalPropertyController extends Controller
         $result = $this->customerRentalPropertyService->findAll();
 
         return response()->json([
-            'data' => $result['data'],
+            'data' => CustomerRentalPropertyResource::collection($result['data']),
         ]);
     }
 
@@ -27,15 +28,19 @@ class CustomerRentalPropertyController extends Controller
     {
         $result = $this->customerRentalPropertyService->create($request->validated());
 
-        return [
+        return response()->json([
             'message' => $result['message']
-        ];
+        ], 201);
     }
 
 
-    public function show(CustomerRentalProperty $customerRentalProperty)
+    public function show(string $id)
     {
-        //
+        $result = $this->customerRentalPropertyService->findOne((int) $id);
+
+        return response()->json([
+            'data' => CustomerRentalPropertyResource::make($result['data']),
+        ]);
     }
 
 

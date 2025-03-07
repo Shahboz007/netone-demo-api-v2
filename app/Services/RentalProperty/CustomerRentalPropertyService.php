@@ -10,7 +10,20 @@ use Illuminate\Support\Facades\Auth;
 
 class CustomerRentalPropertyService
 {
-    public function findAll() {}
+    public function findAll(): array
+    {
+        $data = CustomerRentalProperty::with([
+            'user',
+            'rentalProperty',
+            'customer',
+        ])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return [
+            'data' => $data,
+        ];
+    }
 
     public function create(array $data)
     {
@@ -18,7 +31,7 @@ class CustomerRentalPropertyService
         $reqRentalPropertyId = $data['rental_property_id'];
         $reqCustomerId = $data['customer_id'];
         $reqPrice = $data['price'];
-        $reqComment = $data['comment'];
+        $reqComment = $data['comment'] ?? null;
 
         // Customer
         $customer = Customer::findOrFail($reqCustomerId);
@@ -47,5 +60,17 @@ class CustomerRentalPropertyService
             'data' => $newData
         ];
     }
-    public function findOne($id) {}
+    public function findOne(int $id): array
+    {
+        $data = CustomerRentalProperty::with([
+            'user',
+            'rentalProperty',
+            'customer',
+        ])
+            ->findOrFail($id);
+
+        return [
+            'data' => $data,
+        ];
+    }
 }
