@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCustomerRentalPropertyRequest;
+use App\Http\Requests\UpdateCustomerRentalPropertyRequest;
 use App\Http\Resources\CustomerRentalPropertyResource;
 use App\Models\CustomerRentalProperty;
 use App\Services\RentalProperty\CustomerRentalPropertyService;
@@ -44,9 +45,10 @@ class CustomerRentalPropertyController extends Controller
     }
 
 
-    public function update(Request $request, CustomerRentalProperty $customerRentalProperty)
+    public function update(UpdateCustomerRentalPropertyRequest $request, string $id)
     {
-        //
+        $result = $this->customerRentalPropertyService->update($request->validated(), (int) $id);
+        
     }
 
 

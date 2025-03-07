@@ -73,4 +73,36 @@ class CustomerRentalPropertyService
             'data' => $data,
         ];
     }
+
+    public function update(array $reqData, int $id)
+    {
+        // Request Data
+        $reqRentalPropertyId = $reqData['rental_property_id'];
+        $reqCustomerId = $reqData['customer_id'];
+        $reqPrice = $reqData['price'];
+        $reqComment = $reqData['comment'] ?? null;
+
+        // Customer
+        $customer = Customer::findOrFail($reqCustomerId);
+
+        // Rental Property
+        $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
+
+        // Validation
+        $exists = CustomerRentalProperty::where('rental_property_id', $rentalProperty->id)
+            ->where('customer_id', $customer->id)
+            ->where('id', '<>', $id)
+            ->exists();
+        if ($exists) {
+            throw new InvalidDataException("$customer->first_name $customer->last_name mijoz uchun allaqchon $rentalProperty->name tijoray obyekti ochilgan");
+        }
+
+        $data = CustomerRentalProperty::findOrFail($id);
+
+        // Update data
+        $data->rental_property_id = $reqRentalPropertyId ?? $data->rental_property_id;
+        $data->customer_id = $reqCustomerId ?? $data->customer_id;
+        $data->price = $reqPrice ?? $data->price;
+        $data->comment = $reqComment ?? $data->comment;
+    }
 }
