@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('customer_id')->constrained('customers');
             $table->foreignId('user_wallet_id')->constrained('user_wallet');
-            $table->decimal('price', 14,2); // 900 000 000 000.00
+            $table->decimal('total_price', 15,2); // 900 000 000 000.00
             $table->timestamps();
         });
     }

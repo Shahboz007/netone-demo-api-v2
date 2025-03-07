@@ -15,7 +15,7 @@ class RentalPropertyAction extends Model
         'user_id',
         'customer_id',
         'user_wallet_id',
-        'price',
+        'total_price',
     ];
 
     public function payments(): MorphMany

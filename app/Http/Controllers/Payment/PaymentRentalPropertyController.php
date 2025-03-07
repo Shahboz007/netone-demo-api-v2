@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Payment;
 use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentRentalPropertyRequest;
+use App\Http\Resources\PaymentRentalPropertyResource;
+use App\Http\Resources\PaymentRentalPropertyShowResource;
 use App\Services\Payment\PaymentRentalPropertiesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +24,7 @@ class PaymentRentalPropertyController extends Controller
         $result = $this->paymentRentalPropertiesService->findAll();
 
         return response()->json([
-            'data' => $result['data'],
+            'data' => PaymentRentalPropertyResource::collection($result['data']),
         ]);
     }
 
@@ -38,8 +40,12 @@ class PaymentRentalPropertyController extends Controller
         ],201);
     }
 
-    public function show()
+    public function show(string $id): JsonResponse
     {
+        $result = $this->paymentRentalPropertiesService->findOne((int) $id);
 
+        return response()->json([
+            'data' => PaymentRentalPropertyShowResource::make($result['data']),
+        ]);
     }
 }

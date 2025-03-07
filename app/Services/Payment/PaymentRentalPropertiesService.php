@@ -24,14 +24,12 @@ class PaymentRentalPropertiesService
             'paymentable.user',
             'paymentable.rentalProperty',
             'paymentable.customer',
-            'paymentable.userWallet',
+            'status'
         ])
             ->where('paymentable_type', 'App\Models\RentalPropertyAction')
-            ->where('status_id', 18)
-//            ->orderBy('created_at', 'desc')
+            ->where('status_id', $this->getStatus()->id)
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        dd($data->toArray());
 
         return [
             'data' => $data,
@@ -65,7 +63,7 @@ class PaymentRentalPropertiesService
             // New Rental Property Action
             $newRentalProperty = RentalPropertyAction::create([
                 'rental_property_id' => $reqRentalPropertyId,
-                'price' => $reqAmount,
+                'total_price' => 0,
                 'user_id' => auth()->id(),
                 'customer_id' => $reqCustomerId,
                 'user_wallet_id' => $userWallet->id,
@@ -80,13 +78,17 @@ class PaymentRentalPropertiesService
             $newRentalProperty->payments()->save($newPayment);
 
             // Attach Wallet
+            $sumPrice = $reqAmount * $reqRateAmount;
             $newPayment->wallets()->attach($userWalletId, [
                 'amount' => $reqAmount,
                 'rate_amount' => $reqRateAmount,
-                'sum_price' => $reqAmount * $reqRateAmount,
+                'sum_price' => $sumPrice,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            // Change Total Price Of Rental Property Action
+            $newRentalProperty->total_price = $sumPrice;
 
             // Update User Wallet
             $userWallet->increment('amount', $reqAmount);
@@ -105,8 +107,23 @@ class PaymentRentalPropertiesService
         }
     }
 
-    public function findOne()
+    public function findOne(int $id): array
     {
+        $data = Payment::with([
+            'paymentable.user',
+            'paymentable.rentalProperty',
+            'paymentable.customer',
+            'paymentable.userWallet.user',
+            'paymentable.userWallet.wallet',
+            'wallets',
+            'status'
+        ])
+            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
+            ->where('status_id', $this->getStatus()->id)
+            ->findOrFail($id);
 
+        return [
+            'data' => $data,
+        ];
     }
 }
