@@ -87,7 +87,7 @@ class PaymentRentalPropertiesService
             $currencyCode = $userWallet->wallet->currency->code;
             $formatVal = number_format($reqAmount, 2);
             return [
-                'message' => "Tijorat obyekti uchun $rentalProperty->name  mijozdan $formatVal $currencyCode o'tkazma muvaffaqiyatli qabul qilindi",
+                'message' => "$rentalProperty->name tijorat obyektidan  $formatVal $currencyCode o'tkazma muvaffaqiyatli qabul qilindi",
             ];
 
         } catch (\Exception $e) {
