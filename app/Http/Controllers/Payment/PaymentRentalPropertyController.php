@@ -9,7 +9,6 @@ use App\Http\Resources\PaymentRentalPropertyResource;
 use App\Http\Resources\PaymentRentalPropertyShowResource;
 use App\Services\Payment\PaymentRentalPropertiesService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class PaymentRentalPropertyController extends Controller
 {

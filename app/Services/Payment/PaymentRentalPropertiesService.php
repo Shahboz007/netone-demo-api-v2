@@ -9,6 +9,7 @@ use App\Models\RentalProperty;
 use App\Models\RentalPropertyAction;
 use App\Models\UserWallet;
 use App\Services\Status\StatusService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PaymentRentalPropertiesService
@@ -43,15 +44,14 @@ class PaymentRentalPropertiesService
     {
         // Data
         $reqRentalPropertyId = $data['rental_property_id'];
-        $reqCustomerId = $data['customer_id'];
         $userWalletId = $data['user_wallet_id'];
         $reqAmount = $data['amount'];
         $reqRateAmount = $data['rate_amount'];
         $reqComment = $data['comment'] ?? null;
 
-        // Customer
-        $customer = Customer::findOrFail($reqCustomerId);
-
+        // Rental Property
+        $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
+        
         // User Wallet
         $userWallet = UserWallet::with(['wallet.currency'])->findOrFail($userWalletId);
 
@@ -60,22 +60,14 @@ class PaymentRentalPropertiesService
 
         DB::beginTransaction();
         try {
-            // New Rental Property Action
-            $newRentalProperty = RentalPropertyAction::create([
-                'rental_property_id' => $reqRentalPropertyId,
-                'total_price' => 0,
-                'user_id' => auth()->id(),
-                'customer_id' => $reqCustomerId,
-                'user_wallet_id' => $userWallet->id,
-            ]);
 
             // New Payment
             $newPayment = new Payment([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'comment' => $reqComment,
                 'status_id' => $status->id,
             ]);
-            $newRentalProperty->payments()->save($newPayment);
+            $rentalProperty->payments()->save($newPayment);
 
             // Attach Wallet
             $sumPrice = $reqAmount * $reqRateAmount;
@@ -87,18 +79,15 @@ class PaymentRentalPropertiesService
                 'updated_at' => now(),
             ]);
 
-            // Change Total Price Of Rental Property Action
-            $newRentalProperty->total_price = $sumPrice;
-
             // Update User Wallet
             $userWallet->increment('amount', $reqAmount);
 
             DB::commit();
 
             $currencyCode = $userWallet->wallet->currency->code;
-            $formatVal = number_format(100000, 2);
+            $formatVal = number_format($reqAmount, 2);
             return [
-                'message' => "Tijorat obyekti uchun $customer->first_name $customer->last_name  mijozdan $formatVal $currencyCode o'tkazma muvaffaqiyatli qabul qilindi",
+                'message' => "Tijorat obyekti uchun $rentalProperty->name  mijozdan $formatVal $currencyCode o'tkazma muvaffaqiyatli qabul qilindi",
             ];
 
         } catch (\Exception $e) {
