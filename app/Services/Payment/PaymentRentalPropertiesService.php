@@ -22,12 +22,11 @@ class PaymentRentalPropertiesService
     public function findAll(): array
     {
         $data = Payment::with([
-            'paymentable.user',
-            'paymentable.rentalProperty',
-            'paymentable.customer',
+            'user',
+            'paymentable',
             'status'
         ])
-            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
+            ->where('paymentable_type', 'App\Models\RentalProperty')
             ->where('status_id', $this->getStatus()->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -51,7 +50,7 @@ class PaymentRentalPropertiesService
 
         // Rental Property
         $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
-        
+
         // User Wallet
         $userWallet = UserWallet::with(['wallet.currency'])->findOrFail($userWalletId);
 
@@ -66,6 +65,7 @@ class PaymentRentalPropertiesService
                 'user_id' => Auth::id(),
                 'comment' => $reqComment,
                 'status_id' => $status->id,
+                'total_amount' => 0
             ]);
             $rentalProperty->payments()->save($newPayment);
 
@@ -79,6 +79,10 @@ class PaymentRentalPropertiesService
                 'updated_at' => now(),
             ]);
 
+            // Set Payment Total Amount
+            $newPayment->total_amount = $sumPrice;
+            $newPayment->save();
+
             // Update User Wallet
             $userWallet->increment('amount', $reqAmount);
 
@@ -89,7 +93,6 @@ class PaymentRentalPropertiesService
             return [
                 'message' => "$rentalProperty->name tijorat obyektidan  $formatVal $currencyCode o'tkazma muvaffaqiyatli qabul qilindi",
             ];
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
