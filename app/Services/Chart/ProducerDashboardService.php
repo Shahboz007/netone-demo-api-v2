@@ -2,7 +2,6 @@
 
 namespace App\Services\Chart;
 
-use App\Models\Status;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
