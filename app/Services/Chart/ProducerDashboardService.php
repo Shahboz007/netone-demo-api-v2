@@ -105,7 +105,6 @@ class ProducerDashboardService
 
     private function todayIncome($todaySales, $todayExpense)
     {
-        dd($todaySales['today_profit']);
         return [
             "amount" => $todaySales['today_profit'] - $todayExpense['today_amount']
         ];
