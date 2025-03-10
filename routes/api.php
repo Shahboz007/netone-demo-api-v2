@@ -45,4 +45,3 @@ require __DIR__ . '/api/chart/producer.php';
 
 // Rental Property
 require __DIR__ . '/api/rentalProperty/rentalProperty.php';
-require __DIR__ . '/api/rentalProperty/customerRentalProperty.php';
