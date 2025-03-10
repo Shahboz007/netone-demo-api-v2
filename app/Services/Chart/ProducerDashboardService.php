@@ -28,7 +28,7 @@ class ProducerDashboardService
             ->value('total_sale_price');
 
         $todayCostAmount = (float) DB::table("completed_orders")
-            ->selectRaw('SUM(total_sale_price) as total_sale_price')
+            ->selectRaw('SUM(total_cost_price) as total_cost_price')
             ->whereDate('updated_at', today())
             ->value('total_cost_price');
 
@@ -105,6 +105,7 @@ class ProducerDashboardService
 
     private function todayIncome($todaySales, $todayExpense)
     {
+        dd($todaySales['today_profit']);
         return [
             "amount" => $todaySales['today_profit'] - $todayExpense['today_amount']
         ];
