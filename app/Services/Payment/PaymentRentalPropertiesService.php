@@ -102,15 +102,12 @@ class PaymentRentalPropertiesService
     public function findOne(int $id): array
     {
         $data = Payment::with([
-            'paymentable.user',
-            'paymentable.rentalProperty',
-            'paymentable.customer',
-            'paymentable.userWallet.user',
-            'paymentable.userWallet.wallet',
+            'user',
+            'paymentable',
+            'status',
             'wallets',
-            'status'
         ])
-            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
+            ->where('paymentable_type', 'App\Models\RentalProperty')
             ->where('status_id', $this->getStatus()->id)
             ->findOrFail($id);
 

@@ -11,14 +11,12 @@ class PaymentRentalPropertyShowResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'status' => $this->status,
-            'price' => (float) $this->paymentable->price,
-            'user' => UserResource::make($this->paymentable->user),
-            'rental_property' => RentalPropertyResource::make($this->paymentable->rentalProperty),
-            'customer' => CustomerResource::make($this->paymentable->customer),
-            'user_wallet' => UserWalletResource::make($this->paymentable->userWallet),
+            'user' => UserResource::make($this->user),
+            'rental_property' => RentalPropertyResource::make($this->paymentable),
+            'total_amount' => (float) $this->total_amount,
             'wallet' => PaymentWalletResource::make($this->wallets[0]),
             'comment' => $this->comment,
+            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
