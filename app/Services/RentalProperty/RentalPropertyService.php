@@ -3,9 +3,7 @@
 namespace App\Services\RentalProperty;
 
 use App\Models\RentalProperty;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use staabm\SideEffectsDetector\SideEffect;
 
 class RentalPropertyService
 {
