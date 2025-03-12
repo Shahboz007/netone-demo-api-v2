@@ -12,9 +12,4 @@ class RentalProperty extends Model
         "price",
         "comment",
     ];
-
-    public function payments(): MorphMany
-    {
-        return $this->morphMany(Payment::class, 'paymentable');
-    }
 }

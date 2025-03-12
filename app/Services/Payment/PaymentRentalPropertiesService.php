@@ -60,6 +60,7 @@ class PaymentRentalPropertiesService
     {
         // Data
         $reqRentalPropertyId = $data['rental_property_id'];
+        $reqRentalPropertyCategoryId = $data['rental_property_category_id'];
         $userWalletId = $data['user_wallet_id'];
         $reqAmount = $data['amount'];
         $reqRateAmount = $data['rate_amount'];
@@ -76,7 +77,11 @@ class PaymentRentalPropertiesService
 
         DB::beginTransaction();
         try {
-
+            // New Rental Property Action
+            $newRentalAction = RentalPropertyAction::create([
+                'rental_property_id' => $rentalProperty->id,
+                'rental_property_category_id' => $reqRentalPropertyCategoryId,
+            ]);
             // New Payment
             $newPayment = new Payment([
                 'user_id' => Auth::id(),
@@ -84,7 +89,7 @@ class PaymentRentalPropertiesService
                 'status_id' => $status->id,
                 'total_amount' => 0
             ]);
-            $rentalProperty->payments()->save($newPayment);
+            $newRentalAction->payments()->save($newPayment);
 
             // Attach Wallet
             $sumPrice = $reqAmount * $reqRateAmount;

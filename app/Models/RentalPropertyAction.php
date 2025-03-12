@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class RentalPropertyAction extends Model
 {
@@ -22,5 +23,10 @@ class RentalPropertyAction extends Model
     public function rentalPropertyCategory(): BelongsTo
     {
         return $this->belongsTo(RentalPropertyCategory::class, 'rental_property_category_id');
+    }
+
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'paymentable');
     }
 }
