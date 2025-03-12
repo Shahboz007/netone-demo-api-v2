@@ -33,6 +33,7 @@ class PaymentRentalPropertiesService
             'status'
         ])
             ->where('paymentable_type', 'App\Models\RentalProperty')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status_id', $this->getStatus()->id);
         
         if($rentalPropertyId){
