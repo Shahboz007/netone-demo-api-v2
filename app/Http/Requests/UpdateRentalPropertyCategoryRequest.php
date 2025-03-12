@@ -17,6 +17,7 @@ class UpdateRentalPropertyCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'parent_id' => 'nullable|exists:rental_property_categories,id',
             'name' => [
                 'nullable',
                 'string',

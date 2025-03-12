@@ -2,6 +2,7 @@
 
 namespace App\Services\RentalProperty;
 
+use App\Exceptions\InvalidDataException;
 use App\Models\RentalPropertyCategory;
 use Exception;
 
@@ -19,7 +20,7 @@ class RentalPropertyCategoryService
   public function create(array $data)
   {
     // Data 
-    $reqParentId= $data['parent_id'];
+    $reqParentId = $data['parent_id'];
     $reqName = $data['name'];
     $reqIsIncome = (bool) $data['is_income'] ?? false;
 
@@ -47,11 +48,22 @@ class RentalPropertyCategoryService
 
   public function update(array $reqData, int $id)
   {
+    $reqParentId = $reqData['parent_id'] ?? null;
+
     // Find Data
     $updateData = RentalPropertyCategory::findOrFail($id);
 
+    // Check Parent And Children
+    if ($reqParentId) {
+      $pluckChildren = $updateData->children->pluck('name', 'id');
+
+      if ($updateData->id === $reqParentId || !empty($pluckChildren[$reqParentId])) {
+        throw new InvalidDataException("Ota kategoriya noto'g'ri tanlanmoqda!");
+      }
+    }
+
     $updateData->update($reqData);
-    
+
     return [
       'data' => $updateData,
       'message' => "Muvaffaqiyatli yangilandi"

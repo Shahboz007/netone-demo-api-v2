@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RentalPropertyCategory extends Model
 {
@@ -13,4 +14,9 @@ class RentalPropertyCategory extends Model
         'name',
         'is_income',
     ];
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(RentalPropertyCategory::class, 'parent_id');
+    }
 }
