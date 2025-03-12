@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payment;
 
 use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QueryParameterRequest;
 use App\Http\Requests\StorePaymentRentalPropertyRequest;
 use App\Http\Resources\PaymentRentalPropertyResource;
 use App\Http\Resources\PaymentRentalPropertyShowResource;
@@ -18,12 +19,13 @@ class PaymentRentalPropertyController extends Controller
     {
     }
 
-    public function index()
+    public function index(QueryParameterRequest $request)
     {
-        $result = $this->paymentRentalPropertiesService->findAll();
+        $result = $this->paymentRentalPropertiesService->findAll($request->validated());
 
         return response()->json([
             'data' => PaymentRentalPropertyResource::collection($result['data']),
+            'totals' => $result['totals'],
         ]);
     }
 

@@ -9,6 +9,7 @@ use App\Models\RentalProperty;
 use App\Models\RentalPropertyAction;
 use App\Models\UserWallet;
 use App\Services\Status\StatusService;
+use App\Services\Utils\DateFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -19,20 +20,35 @@ class PaymentRentalPropertiesService
         return StatusService::findByCode('paymentRentalProperty');
     }
 
-    public function findAll(): array
+    public function findAll(array $query): array
     {
-        $data = Payment::with([
+        // Query
+        $startDate = DateFormatter::format($query['startDate']);
+        $endDate = DateFormatter::format($query['endDate'], 'end');
+        $rentalPropertyId = $query['rental_property_id'] ?? null;
+
+        $query = Payment::with([
             'user',
             'paymentable',
             'status'
         ])
             ->where('paymentable_type', 'App\Models\RentalProperty')
-            ->where('status_id', $this->getStatus()->id)
+            ->where('status_id', $this->getStatus()->id);
+        
+        if($rentalPropertyId){
+            $query->where('paymentable_id', $rentalPropertyId);
+        }
+
+        $data = $query
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Totals
+        $totals = $this->getTotals($rentalPropertyId, [$startDate, $endDate]);
+
         return [
             'data' => $data,
+            'totals' => $totals
         ];
     }
 
@@ -113,6 +129,31 @@ class PaymentRentalPropertiesService
 
         return [
             'data' => $data,
+        ];
+    }
+
+    private function getTotals(string|null $rentalPropertyId, array $date): array
+    {
+        $query = DB::table('payments')
+            ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
+            ->select(
+                DB::raw('SUM(payment_wallet.sum_price) as total_amount'),
+                DB::raw('COUNT(payments.id) as total_count')
+            )
+            ->where('paymentable_type', 'App\Models\RentalProperty');
+
+        if ($rentalPropertyId) {
+            $query->where('payments.paymentable_id', $rentalPropertyId);
+        }
+
+        $query->whereBetween('payments.created_at', [$date[0], $date[1]])
+            ->first();
+
+        $data = $query->first();
+
+        return [
+            "total_amount" => (float)$data->total_amount,
+            "total_count" => (int)$data->total_count,
         ];
     }
 }
