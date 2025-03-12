@@ -9,14 +9,14 @@ class StoreRentalPropertyCategoryRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
 
     public function rules(): array
     {
         return [
-            'name' => "required|string|unique:rental_property_categories,name",
+            'name' => "required|string|max:255|unique:rental_property_categories,name",
             'is_income' => 'nullable|boolean'
         ];
     }
