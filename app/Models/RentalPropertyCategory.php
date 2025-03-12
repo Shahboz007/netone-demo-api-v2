@@ -17,6 +17,7 @@ class RentalPropertyCategory extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(RentalPropertyCategory::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id')
+            ->with('children');
     }
 }

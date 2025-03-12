@@ -8,9 +8,19 @@ use Exception;
 
 class RentalPropertyCategoryService
 {
-  public function findAll()
+  public function findAll(array $params)
   {
-    $data = RentalPropertyCategory::all();
+    // Params
+    $paramIsTree = $params["is_tree"] ?? false;
+
+    $query = RentalPropertyCategory::query();
+
+    if ($paramIsTree) {
+      $query->with('children')
+        ->whereNull('parent_id');
+    }
+
+    $data = $query->get();
 
     return [
       'data' => $data
@@ -20,7 +30,7 @@ class RentalPropertyCategoryService
   public function create(array $data)
   {
     // Data 
-    $reqParentId = $data['parent_id'];
+    $reqParentId = $data['parent_id'] ?? null;
     $reqName = $data['name'];
     $reqIsIncome = (bool) $data['is_income'] ?? false;
 

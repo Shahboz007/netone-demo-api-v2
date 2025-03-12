@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRentalPropertyCategoryRequest;
 use App\Http\Requests\UpdateRentalPropertyCategoryRequest;
 use App\Services\RentalProperty\RentalPropertyCategoryService;
+use Illuminate\Http\Request;
 
 class RentalPropertyCategoryController extends Controller
 {
@@ -12,9 +13,13 @@ class RentalPropertyCategoryController extends Controller
         protected RentalPropertyCategoryService $rentalPropertyCategoryService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $result = $this->rentalPropertyCategoryService->findAll();
+        $validated = $request->validate([
+            'is_tree' => 'nullable|boolean',
+        ]);
+        
+        $result = $this->rentalPropertyCategoryService->findAll($validated);
 
         return response()->json([
             'data' => $result['data']
