@@ -19,11 +19,13 @@ class RentalPropertyCategoryService
   public function create(array $data)
   {
     // Data 
+    $reqParentId= $data['parent_id'];
     $reqName = $data['name'];
     $reqIsIncome = (bool) $data['is_income'] ?? false;
 
     // New Rental Property Category
     $newData = RentalPropertyCategory::create([
+      'parent_id' => $reqParentId,
       'name' => $reqName,
       'is_income' => $reqIsIncome
     ]);

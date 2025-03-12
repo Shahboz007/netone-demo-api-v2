@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('rental_property_categories', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id', 'rental_property_categories')->references('id')->on('rental_property_categories')->nullOnDelete();
             $table->string('name');
             $table->boolean('is_income')->default(false);
             $table->timestamps();

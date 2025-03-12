@@ -16,6 +16,7 @@ class StoreRentalPropertyCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'parent_id' => 'nullable|integer|exists:rental_property_categories,id',
             'name' => "required|string|max:255|unique:rental_property_categories,name",
             'is_income' => 'nullable|boolean'
         ];

@@ -9,6 +9,7 @@ class RentalPropertyCategory extends Model
     //
 
     protected $fillable = [
+        'parent_id',
         'name',
         'is_income',
     ];
