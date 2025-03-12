@@ -60,18 +60,26 @@ class RentalPropertyCategoryService
   {
     $reqParentId = $reqData['parent_id'] ?? null;
 
-    // Find Data
-    $updateData = RentalPropertyCategory::findOrFail($id);
-
     // Check Parent And Children
-    if ($reqParentId) {
-      $pluckChildren = $updateData->children->pluck('name', 'id');
-
-      if ($updateData->id === $reqParentId || !empty($pluckChildren[$reqParentId])) {
-        throw new InvalidDataException("Ota kategoriya noto'g'ri tanlanmoqda!");
-      }
+    if ($id === $reqParentId) {
+      throw new InvalidDataException("Ota kategoriyani noto'g'ri tanlamoqdasiz");
     }
 
+    $childIds = RentalPropertyCategory::where('parent_id', $id)
+      ->orWhereIn('parent_id', function ($query) use ($id) {
+        $query->select('id')
+          ->from('rental_property_categories')
+          ->where('parent_id', $id);
+      })
+      ->pluck('id')
+      ->toArray();
+
+    if (in_array($reqParentId, $childIds)) {
+      throw new InvalidDataException("Ota kategoriyani noto'g'ri tanlamoqdasiz");
+    }
+
+    // Find Data
+    $updateData = RentalPropertyCategory::findOrFail($id);
     $updateData->update($reqData);
 
     return [
