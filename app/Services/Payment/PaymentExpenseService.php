@@ -98,10 +98,10 @@ class PaymentExpenseService
             // Amount Currency
             $currency = $userWallet->wallet->currency->symbol;
 
-            $formatNum = number_format($amount, 2, '.', ',');
+            $formatNumVal = number_format($amount, 2, '.', ',');
 
             return [
-                'message' => "`$expense->name` xarajat uchun $formatNum $currency  muvaffaqiyatli o'tkazildi!",
+                'message' => "`$expense->name` xarajat uchun $formatNumVal $currency  muvaffaqiyatli o'tkazildi!",
             ];
         } catch (\Exception $e) {
             DB::rollBack();
