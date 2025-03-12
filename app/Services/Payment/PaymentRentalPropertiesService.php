@@ -126,11 +126,12 @@ class PaymentRentalPropertiesService
     {
         $data = Payment::with([
             'user',
-            'paymentable',
+            'paymentable.rentalProperty',
+            'paymentable.rentalPropertyCategory',
             'status',
             'wallets',
         ])
-            ->where('paymentable_type', 'App\Models\RentalProperty')
+            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
             ->where('status_id', $this->getStatus()->id)
             ->findOrFail($id);
 
