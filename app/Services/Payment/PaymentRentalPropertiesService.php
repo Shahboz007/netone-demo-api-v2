@@ -81,7 +81,7 @@ class PaymentRentalPropertiesService
         $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
 
         // Rental Property Category
-        $rentalPropertyCategory = RentalPropertyCategory::findOrFail($reqRentalPropertyCategoryId);
+        $rentalPropertyCategory = RentalPropertyCategory::with('status')->findOrFail($reqRentalPropertyCategoryId);
 
         // Status Payment
         $statusPayment = $rentalPropertyCategory->is_income ? $this->getIncomeStatus() : $this->getExpenseStatus();
@@ -120,8 +120,13 @@ class PaymentRentalPropertiesService
             $newPayment->total_amount = $sumPrice;
             $newPayment->save();
 
-            // Update User Wallet
-            $userWallet->increment('amount', $reqAmount);
+            if($rentalPropertyCategory->is_income){
+                // Update User Wallet
+                $userWallet->increment('amount', $reqAmount);
+            }else {
+                // Update User Wallet
+                $userWallet->decrement('amount', $reqAmount);
+            }
 
             DB::commit();
 
