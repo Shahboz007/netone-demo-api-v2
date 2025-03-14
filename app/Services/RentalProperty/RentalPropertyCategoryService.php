@@ -11,14 +11,13 @@ class RentalPropertyCategoryService
   public function findAll(array $params)
   {
     // Params
-    $paramIsTree = $params["is_tree"] ?? false;
+    $paramIsTree = (bool) $params["is_tree"] ?? false;
+    $paramIsIncome = (bool) $params["is_income"] ?? false;
 
-    $query = RentalPropertyCategory::query();
+    $query = RentalPropertyCategory::query()->where('is_income', $paramIsIncome);
 
-    if ($paramIsTree) {
-      $query->with('children')
-        ->whereNull('parent_id');
-    }
+    if ($paramIsTree) $query->with('children')->whereNull('parent_id');
+    
 
     $data = $query->get();
 

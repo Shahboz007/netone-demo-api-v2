@@ -18,8 +18,9 @@ class RentalPropertyCategoryController extends Controller
     {
         $validated = $request->validate([
             'is_tree' => 'nullable|boolean',
+            'is_income' => 'required|boolean'
         ]);
-        
+
         $result = $this->rentalPropertyCategoryService->findAll($validated);
 
         return response()->json([
