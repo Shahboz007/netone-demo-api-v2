@@ -81,7 +81,7 @@ class PaymentRentalPropertiesService
         $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
 
         // Rental Property Category
-        $rentalPropertyCategory = RentalPropertyCategory::with('status')->findOrFail($reqRentalPropertyCategoryId);
+        $rentalPropertyCategory = RentalPropertyCategory::findOrFail($reqRentalPropertyCategoryId);
 
         // Status Payment
         $statusPayment = $rentalPropertyCategory->is_income ? $this->getIncomeStatus() : $this->getExpenseStatus();
