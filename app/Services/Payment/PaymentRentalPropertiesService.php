@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\RentalProperty;
 use App\Models\RentalPropertyAction;
+use App\Models\RentalPropertyCategory;
 use App\Models\UserWallet;
 use App\Services\Status\StatusService;
 use App\Services\Utils\DateFormatter;
@@ -70,6 +71,9 @@ class PaymentRentalPropertiesService
         // Rental Property
         $rentalProperty = RentalProperty::findOrFail($reqRentalPropertyId);
 
+        // Rental Property Category
+        $rentalPropertyCategory = RentalPropertyCategory::findOrFail($reqRentalPropertyCategoryId);
+
         // User Wallet
         $userWallet = UserWallet::with(['wallet.currency'])->findOrFail($userWalletId);
 
@@ -81,7 +85,8 @@ class PaymentRentalPropertiesService
             // New Rental Property Action
             $newRentalAction = RentalPropertyAction::create([
                 'rental_property_id' => $rentalProperty->id,
-                'rental_property_category_id' => $reqRentalPropertyCategoryId,
+                'rental_property_category_id' => $rentalPropertyCategory->id,
+                'is_income' => $rentalPropertyCategory->is_income,
             ]);
             // New Payment
             $newPayment = new Payment([

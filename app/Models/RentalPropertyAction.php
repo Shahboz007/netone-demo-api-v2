@@ -13,6 +13,7 @@ class RentalPropertyAction extends Model
     protected $fillable = [
         'rental_property_id',
         'rental_property_category_id',
+        'is_income'
     ];
 
     public function rentalProperty(): BelongsTo

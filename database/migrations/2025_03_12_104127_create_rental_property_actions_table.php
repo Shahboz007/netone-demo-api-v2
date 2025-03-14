@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rental_property_id')->constrained('rental_properties');
             $table->foreignId('rental_property_category_id')->constrained('rental_property_categories');
+            $table->boolean('is_income');
             $table->timestamps();
         });
     }
