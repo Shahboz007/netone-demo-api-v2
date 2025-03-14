@@ -35,9 +35,14 @@ require __DIR__ . "/api/finance/paymentSupplier.php";
 require __DIR__ . "/api/finance/getMoney.php";
 require __DIR__ . "/api/finance/paymentGetMoney.php";
 require __DIR__ . "/api/finance/paymentSetMoney.php";
+require __DIR__ . "/api/finance/paymentRentalProperty.php";
 
 // Statement
 require __DIR__ . '/api/statement/statement.php';
 
 // Chart
 require __DIR__ . '/api/chart/producer.php';
+
+// Rental Property
+require __DIR__ . '/api/rentalProperty/rentalProperty.php';
+require __DIR__ . '/api/rentalProperty/rentalPropertyCategory.php';

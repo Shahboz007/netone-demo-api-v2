@@ -14,7 +14,8 @@ class RecipeItems extends Model
         'product_id',
         'amount_type_id',
         'amount',
-        'coefficient'
+        'coefficient',
+        'is_change'
     ];
 
     public function productionRecipe(): BelongsTo

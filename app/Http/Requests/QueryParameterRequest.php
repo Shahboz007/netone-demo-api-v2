@@ -21,6 +21,7 @@ class QueryParameterRequest extends FormRequest
             'supplier_id' => 'nullable|integer|exists:suppliers,id',
             'customer_id' => 'nullable|integer|exists:customers,id',
             'expense_id' => 'nullable|integer|exists:expenses,id',
+            'rental_property_id' => 'nullable|integer|exists:rental_properties,id'
         ];
     }
 }

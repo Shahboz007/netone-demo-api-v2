@@ -18,7 +18,7 @@ class Expense extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(Expense::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     public function payments(): MorphMany

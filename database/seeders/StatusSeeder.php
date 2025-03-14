@@ -33,6 +33,8 @@ class StatusSeeder extends Seeder
         Status::create(['name' => "Xarajat", 'code' => 'paymentExpense']);
         Status::create(['name' => "Dividend", 'code' => 'paymentGetMoney']);
         Status::create(['name' => "Kassirga o'tkazma", 'code' => 'paymentSetMoney']);
+        Status::create(['name' => "Tijorat obyektidan kirim", 'code' => 'paymentIncomeRentalProperty']);
+        Status::create(['name' => "Tijorat obyektidan chiqim", 'code' => 'paymentExpenseRentalProperty']);
 
         // Receive Product
         Status::create(['name' => "To'lov qilinmagan", 'code' => 'receiveProductDebt']);

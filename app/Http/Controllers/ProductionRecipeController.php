@@ -13,7 +13,9 @@ class ProductionRecipeController extends Controller
 {
     public function __construct(
         protected AmountConverterService $amountConverter
-    ) {}
+    )
+    {
+    }
 
     public function index()
     {
@@ -30,7 +32,6 @@ class ProductionRecipeController extends Controller
 
     public function store(StoreProductionRecipeRequest $request)
     {
-
         DB::beginTransaction();
 
         try {
@@ -52,7 +53,8 @@ class ProductionRecipeController extends Controller
                     "product_id" => $item['product_id'],
                     "amount" => $item["amount"],
                     "amount_type_id" => $item['amount_type_id'],
-                    'coefficient' => $item['amount'] / $request->validated('out_amount')
+                    'coefficient' => $item['amount'] / $request->validated('out_amount'),
+                    'is_change' => (bool) $item['is_change'],
                 ];
             }
             $newRecipe->recipeItems()->createMany($list);

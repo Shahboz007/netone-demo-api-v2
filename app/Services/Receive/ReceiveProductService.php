@@ -145,6 +145,7 @@ class ReceiveProductService
                 // Change Product Receive Price
                 $productItem = Product::where('id', $item['product_id'])->firstOrFail();
                 $productItem->receive_price = $item['price'];
+                $productItem->cost_price = $item['price'];
                 $productItem->save();
 
                 // Change Stock Amount

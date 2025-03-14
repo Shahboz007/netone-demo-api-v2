@@ -2,7 +2,6 @@
 
 namespace App\Services\Chart;
 
-use App\Models\Status;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +27,11 @@ class ProducerDashboardService
             ->whereDate('updated_at', today())
             ->value('total_sale_price');
 
+        $todayCostAmount = (float) DB::table("completed_orders")
+            ->selectRaw('SUM(total_cost_price) as total_cost_price')
+            ->whereDate('updated_at', today())
+            ->value('total_cost_price');
+
         $yesterdayAmount = (float) DB::table("completed_orders")
             ->selectRaw('SUM(total_sale_price) as total_sale_price')
             ->whereDate('updated_at', Carbon::yesterday())
@@ -46,6 +50,10 @@ class ProducerDashboardService
         return [
             'yesterday_amount' => $yesterdayAmount,
             "today_amount" => $todayAmount,
+
+            "today_profit" => $todayAmount - $todayCostAmount,
+            "today_cost_amount" => $todayCostAmount,
+            
             "diff_amount" => $diffAmount,
             "diff_percent" => $diffPercent,
         ];
@@ -98,7 +106,7 @@ class ProducerDashboardService
     private function todayIncome($todaySales, $todayExpense)
     {
         return [
-            "amount" => $todaySales['today_amount'] - $todayExpense['today_amount']
+            "amount" => $todaySales['today_profit'] - $todayExpense['today_amount']
         ];
     }
 }
