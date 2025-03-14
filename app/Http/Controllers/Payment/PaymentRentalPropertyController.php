@@ -21,7 +21,16 @@ class PaymentRentalPropertyController extends Controller
 
     public function index(QueryParameterRequest $request)
     {
-        $result = $this->paymentRentalPropertiesService->findAll($request->validated());
+        $validated = $request->validate([
+            'status_code' => 'required|string|in:paymentIncomeRentalProperty,paymentExpenseRentalProperty|exists:statuses,code',
+        ]);
+
+        $result = $this->paymentRentalPropertiesService->findAll([
+            'startDate' => $request->validated('startDate'),
+            'endDate' => $request->validated('endDate'),
+            'rental_property_id' => $request->validated('rental_property_id'),
+            'status_code' => $validated['status_code'],
+        ]);
 
         return response()->json([
             'data' => PaymentRentalPropertyResource::collection($result['data']),

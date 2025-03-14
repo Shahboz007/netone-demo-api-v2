@@ -33,6 +33,9 @@ class PaymentRentalPropertiesService
         $startDate = DateFormatter::format($query['startDate']);
         $endDate = DateFormatter::format($query['endDate'], 'end');
         $rentalPropertyId = $query['rental_property_id'] ?? null;
+        $statusCode = $query['status_code'];
+
+        $statusPayment = $statusCode == 'paymentIncomeRentalProperty' ? $this->getIncomeStatus() : $this->getExpenseStatus();
 
         $query = Payment::with([
             'user',
@@ -42,7 +45,7 @@ class PaymentRentalPropertiesService
         ])
             ->where('paymentable_type', 'App\Models\RentalPropertyAction')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('status_id', $this->getIncomeStatus()->id);
+            ->where('status_id', $statusPayment->id);
 
         if ($rentalPropertyId) {
             $query->where('paymentable_id', $rentalPropertyId);
@@ -53,7 +56,7 @@ class PaymentRentalPropertiesService
             ->get();
 
         // Totals
-        $totals = $this->getTotals($rentalPropertyId, [$startDate, $endDate]);
+        $totals = $this->getTotals($rentalPropertyId, [$startDate, $endDate], $statusPayment->id);
 
         return [
             'data' => $data,
@@ -85,9 +88,6 @@ class PaymentRentalPropertiesService
 
         // User Wallet
         $userWallet = UserWallet::with(['wallet.currency'])->findOrFail($userWalletId);
-
-        // Payment Rental Status
-        $status = StatusService::findByCode('paymentRentalProperty');
 
         DB::beginTransaction();
         try {
@@ -154,7 +154,7 @@ class PaymentRentalPropertiesService
         ];
     }
 
-    private function getTotals(string|null $rentalPropertyId, array $date): array
+    private function getTotals(string|null $rentalPropertyId, array $date, $statusId): array
     {
         $query = DB::table('payments')
             ->join('payment_wallet', 'payments.id', '=', 'payment_wallet.payment_id')
@@ -162,7 +162,8 @@ class PaymentRentalPropertiesService
                 DB::raw('SUM(payment_wallet.sum_price) as total_amount'),
                 DB::raw('COUNT(payments.id) as total_count')
             )
-            ->where('paymentable_type', 'App\Models\RentalPropertyAction');
+            ->where('paymentable_type', 'App\Models\RentalPropertyAction')
+            ->where('status_id', $statusId);
 
         if ($rentalPropertyId) {
             $query->where('payments.paymentable_id', $rentalPropertyId);
