@@ -16,9 +16,15 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentRentalPropertiesService
 {
-    public function getStatus()
+
+    public function getIncomeStatus()
     {
-        return StatusService::findByCode('paymentRentalProperty');
+        return StatusService::findByCode('paymentIncomeRentalProperty');
+    }
+
+    public function getExpenseStatus()
+    {
+        return StatusService::findByCode('paymentExpenseRentalProperty');
     }
 
     public function findAll(array $query): array
@@ -36,9 +42,9 @@ class PaymentRentalPropertiesService
         ])
             ->where('paymentable_type', 'App\Models\RentalPropertyAction')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('status_id', $this->getStatus()->id);
-        
-        if($rentalPropertyId){
+            ->where('status_id', $this->getIncomeStatus()->id);
+
+        if ($rentalPropertyId) {
             $query->where('paymentable_id', $rentalPropertyId);
         }
 
@@ -74,6 +80,9 @@ class PaymentRentalPropertiesService
         // Rental Property Category
         $rentalPropertyCategory = RentalPropertyCategory::findOrFail($reqRentalPropertyCategoryId);
 
+        // Status Payment
+        $statusPayment = $rentalPropertyCategory->is_income ? $this->getIncomeStatus() : $this->getExpenseStatus();
+
         // User Wallet
         $userWallet = UserWallet::with(['wallet.currency'])->findOrFail($userWalletId);
 
@@ -92,11 +101,11 @@ class PaymentRentalPropertiesService
             $newPayment = new Payment([
                 'user_id' => Auth::id(),
                 'comment' => $reqComment,
-                'status_id' => $status->id,
+                'status_id' => $statusPayment->id,
                 'total_amount' => 0
             ]);
             $newRentalAction->payments()->save($newPayment);
-            
+
             // Attach Wallet
             $sumPrice = $reqAmount * $reqRateAmount;
             $newPayment->wallets()->attach($userWallet->wallet_id, [
@@ -137,7 +146,7 @@ class PaymentRentalPropertiesService
             'wallets',
         ])
             ->where('paymentable_type', 'App\Models\RentalPropertyAction')
-            ->where('status_id', $this->getStatus()->id)
+            ->where('status_id', $this->getIncomeStatus()->id)
             ->findOrFail($id);
 
         return [
