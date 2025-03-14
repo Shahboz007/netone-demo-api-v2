@@ -96,10 +96,10 @@ class PaymentRentalPropertiesService
                 'total_amount' => 0
             ]);
             $newRentalAction->payments()->save($newPayment);
-
+            
             // Attach Wallet
             $sumPrice = $reqAmount * $reqRateAmount;
-            $newPayment->wallets()->attach($userWalletId, [
+            $newPayment->wallets()->attach($userWallet->wallet_id, [
                 'amount' => $reqAmount,
                 'rate_amount' => $reqRateAmount,
                 'sum_price' => $sumPrice,
