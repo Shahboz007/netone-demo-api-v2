@@ -20,6 +20,8 @@ class StatementRentalPropertyController extends Controller
     {
         $result = $this->statementRentalPropertyService->findAll($request->validated());
 
-        return $result;
+        return response()->json([
+            'data' => $result['data']
+        ]);
     }
 }

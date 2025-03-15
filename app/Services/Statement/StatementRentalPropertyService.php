@@ -28,8 +28,6 @@ class StatementRentalPropertyService
         DB::raw('SUM(CASE WHEN statuses.code = "paymentExpenseRentalProperty" THEN payments.total_amount ELSE 0 END) as expense_amount'),
         DB::raw('SUM(CASE WHEN statuses.code = "paymentExpenseRentalProperty" THEN 1 ELSE 0 END) as expense_count'),
         DB::raw('(
-          GREATEST(
-              (
                   SUM(
                       CASE 
                           WHEN statuses.code = "paymentIncomeRentalProperty" 
@@ -43,11 +41,9 @@ class StatementRentalPropertyService
                           THEN payments.total_amount 
                           ELSE 0 
                       END
-                  )
-              ), 0
-          )
+                  )        
       ) as diff_amount')
-      
+
       )
       ->where('payments.paymentable_type', 'App\Models\RentalPropertyAction')
       ->whereBetween('payments.created_at', [$startDate, $endDate])
@@ -55,13 +51,15 @@ class StatementRentalPropertyService
       ->get();
 
     foreach ($data as $key => $item) {
-      $data[$key]->income_amount =(float) $item->income_amount;
-      $data[$key]->income_count =(int) $item->income_count;
-      $data[$key]->expense_amount =(float) $item->expense_amount;
-      $data[$key]->expense_count =(float) $item->expense_count;
-      $data[$key]->diff_amount =(float) $item->diff_amount;
+      $data[$key]->income_amount = (float) $item->income_amount;
+      $data[$key]->income_count = (int) $item->income_count;
+      $data[$key]->expense_amount = (float) $item->expense_amount;
+      $data[$key]->expense_count = (float) $item->expense_count;
+      $data[$key]->diff_amount = (float) $item->diff_amount;
     }
 
-    return $data;
+    return [
+      'data' => $data
+    ];
   }
 }
