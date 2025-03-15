@@ -4,6 +4,7 @@ use App\Http\Controllers\Statement\BalanceController;
 use App\Http\Controllers\Statement\ProfitAndLostController;
 use App\Http\Controllers\Statement\ReconciliationCustomerController;
 use App\Http\Controllers\Statement\ReconciliationSupplierController;
+use App\Http\Controllers\Statement\StatementRentalPropertyController;
 use App\Http\Middleware\StatementMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -20,4 +21,7 @@ Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], funct
 
     // Balance
     Route::get('/balance', [BalanceController::class, 'index']);
+
+    // Rental Property
+    Route::get('/rental-property', [StatementRentalPropertyController::class, 'index']);
 });
