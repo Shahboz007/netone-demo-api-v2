@@ -20,6 +20,8 @@ class StatementRentalPropertyService
       ->select(
         'rental_properties.id',
         'rental_properties.name',
+        'rental_properties.created_at',
+        'rental_properties.updated_at',
         DB::raw('COUNT(rental_property_actions.id) as action_count'),
         DB::raw('SUM(CASE WHEN statuses.code = "paymentIncomeRentalProperty" THEN payments.total_amount ELSE 0 END) as income_amount'),
         DB::raw('SUM(CASE WHEN statuses.code = "paymentIncomeRentalProperty" THEN 1 ELSE 0 END) as income_count'),
@@ -52,6 +54,14 @@ class StatementRentalPropertyService
       ->groupBy('rental_properties.id', 'rental_properties.name')
       ->get();
 
-    return ($data);
+    foreach ($data as $key => $item) {
+      $data[$key]->income_amount =(float) $item->income_amount;
+      $data[$key]->income_count =(int) $item->income_count;
+      $data[$key]->expense_amount =(float) $item->expense_amount;
+      $data[$key]->expense_count =(float) $item->expense_count;
+      $data[$key]->diff_amount =(float) $item->diff_amount;
+    }
+
+    return $data;
   }
 }
