@@ -62,7 +62,7 @@ class ProductionProcessController extends Controller
         }
 
         // Pluck Request Items
-//        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
+        //        $pluckReqProductsAmountType = collect($validateItems)->pluck('amount_type_id', 'product_id');
         $pluckReqProducts = collect($validateItems)->pluck('amount', 'product_id');
 
         DB::beginTransaction();
@@ -87,8 +87,6 @@ class ProductionProcessController extends Controller
 
                 // Decrement
                 $item->decrement('amount', $amount);
-
-
             }
 
             DB::commit();
@@ -159,10 +157,13 @@ class ProductionProcessController extends Controller
 
             foreach ($productionProcess->processItems as $item) {
                 // Get Last Receive Product
-                $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
-                if ($lastReceive) {
-                    $costPrice += $lastReceive->price * $item->amount;
-                }
+                // $lastReceive = ReceiveProductDetail::where('product_id', $item->product_id)->latest()->first();
+                // if ($lastReceive) {
+                //     $costPrice += $lastReceive->price * $item->amount;
+                // }
+
+                $product = Product::findOrFail($item->product_id);
+                $costPrice += $product->cost_price * $item->amount;
             }
 
             $costPrice /= $request->validated('total_amount');
