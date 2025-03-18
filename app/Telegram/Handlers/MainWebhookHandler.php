@@ -2,34 +2,29 @@
 
 namespace App\Telegram\Handlers;
 
-use App\Telegram\Keyboards\Customer\HomeReplyKeyboard;
+use App\Contracts\TelegramCommandInterface;
+use App\Telegram\Commands\Customer\StartCommand;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use DefStudio\Telegraph\Keyboard\Keyboard;
-use DefStudio\Telegraph\Keyboard\ReplyButton;
-use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Stringable;
 
 class MainWebhookHandler extends WebhookHandler
 {
-  public function processAction()
-  {
-    $action = $this->data->get('action');
-    $id = $this->data->get('id');
-    Log::info('action-test', [$action, $id]);
-  }
+  protected array $commands = [
+    '/start' => StartCommand::class,
+  ];
 
-  public function start()
+  public function handleCommand(Stringable $text): void
   {
-    $chatId = $this->chat->chat_id;
+    $command = $text->toString();
 
-    $this->chat
-      ->html("<b>Assalomu alaykum</b>\n\nNetOnega xush kelibsiz! Siz telegram botimiz yordamida berilgan buyurtmalar, qarzdorlik, to'lovlar va aktsverka hisobotlarini ko'rib borishingiz mumkin\n\n✅ <code>$chatId</code> - <i>bu id raqam yordamida bizning xodimlarimiz sizni tizimga kiritishadi va siz telegram botimizni ishlatishingiz mumkin</i>")
-      ->replyKeyboard(HomeReplyKeyboard::make())
-      ->send();
-  }
+    if (isset($this->commands[$command])) {
+      $handler = $this->commands[$command];
 
-  public function delete(string $id): void
-  {
-    $this->chat->message($id)->send();
+      if (is_subclass_of($handler, TelegramCommandInterface::class)) {
+        $handler::handle($this->chat);
+      } else {
+        $this->chat->html("❌ Command handler for <code>{$command}</code> is invalid.")->send();
+      }
+    }
   }
 }
