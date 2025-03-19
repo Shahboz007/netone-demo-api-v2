@@ -15,5 +15,12 @@ class CustomerService
     ];
   }
 
-  public function findOne(array $id) {}
+  public function findOne(int $id): array
+  {
+    $data = Customer::findOrFail($id);
+
+    return [
+      'data' => $data
+    ];
+  }
 }

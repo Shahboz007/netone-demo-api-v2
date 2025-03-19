@@ -42,13 +42,15 @@ class CustomerController extends Controller
     }
 
 
-    public function show(Customer $customer)
+    public function show(string $id)
     {
         // Gate
         Gate::authorize('view', Customer::class);
 
+        $result = $this->customerService->findOne((int) $id);
+        
         return response()->json([
-            "data" => CustomerResource::make($customer),
+            "data" => CustomerResource::make($result['data']),
         ]);
     }
 
