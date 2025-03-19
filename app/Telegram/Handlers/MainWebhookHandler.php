@@ -53,7 +53,6 @@ class MainWebhookHandler extends WebhookHandler
   // Actions
   public function handleOrderPagination($name, $value)
   {
-    Log::info("render", [$name, $value]);
     // Order Pagination
     $paginate = new OrderPaginationAction($this->chat);
 
