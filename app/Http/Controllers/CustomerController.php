@@ -33,11 +33,11 @@ class CustomerController extends Controller
         // Gate
         Gate::authorize('create', Customer::class);
 
-        $newCustomer = Customer::create($request->validated());
+        $result = $this->customerService->create($request->validated());
 
         return response()->json([
-            'message' => "Yangi mijoz muvaffaqiyatli qo'shildi!",
-            'data' => CustomerResource::make($newCustomer)
+            'message' => $request['message'],
+            'data' => $result['data'],
         ], 201);
     }
 
@@ -48,7 +48,7 @@ class CustomerController extends Controller
         Gate::authorize('view', Customer::class);
 
         $result = $this->customerService->findOne((int) $id);
-        
+
         return response()->json([
             "data" => CustomerResource::make($result['data']),
         ]);

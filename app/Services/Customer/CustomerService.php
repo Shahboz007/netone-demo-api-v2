@@ -6,6 +6,7 @@ use App\Models\Customer;
 
 class CustomerService
 {
+
   public function findAll(): array
   {
     $data = Customer::all();
@@ -15,12 +16,27 @@ class CustomerService
     ];
   }
 
+  public function create(array $data)
+  {
+    // Data
+    $telegram = $data["telegram"] ?? null;
+
+    // New Customer
+    $newCustomer = Customer::create($data);
+    
+    // Finish
+    return [
+      'message' => "Yangi mijoz muvaffaqiyatli qo'shildi!",
+      'data' => $newCustomer,
+    ];
+  }
+
   public function findOne(int $id): array
   {
-    $data = Customer::findOrFail($id);
+    $customer = Customer::findOrFail($id);
 
     return [
-      'data' => $data
+      'data' => $customer
     ];
   }
 }
