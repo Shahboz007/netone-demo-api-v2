@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Events\CustomerCreated;
+use App\Events\CustomerCreatedEvent;
 use App\Listeners\CustomerSendWelcomeMessage;
-use App\Listeners\CustomerSendWelcomeNotification;
+use App\Listeners\CustomerCreatedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(
-            CustomerCreated::class,
-            CustomerSendWelcomeNotification::class
+            CustomerCreatedEvent::class,
+            CustomerCreatedListener::class
         );
     }
 }

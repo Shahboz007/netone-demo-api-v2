@@ -2,7 +2,7 @@
 
 namespace App\Services\Customer;
 
-use App\Events\CustomerCreated;
+use App\Events\CustomerCreatedEvent;
 use App\Models\Customer;
 
 class CustomerService
@@ -26,7 +26,7 @@ class CustomerService
     $newCustomer = Customer::create($data);
 
     // Event
-    CustomerCreated::dispatch($newCustomer);
+    CustomerCreatedEvent::dispatch($newCustomer);
 
     // Finish
     return [
