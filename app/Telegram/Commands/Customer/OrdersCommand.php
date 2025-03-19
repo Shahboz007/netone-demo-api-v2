@@ -13,9 +13,6 @@ class OrdersCommand implements TelegramCommandInterface
 {
   public static function handle(TelegraphChat $chat): void
   {
-    // Command Name
-    $cmdValue = CustomerCommandEnum::ORDERS->value;
-
     // Service
     $service = new OrderTelegramService();
     $orders = $service->paginate(1);

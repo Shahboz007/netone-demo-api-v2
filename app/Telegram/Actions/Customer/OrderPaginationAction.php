@@ -14,7 +14,7 @@ class OrderPaginationAction
   public function __construct(protected TelegraphChat $chat) {}
 
   // public function 
-  
+
   public function prev()
   {
     Log::info("prev_info", ["render"]);
@@ -22,22 +22,5 @@ class OrderPaginationAction
   public function next()
   {
     Log::info("next_info", ["render"]);
-  }
-
-  public function howPage(int $page = 1)
-  {
-    $orders = Order::with('status')
-      ->paginate(1, ['*'], 'page', $page);
-
-    $message = "Buyurtmaringiz (sahifa $page):\n\n";
-    foreach ($orders as $order) {
-      $message .= "🛒 Buyurtma ID: {$order->id}, Holati: {$order->status->name}\n";
-    }
-
-    $keyboard = OrderPaginationKeyboard::make($orders->items());
-
-    $this->chat->html("Buyurtmalaringiz:")
-      ->keyboard($keyboard)
-      ->send();
   }
 }
