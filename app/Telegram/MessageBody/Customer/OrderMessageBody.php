@@ -59,7 +59,7 @@ class OrderMessageBody
     $message .= $this->orderStatusMsg();
 
     // Items
-    $message .= "items>>>";
+    $message .= $this->orderDetails();
 
     return $message;
   }
@@ -80,6 +80,35 @@ class OrderMessageBody
 
     $emoji = $emojis[$code] ?? "";
 
-    return "Holati: $emoji $name\n\n";
+    return "Holati:     $emoji $name\n\n";
+  }
+
+  private function orderDetails(): string
+  {
+    $message = "";
+
+    foreach ($this->order->orderDetails as $item) {
+      $message .= $item->product->name . "\n";
+
+      // Amount
+      $amount = number_format($item->amount);
+      $message .= "   <code>" . $amount . " " . $item->amountType->name . "</code>";
+
+      $message .= " x ";
+
+      // Price
+      $price = number_format($item->product->sale_price);
+      $message .= "<code>$price </code>";
+
+      // Total
+      $sumSalePrice = number_format($item->sum_sale_price);
+      $message .= "= $sumSalePrice";
+
+      $message .= "\n";
+    }
+
+    $message .= "\n\n";
+    
+    return $message;
   }
 }

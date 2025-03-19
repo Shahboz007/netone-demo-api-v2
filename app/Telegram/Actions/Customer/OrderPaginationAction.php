@@ -3,7 +3,7 @@
 namespace App\Telegram\Actions\Customer;
 
 use App\Models\Order;
-use App\Telegram\Keyboards\Customer\OrderMessageKeyboard;
+use App\Telegram\Keyboards\Customer\OrderPaginationKeyboard;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Facades\Log;
 
@@ -13,6 +13,8 @@ class OrderPaginationAction
 
   public function __construct(protected TelegraphChat $chat) {}
 
+  // public function 
+  
   public function prev()
   {
     Log::info("prev_info", ["render"]);
@@ -32,7 +34,7 @@ class OrderPaginationAction
       $message .= "🛒 Buyurtma ID: {$order->id}, Holati: {$order->status->name}\n";
     }
 
-    $keyboard = OrderMessageKeyboard::make($orders->items());
+    $keyboard = OrderPaginationKeyboard::make($orders->items());
 
     $this->chat->html("Buyurtmalaringiz:")
       ->keyboard($keyboard)

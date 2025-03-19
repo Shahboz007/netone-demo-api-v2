@@ -11,7 +11,7 @@ class OrderTelegramService
     return Order::with([
       'status',
       'completedOrder',
-      'orderDetails',
+      'orderDetails.product',
     ])
       ->paginate($perPage, ['*'], 'page', $page);
   }

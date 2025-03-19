@@ -15,7 +15,8 @@ class HomeReplyKeyboard
       ReplyButton::make(CustomerCommandEnum::BALANCE->value),
       ReplyButton::make(CustomerCommandEnum::DOCS->value),
       ReplyButton::make(CustomerCommandEnum::NEW_ORDERS->value),
-    ])
+      ])
+      ->oneTime()
       ->chunk(2)
       ->resize(true);
   }
