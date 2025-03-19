@@ -6,19 +6,24 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
+use App\Services\Customer\CustomerService;
 use Illuminate\Support\Facades\Gate;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        protected CustomerService $customerService
+    ) {}
+
     public function index()
     {
         // Gate
         Gate::authorize('viewAny', Customer::class);
 
-        $data = Customer::all();
+        $result = $this->customerService->findAll();
 
         return response()->json([
-            "data" => CustomerResource::collection($data),
+            "data" => CustomerResource::collection($result['data']),
         ]);
     }
 
@@ -76,7 +81,7 @@ class CustomerController extends Controller
     {
         // Gate
         Gate::authorize('delete', Customer::class);
-        
+
         $customer->delete();
 
         return response()->json([
