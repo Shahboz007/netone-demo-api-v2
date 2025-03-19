@@ -6,7 +6,6 @@ namespace App\Services\Customer;
 use App\Models\Customer;
 use App\Telegram\Keyboards\Customer\HomeReplyKeyboard;
 use DefStudio\Telegraph\Models\TelegraphChat;
-use Illuminate\Support\Facades\Log;
 
 class CustomerTelegramService
 {
