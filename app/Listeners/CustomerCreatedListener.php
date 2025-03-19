@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use App\Services\Customer\CustomerTelegramService;
 
-class CustomerSendWelcomeNotification
+class CustomerCreatedListener
 {
     /**
      * Create the event listener.
