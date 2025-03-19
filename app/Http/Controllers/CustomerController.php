@@ -55,26 +55,19 @@ class CustomerController extends Controller
     }
 
 
-    public function update(UpdateCustomerRequest $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, string $id)
     {
         // Gate
         Gate::authorize('update', Customer::class);
 
-        // Check if Phone and Telegram already exist
-        if ($request->validated('phone')) {
-            $phoneExists = Customer::where('phone', $request->validated('phone'))->where('id', '<>', $customer->id)->exists();
-            if ($phoneExists) abort(422, "Bu telefon raqam allaqachon mavjud!");
-        }
-        if ($request->validated('telegram')) {
-            $telegramExists = Customer::where('telegram', $request->validated('telegram'))->where('id', '<>', $customer->id)->exists();
-            if ($telegramExists) abort(422, "Bu telegram allaqachon mavjud!");
-        }
 
-        $customer->update($request->validated());
+        // Update
+        $result = $this->customerService->update((int)$id, $request->validated());
+
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli tahrirlandi!",
-            'data' => CustomerResource::make($customer)
+            'message' => $result['message'],
+            'data' => CustomerResource::make($result['data'])
         ]);
     }
 

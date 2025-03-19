@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerTelegramService
 {
+  // Send Message
   public function sendMessage(Customer $customer, $message)
   {
     $chat = $this->getChat($customer->telegram);
@@ -19,6 +20,7 @@ class CustomerTelegramService
     $chat->markdown($message)->send();
   }
 
+  /* Welcome */
   public function welcome(Customer $customer)
   {
     $chat = $this->getChat($customer->telegram);
@@ -29,7 +31,8 @@ class CustomerTelegramService
       ->send();
   }
 
-  public function deleteMessage($customer)
+  /* Delete Customer Message */
+  public function deleteCustomerMessage($customer)
   {
     $chat = $this->getChat($customer->telegram);
 
@@ -40,7 +43,26 @@ class CustomerTelegramService
       ->send();
   }
 
-  private function getChat(string $chat_id)
+  public function addTelegramToCustomer($customer)
+  {
+    $chat = $this->getChat($customer->telegram);
+    if (!$chat) return;
+
+    $chat->html("<b>✅ Tabriklaymiz!</b>\n\nSizning hisobingiz muvaffaqiyatli ravishda Telegram bilan bog'landi! Endi xizmatlarimizdan to'liq foydalanishingiz mumkin.")
+      ->replyKeyboard(HomeReplyKeyboard::make())
+      ->send();
+  }
+  public function removeTelegramFromCustomer($customer)
+  {
+    $chat = $this->getChat($customer->telegram);
+    if (!$chat) return;
+
+    $chat->html("<b>❌ Diqqat!</b>\n\nSizning hisobingizdan Telegram chat bog'lanishi o'chirildi.")
+      ->removeReplyKeyboard()
+      ->send();
+  }
+
+  private function getChat(string|null $chat_id)
   {
     return TelegraphChat::where('chat_id', $chat_id)->first();
   }

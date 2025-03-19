@@ -6,7 +6,7 @@ use App\Services\Customer\CustomerTelegramService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class CustomerDeletedListener
+class CustomerTelegramAddedListener
 {
     /**
      * Create the event listener.
@@ -22,6 +22,6 @@ class CustomerDeletedListener
     public function handle(object $event): void
     {
         $customer = $event->customer;
-        $this->customerTelegramService->deleteCustomerMessage($customer);
+        $this->customerTelegramService->addTelegramToCustomer($customer);
     }
 }
