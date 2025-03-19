@@ -2,12 +2,11 @@
 
 namespace App\Telegram\Keyboards\Customer;
 
-use App\Contracts\TelegramKeyboardInterface;
 use App\Telegram\Enums\CustomerCommandEnum;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 
-class HomeReplyKeyboard implements TelegramKeyboardInterface
+class HomeReplyKeyboard
 {
   public static function make(): ReplyKeyboard
   {

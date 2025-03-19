@@ -25,17 +25,18 @@ class MainWebhookHandler extends WebhookHandler
     CustomerCommandEnum::NEW_ORDERS->value => NewOrderCommand::class,
   ];
 
-  public function dismiss(){
+  public function dismiss()
+  {
     Log::info("dismiss", ["render"]);
   }
-  
-  public function handleCommand(Stringable $text): void
+
+  public function handleCommand(Stringable $command): void
   {
     // Send Bot Action
-    $this->chat->action(ChatActions::TYPING)->send();
+    $this->sendTypingAction();
 
     // Command
-    $command = $text->toString();
+    $command = $command->toString();
 
     // Runner
     if (isset($this->commands[$command])) {
@@ -49,23 +50,9 @@ class MainWebhookHandler extends WebhookHandler
     }
   }
 
-  public function handleChatMessage($text): void
+  public function handleChatMessage(Stringable $message): void
   {
-    // Send Bot Action
-    $this->chat->action(ChatActions::TYPING)->send();
-
-    // Message
-    $message = $text->toString();
-
-    // Runner
-    if (isset($this->commands[$message])) {
-      $handler = $this->commands[$message];
-      if (is_subclass_of($handler, TelegramCommandInterface::class)) {
-        $handler::handle($this->chat);
-      } else {
-        $this->chat->html("❌ Command handler for <code>{$message}</code> is invalid.")->send();
-      }
-    }
+    $this->handleCommand($message);
   }
 
   // Actions
@@ -73,11 +60,18 @@ class MainWebhookHandler extends WebhookHandler
   {
     // Order Pagination
     $paginate = new OrderPaginationAction($this->chat);
-    
-    // Methods
-    switch ($type) {
-      case "prev": $paginate->prev(); break;
-      case "next": $paginate->next(); break;
+
+    if (method_exists($paginate, $type)) {
+      $paginate->{$type}();
+    } else {
+      Log::warning("Unknown paginate type: {$type}");
+      $this->chat->html("❌ Unknown pagination action: <code>{$type}</code>")->send();
     }
+  }
+
+  // Typing action
+  private function sendTypingAction(): void
+  {
+    $this->chat->action(ChatActions::TYPING)->send();
   }
 }
