@@ -2,6 +2,7 @@
 
 namespace App\Services\Customer;
 
+use App\Events\CustomerCreated;
 use App\Models\Customer;
 
 class CustomerService
@@ -23,7 +24,10 @@ class CustomerService
 
     // New Customer
     $newCustomer = Customer::create($data);
-    
+
+    // Event
+    CustomerCreated::dispatch($newCustomer);
+
     // Finish
     return [
       'message' => "Yangi mijoz muvaffaqiyatli qo'shildi!",
