@@ -12,6 +12,6 @@ class NewOrderCommand implements TelegramCommandInterface
   {
     $cmdValue = CustomerCommandEnum::NEW_ORDERS->value;
 
-    $chat->html("<b>$cmdValue</b>\n\n")->send();
+    $chat->html("<b>$cmdValue</b>\n\n Hozircha buyurtma berib bo'lmaydi")->send();
   }
 }
