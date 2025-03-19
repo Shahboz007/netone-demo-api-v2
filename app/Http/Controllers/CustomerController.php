@@ -79,16 +79,17 @@ class CustomerController extends Controller
     }
 
 
-    public function destroy(Customer $customer)
+    public function destroy(string $id)
     {
         // Gate
         Gate::authorize('delete', Customer::class);
 
-        $customer->delete();
+        // Delete Customer
+        $result = $this->customerService->delete((int) $id);
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli o'chirildi!",
-            'data' => CustomerResource::make($customer)
+            'message' => $result['message'],
+            'data' => CustomerResource::make($result['data'])
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Services\Customer\CustomerTelegramService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -10,7 +11,7 @@ class CustomerDeletedListener
     /**
      * Create the event listener.
      */
-    public function __construct()
+    public function __construct(protected CustomerTelegramService $customerTelegramService)
     {
         //
     }
@@ -20,6 +21,7 @@ class CustomerDeletedListener
      */
     public function handle(object $event): void
     {
-        //
+        $customer = $event->customer;
+        $this->customerTelegramService->deleteMessage($customer);
     }
 }

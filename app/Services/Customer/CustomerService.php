@@ -3,6 +3,7 @@
 namespace App\Services\Customer;
 
 use App\Events\CustomerCreatedEvent;
+use App\Events\CustomerDeletedEvent;
 use App\Models\Customer;
 
 class CustomerService
@@ -41,6 +42,23 @@ class CustomerService
 
     return [
       'data' => $customer
+    ];
+  }
+
+  public function delete(int $id)
+  {
+    $customer = Customer::findOrFail($id);
+
+
+    // Delete Customer
+    $customer->delete();
+
+    // Event
+    CustomerDeletedEvent::dispatch($customer);
+    
+    return [
+      'message' => "Mijoz muvaffaqiyatli o'chirildi!",
+      'data' => $customer,
     ];
   }
 }
