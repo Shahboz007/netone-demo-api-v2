@@ -5,6 +5,7 @@ namespace App\Telegram\Handlers;
 use App\Contracts\TelegramCommandInterface;
 use App\Telegram\Commands\Customer\StartCommand;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 
 class MainWebhookHandler extends WebhookHandler

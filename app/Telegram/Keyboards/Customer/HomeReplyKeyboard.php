@@ -2,18 +2,22 @@
 
 namespace App\Telegram\Keyboards\Customer;
 
-use DefStudio\Telegraph\Keyboard\Keyboard;
+use App\Contracts\TelegramKeyboardInterface;
+use App\Telegram\Enums\CustomerCommandEnum;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 
-class HomeReplyKeyboard
+class HomeReplyKeyboard implements TelegramKeyboardInterface
 {
   public static function make(): ReplyKeyboard
   {
     return ReplyKeyboard::make()->buttons([
-      ReplyButton::make('📦 Buyurtmalarim'),
-      // ReplyButton::make('Balans')
+      ReplyButton::make(CustomerCommandEnum::ORDERS->value),
+      ReplyButton::make(CustomerCommandEnum::BALANCE->value),
+      ReplyButton::make(CustomerCommandEnum::DOCS->value),
+      ReplyButton::make(CustomerCommandEnum::NEW_ORDERS->value),
     ])
+      ->chunk(2)
       ->resize(true);
   }
 }
