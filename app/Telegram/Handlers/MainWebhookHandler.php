@@ -25,11 +25,6 @@ class MainWebhookHandler extends WebhookHandler
     CustomerCommandEnum::NEW_ORDERS->value => NewOrderCommand::class,
   ];
 
-  public function dismiss()
-  {
-    Log::info("dismiss", ["render"]);
-  }
-
   public function handleCommand(Stringable $command): void
   {
     // Send Bot Action
@@ -58,7 +53,7 @@ class MainWebhookHandler extends WebhookHandler
   // Actions
   public function handleOrderPagination($name, $value)
   {
-    Log::info("render",[$name, $value]);
+    Log::info("render", [$name, $value]);
     // Order Pagination
     $paginate = new OrderPaginationAction($this->chat);
 
