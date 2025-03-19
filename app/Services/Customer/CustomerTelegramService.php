@@ -43,6 +43,7 @@ class CustomerTelegramService
       ->send();
   }
 
+  /* Add Telegram */
   public function addTelegramToCustomer($customer)
   {
     $chat = $this->getChat($customer->telegram);
@@ -52,6 +53,8 @@ class CustomerTelegramService
       ->replyKeyboard(HomeReplyKeyboard::make())
       ->send();
   }
+
+  /* Remove Telegram */
   public function removeTelegramFromCustomer($customer)
   {
     $chat = $this->getChat($customer->telegram);
