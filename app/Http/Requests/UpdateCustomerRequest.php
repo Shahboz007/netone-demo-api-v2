@@ -26,7 +26,7 @@ class UpdateCustomerRequest extends FormRequest
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'phone' => [
-                'required',
+                'nullable',
                 'numeric',
                 Rule::unique('customers', 'phone')->ignore($this->customer),
             ],
