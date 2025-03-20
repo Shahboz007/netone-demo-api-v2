@@ -11,6 +11,7 @@ class MainChat extends BaseModel
   protected $fillable = [
     'chat_id',
     'name',
-    'last_message_id'
+    'last_message_id',
+    'last_command'
   ];
 }
