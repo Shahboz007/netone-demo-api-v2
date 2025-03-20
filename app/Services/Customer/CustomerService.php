@@ -2,10 +2,10 @@
 
 namespace App\Services\Customer;
 
-use App\Events\CustomerCreatedEvent;
-use App\Events\CustomerDeletedEvent;
-use App\Events\CustomerTelegramAddedEvent;
-use App\Events\CustomerTelegramRemoveEvent;
+use App\Events\Customer\CustomerCreatedEvent;
+use App\Events\Customer\CustomerDeletedEvent;
+use App\Events\Customer\CustomerTelegramAddedEvent;
+use App\Events\Customer\CustomerTelegramRemoveEvent;
 use App\Models\Customer;
 
 class CustomerService
