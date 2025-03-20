@@ -4,7 +4,7 @@ namespace App\Models\Telegram;
 
 use DefStudio\Telegraph\Models\TelegraphChat as BaseModel;
 
-class MainChat extends BaseModel
+class TelegramChat extends BaseModel
 {
   protected $table = "telegraph_chats";
 
