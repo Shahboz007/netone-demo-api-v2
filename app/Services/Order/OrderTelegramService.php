@@ -8,10 +8,6 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 
 class OrderTelegramService
 {
-  public function __construct(
-    protected TelegramChat $telegramChat
-  ) {}
-
   // Get Order Date By Paginate
   public function paginate($customerId, int $perPage = 5, ?int $page = null)
   {
