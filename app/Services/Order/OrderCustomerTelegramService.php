@@ -5,6 +5,7 @@ namespace App\Services\Order;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Telegram\TelegramChat;
+use App\Telegram\MessageBody\Customer\OrderMessageBody;
 use Illuminate\Support\Facades\Log;
 
 class OrderCustomerTelegramService
@@ -25,7 +26,15 @@ class OrderCustomerTelegramService
   // New Order Msg
   public function sendNewOrderMsg(): void
   {
-    $this->chat()->message("salom")->send();
+    // Title
+    $message = "<b>🟢Yangi buyurtma</b>\n\n";
+
+    // Order ID
+    $message .= OrderMessageBody::makeMessage($this->order);
+
+    $this->chat()
+      ->html($message)
+      ->send();
   }
 
   // Process Order Msg

@@ -36,7 +36,7 @@ class OrderMessageBody
     $message .= $this->orderStatusMsg();
 
     // Items
-    $message .= "items>>>";
+    $message .= $this->orderDetails();
 
     return $message;
   }
