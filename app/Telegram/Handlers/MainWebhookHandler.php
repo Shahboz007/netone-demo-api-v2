@@ -8,6 +8,7 @@ use App\Telegram\Commands\Customer\BalanceCommand;
 use App\Telegram\Commands\Customer\DocsCommand;
 use App\Telegram\Commands\Customer\NewOrderCommand;
 use App\Telegram\Commands\Customer\OrdersCommand;
+use App\Telegram\Commands\Customer\SettingsCommand;
 use App\Telegram\Commands\Customer\StartCommand;
 use App\Telegram\Enums\CustomerCommandEnum;
 use DefStudio\Telegraph\Enums\ChatActions;
@@ -23,6 +24,7 @@ class MainWebhookHandler extends WebhookHandler
     CustomerCommandEnum::BALANCE->value => BalanceCommand::class,
     CustomerCommandEnum::DOCS->value => DocsCommand::class,
     CustomerCommandEnum::NEW_ORDERS->value => NewOrderCommand::class,
+    CustomerCommandEnum::SETTINGS->value => SettingsCommand::class,
   ];
 
   public function handleCommand(Stringable $command): void
