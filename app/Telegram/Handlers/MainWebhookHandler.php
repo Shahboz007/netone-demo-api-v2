@@ -51,17 +51,16 @@ class MainWebhookHandler extends WebhookHandler
   }
 
   // Actions
-  public function handleOrderPagination($name, $value)
+  public function handleOrderPagination($value)
   {
     // Order Pagination
     $paginate = new OrderPaginationAction($this->chat);
 
-    if (method_exists($paginate, $name)) {
-      $paginate->{$name}();
-    } else {
-      Log::warning("Unknown paginate type: {$name}");
-      $this->chat->html("❌ Unknown pagination action: <code>{$name}</code>")->send();
+    if ($value == '1') {
+      $this->reply("Siz birinchi sahifadasiz");
     }
+
+    $paginate->showPage($value);
   }
 
   // Typing action

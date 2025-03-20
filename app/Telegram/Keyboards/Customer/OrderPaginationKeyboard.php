@@ -9,30 +9,40 @@ class OrderPaginationKeyboard
 {
   public static function getMsg(int $current, int $total)
   {
-    return "Sahifalar   <b>$current/$total</b>";
+    return "Buyurtmalar:   <b>$current/$total</b>";
   }
-  
+
   /**
    * Generate a keyboard for the given orders.
    *
    * @param \App\Models\Order[] $orders Array of Order objects.
    * @return Keyboard
    */
-  public static function make(int $current=1, $total=0): Keyboard
+  public static function make(int $currentPage = 1, $lastPage = 0): Keyboard
   {
     $keyboard = Keyboard::make();
 
-    
+    $prev = $currentPage > 1 ? $currentPage - 1 : 1;
+    $next = $currentPage < $lastPage ? $currentPage + 1 : $lastPage;
+
     $keyboard->row([
-      Button::make("1")->action('handleOrderPagination')->param("name", "jump")->param("value", 1),
-      Button::make("$total")->action('handleOrderPagination')->param("name", "jump")->param('value', $total),
+      self::btn(1, 1),
+
+      self::btn($lastPage, $currentPage),
     ]);
     $keyboard->row([
-      Button::make("⬅️")->action('handleOrderPagination')->param('name', "navigate")->param("value", "prev"),
-      Button::make("$current")->action('handleOrderPagination')->param('name', "disabled")->param("value", $current),
-      Button::make("➡️")->action('handleOrderPagination')->param("name", "next")->param("value", "next"),
+      self::btn("⬅️", $prev),
+      self::btn($currentPage, $currentPage),
+      self::btn("➡️", $next),
     ]);
- 
+
     return $keyboard;
+  }
+
+  private static function btn(string $label, int $val): Button
+  {
+    return  Button::make($label)
+      ->action('handleOrderPagination')
+      ->param("value", $val);
   }
 }
