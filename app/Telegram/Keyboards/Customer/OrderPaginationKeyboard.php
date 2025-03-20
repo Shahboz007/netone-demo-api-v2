@@ -27,22 +27,21 @@ class OrderPaginationKeyboard
 
     $keyboard->row([
       self::btn(1, 1),
-
-      self::btn($lastPage, $currentPage),
+      self::btn($lastPage, $lastPage),
     ]);
     $keyboard->row([
       self::btn("⬅️", $prev),
-      self::btn($currentPage, $currentPage),
+      self::btn($currentPage, $currentPage, true),
       self::btn("➡️", $next),
     ]);
 
     return $keyboard;
   }
 
-  private static function btn(string $label, int $val): Button
+  private static function btn(string $label, int $val, bool $disable=false): Button
   {
     return  Button::make($label)
-      ->action('handleOrderPagination')
+      ->action($disable?"":'handleOrderPagination')
       ->param("value", $val);
   }
 }

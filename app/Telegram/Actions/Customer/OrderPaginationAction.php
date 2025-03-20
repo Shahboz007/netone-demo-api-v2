@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Actions\Customer;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Order\OrderTelegramService;
 use App\Telegram\Keyboards\Customer\OrderPaginationKeyboard;
@@ -18,9 +19,12 @@ class OrderPaginationAction
   public function showPage($page = 1)
   {
     Log::info("render0action",[$page]);
+    // Customer
+    $customer = Customer::where('telegram', $this->chat->chat_id)->first();
+    
     // Service
     $service = new OrderTelegramService();
-    $orders = $service->paginate(1, $page);
+    $orders = $service->paginate($customer->id,1, $page);
 
     $message = "";
     // Order Details List
