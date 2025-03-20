@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Events\Order\OrderCreatedEvent;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
@@ -157,10 +158,13 @@ class OrderService
             $query->where('user_id', auth()->id());
         }
 
-        $data = $query->firstOrFail();
+        $order = $query->firstOrFail();
+
+        // Event
+        OrderCreatedEvent::dispatch($order);
 
         return [
-            "data" => $data,
+            "data" => $order,
         ];
     }
 

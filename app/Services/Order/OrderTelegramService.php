@@ -3,9 +3,15 @@
 namespace App\Services\Order;
 
 use App\Models\Order;
+use App\Models\Telegram\TelegramChat;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class OrderTelegramService
 {
+  public function __construct(
+    protected TelegramChat $telegramChat
+  ) {}
+
   // Get Order Date By Paginate
   public function paginate($customerId, int $perPage = 5, ?int $page = null)
   {
@@ -19,13 +25,5 @@ class OrderTelegramService
   }
 
   // New Order Msg
-  public function newOrderMsg() {}
-  // Process Order Msg
-  public function processOrderMsg() {}
-  // Cancel Order Msg
-  public function cancelOrderMsg() {}
-  // Completed Order Msg
-  public function CompletedOrderMsg() {}
-  // Submitted Order Msg
-  public function SubmittedOrderMsg() {}
+  public function newOrderMsg(Order $order) {}
 }
