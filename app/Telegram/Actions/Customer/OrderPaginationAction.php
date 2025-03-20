@@ -26,6 +26,15 @@ class OrderPaginationAction
     $service = new OrderTelegramService();
     $orders = $service->paginate($customer->id, 1, $page);
 
+    if ($orders->isEmpty()) {
+      $message = "<b>Mavjud emas!</b>\n\n";
+      $message = "❌Sizda hozircha buyurtmalar mavjud emas!";
+
+      $this->chat->html($message)
+        ->send();
+      exit();
+    }
+
     $message = "";
     // Order Details List
     foreach ($orders as $order) {
