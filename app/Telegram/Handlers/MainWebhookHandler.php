@@ -60,7 +60,7 @@ class MainWebhookHandler extends WebhookHandler
       $this->reply("Siz birinchi sahifadasiz");
     }
 
-    $paginate->showPage($value);
+    $paginate->showPage($value, true);
   }
 
   // Typing action

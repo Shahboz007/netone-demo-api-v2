@@ -30,9 +30,9 @@ class OrderPaginationKeyboard
       self::btn($lastPage, $lastPage),
     ]);
     $keyboard->row([
-      self::btn("⬅️", $prev),
+      self::btn("⬅️", $prev, $currentPage == 1),
       self::btn($currentPage, $currentPage, true),
-      self::btn("➡️", $next),
+      self::btn("➡️", $next, $currentPage == $lastPage),
     ]);
 
     return $keyboard;

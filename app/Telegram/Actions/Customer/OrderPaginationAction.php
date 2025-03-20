@@ -16,15 +16,15 @@ class OrderPaginationAction
 
   // public function 
 
-  public function showPage($page = 1)
+  public function showPage($page = 1, $isReply = false)
   {
-    Log::info("render0action",[$page]);
+    Log::info("render0action", [$page]);
     // Customer
     $customer = Customer::where('telegram', $this->chat->chat_id)->first();
-    
+
     // Service
     $service = new OrderTelegramService();
-    $orders = $service->paginate($customer->id,1, $page);
+    $orders = $service->paginate($customer->id, 1, $page);
 
     $message = "";
     // Order Details List
@@ -35,11 +35,28 @@ class OrderPaginationAction
     // Pagination
     if ($orders->total() > 1) {
       $message .= OrderPaginationKeyboard::getMsg($orders->currentPage(), $orders->total());
-      $this->chat->html($message)
-        ->keyboard(OrderPaginationKeyboard::make($orders->currentPage(), $orders->total()))
-        ->send();
+
+      $response = null;
+
+      if ($this->chat->last_message_id && $isReply) {
+        $response = $this->chat
+          ->edit($this->chat->last_message_id)
+          ->html($message)
+          ->keyboard(OrderPaginationKeyboard::make($orders->currentPage(), $orders->total()))
+          ->send();
+      } else {
+        $response = $this->chat
+          ->html($message)
+          ->keyboard(OrderPaginationKeyboard::make($orders->currentPage(), $orders->total()))
+          ->send();
+      }
+
+      // Extract the message ID
+      $this->chat->last_message_id = $response->telegraphMessageId();
+      $this->chat->save();
     } else {
-      $this->chat->html($message)
+      $this->chat
+        ->html($message)
         ->send();
     }
   }

@@ -10,8 +10,8 @@ class OrdersCommand implements TelegramCommandInterface
 {
   public static function handle(TelegraphChat $chat): void
   {
-   $action = new OrderPaginationAction($chat);
+    $action = new OrderPaginationAction($chat);
 
-   $action->showPage();
+    $action->showPage();
   }
 }
