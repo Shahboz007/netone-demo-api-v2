@@ -13,7 +13,6 @@ use App\Telegram\Commands\Customer\StartCommand;
 use App\Telegram\Enums\CustomerCommandEnum;
 use DefStudio\Telegraph\Enums\ChatActions;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 
 class MainWebhookHandler extends WebhookHandler
