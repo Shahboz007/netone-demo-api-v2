@@ -6,19 +6,24 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
+use App\Services\Customer\CustomerService;
 use Illuminate\Support\Facades\Gate;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        protected CustomerService $customerService
+    ) {}
+
     public function index()
     {
         // Gate
         Gate::authorize('viewAny', Customer::class);
 
-        $data = Customer::all();
+        $result = $this->customerService->findAll();
 
         return response()->json([
-            "data" => CustomerResource::collection($data),
+            "data" => CustomerResource::collection($result['data']),
         ]);
     }
 
@@ -28,60 +33,56 @@ class CustomerController extends Controller
         // Gate
         Gate::authorize('create', Customer::class);
 
-        $newCustomer = Customer::create($request->validated());
+        $result = $this->customerService->create($request->validated());
 
         return response()->json([
-            'message' => "Yangi mijoz muvaffaqiyatli qo'shildi!",
-            'data' => CustomerResource::make($newCustomer)
+            'message' => $request['message'],
+            'data' => $result['data'],
         ], 201);
     }
 
 
-    public function show(Customer $customer)
+    public function show(string $id)
     {
         // Gate
         Gate::authorize('view', Customer::class);
 
+        $result = $this->customerService->findOne((int) $id);
+
         return response()->json([
-            "data" => CustomerResource::make($customer),
+            "data" => CustomerResource::make($result['data']),
         ]);
     }
 
 
-    public function update(UpdateCustomerRequest $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, string $id)
     {
         // Gate
         Gate::authorize('update', Customer::class);
 
-        // Check if Phone and Telegram already exist
-        if ($request->validated('phone')) {
-            $phoneExists = Customer::where('phone', $request->validated('phone'))->where('id', '<>', $customer->id)->exists();
-            if ($phoneExists) abort(422, "Bu telefon raqam allaqachon mavjud!");
-        }
-        if ($request->validated('telegram')) {
-            $telegramExists = Customer::where('telegram', $request->validated('telegram'))->where('id', '<>', $customer->id)->exists();
-            if ($telegramExists) abort(422, "Bu telegram allaqachon mavjud!");
-        }
 
-        $customer->update($request->validated());
+        // Update
+        $result = $this->customerService->update((int)$id, $request->validated());
+
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli tahrirlandi!",
-            'data' => CustomerResource::make($customer)
+            'message' => $result['message'],
+            'data' => CustomerResource::make($result['data'])
         ]);
     }
 
 
-    public function destroy(Customer $customer)
+    public function destroy(string $id)
     {
         // Gate
         Gate::authorize('delete', Customer::class);
-        
-        $customer->delete();
+
+        // Delete Customer
+        $result = $this->customerService->delete((int) $id);
 
         return response()->json([
-            'message' => "Mijoz muvaffaqiyatli o'chirildi!",
-            'data' => CustomerResource::make($customer)
+            'message' => $result['message'],
+            'data' => CustomerResource::make($result['data'])
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Order;
+namespace App\Services\Order;
 
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
