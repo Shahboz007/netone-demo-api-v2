@@ -95,7 +95,19 @@ class OrderCustomerTelegramService
       ->send();
   }
   // Submitted Order Msg
-  public function SubmittedOrderMsg() {}
+  public function sendSubmittedOrderMsg()
+  {
+    // Title
+    $status = $this->order->status->name;
+    $message = "<b>📦$status</b>\n\n";
+
+    // Order Details
+    $message .= OrderMessageBody::makeMessage($this->order);
+
+    $this->chat()
+      ->html($message)
+      ->send();
+  }
 
   private function chat()
   {

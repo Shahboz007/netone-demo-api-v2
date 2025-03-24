@@ -7,6 +7,7 @@ use App\Events\Order\OrderCompletedEvent;
 use App\Events\Order\OrderCreatedEvent;
 use App\Events\Order\OrderProcessedEvent;
 use App\Events\Order\OrderProcessEvent;
+use App\Events\Order\OrderSubmittedEvent;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
@@ -454,6 +455,10 @@ class OrderService
             $customer->decrement('balance', $completedOrder->total_sale_price);
 
             DB::commit();
+
+            // Event
+            OrderSubmittedEvent::dispatch($order);
+            
             return [
                 'message' => "Buyurtma muvaffaqiyatli topshirildi! Mijoz balansini tekshiring",
                 'data' => [
