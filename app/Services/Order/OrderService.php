@@ -134,6 +134,9 @@ class OrderService
 
             DB::commit();
 
+            // Event
+            OrderCreatedEvent::dispatch($newOrder);
+
             return [
                 "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
             ];
@@ -159,9 +162,6 @@ class OrderService
         }
 
         $order = $query->firstOrFail();
-
-        // Event
-        OrderCreatedEvent::dispatch($order);
 
         return [
             "data" => $order,
