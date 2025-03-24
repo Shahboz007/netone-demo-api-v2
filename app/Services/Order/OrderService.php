@@ -3,6 +3,7 @@
 namespace App\Services\Order;
 
 use App\Events\Order\OrderAddedNewProductEvent;
+use App\Events\Order\OrderCompletedEvent;
 use App\Events\Order\OrderCreatedEvent;
 use App\Events\Order\OrderProcessedEvent;
 use App\Events\Order\OrderProcessEvent;
@@ -395,6 +396,10 @@ class OrderService
             $order->save();
 
             DB::commit();
+
+            // Event
+            OrderCompletedEvent::dispatch($order);
+            
             return [
                 'message' => "Buyurtma topshirishga tayyor, hozirgi holati tayyorlandi",
                 'data' => [

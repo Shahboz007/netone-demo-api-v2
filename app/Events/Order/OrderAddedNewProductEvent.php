@@ -32,7 +32,7 @@ class OrderAddedNewProductEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('order-chanel'),
+            new PrivateChannel('order-channel'),
         ];
     }
 }

@@ -81,7 +81,19 @@ class OrderCustomerTelegramService
   // Cancel Order Msg
   public function cancelOrderMsg() {}
   // Completed Order Msg
-  public function CompletedOrderMsg() {}
+  public function sendCompletedOrderMsg()
+  {
+    // Title
+    $status = $this->order->status->name;
+    $message = "<b>✅$status</b>\n\n";
+
+    // Order Details
+    $message .= OrderMessageBody::makeMessage($this->order);
+
+    $this->chat()
+      ->html($message)
+      ->send();
+  }
   // Submitted Order Msg
   public function SubmittedOrderMsg() {}
 
