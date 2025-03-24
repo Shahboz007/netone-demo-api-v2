@@ -31,7 +31,7 @@ class OrderCreatedEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('order-chanel'),
         ];
     }
 }

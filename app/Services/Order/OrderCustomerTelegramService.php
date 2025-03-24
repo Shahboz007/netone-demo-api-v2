@@ -27,9 +27,10 @@ class OrderCustomerTelegramService
   public function sendNewOrderMsg(): void
   {
     // Title
-    $message = "<b>🟢Yangi buyurtma</b>\n\n";
+    $status = $this->order->status->name;
+    $message = "<b>🟢$status</b>\n\n";
 
-    // Order ID
+    // Order Details
     $message .= OrderMessageBody::makeMessage($this->order);
 
     $this->chat()
@@ -38,7 +39,19 @@ class OrderCustomerTelegramService
   }
 
   // Process Order Msg
-  public function processOrderMsg() {}
+  public function sendProcessOrderMsg()
+  {
+    // Title
+    $status = $this->order->status->name;
+    $message = "<b>⏳$status</b>\n\n";
+    
+    // Order Details
+    $message .= OrderMessageBody::makeMessage($this->order);
+
+    $this->chat()
+      ->html($message)
+      ->send();
+  }
   // Cancel Order Msg
   public function cancelOrderMsg() {}
   // Completed Order Msg

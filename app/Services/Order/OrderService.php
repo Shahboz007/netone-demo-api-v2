@@ -3,6 +3,8 @@
 namespace App\Services\Order;
 
 use App\Events\Order\OrderCreatedEvent;
+use App\Events\Order\OrderProcessedEvent;
+use App\Events\Order\OrderProcessEvent;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
@@ -181,6 +183,9 @@ class OrderService
 
         $order->status_id = $statusInProgress->id;
         $order->save();
+
+        // Event
+        OrderProcessedEvent::dispatch($order);
 
         return [
             'message' => "Buyurtma tasdiqlandi va hozir jarayonda",

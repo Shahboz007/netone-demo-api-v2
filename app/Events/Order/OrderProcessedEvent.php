@@ -2,6 +2,7 @@
 
 namespace App\Events\Order;
 
+use App\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,7 +18,7 @@ class OrderProcessedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(public Order $order)
     {
         //
     }
@@ -30,7 +31,7 @@ class OrderProcessedEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('order-chanel'),
         ];
     }
 }

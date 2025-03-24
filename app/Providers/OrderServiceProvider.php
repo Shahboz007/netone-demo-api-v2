@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\Order\OrderCreatedEvent;
 use App\Events\Order\OrderProcessedEvent;
 use App\Listeners\Order\OrderCreatedListener;
+use App\Listeners\Order\OrderProcessedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,11 +33,11 @@ class OrderServiceProvider extends ServiceProvider
         // Processed
         Event::listen(
             OrderProcessedEvent::class,
-            OrderCreatedListener::class,
+            OrderProcessedListener::class,
         );
-        
+
         // Cancel
-        
+
         // Completed
     }
 }
