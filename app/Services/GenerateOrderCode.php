@@ -15,7 +15,7 @@ class GenerateOrderCode
         $date = Carbon::now();
         $yy = $date->format('y'); // Last two digits of the year
         $mm = $date->format('m'); // Month (zero-padded)
-        $baseCode = "ORD-{$yy}{$mm}{$customerId}-";
+        $baseCode = "{$yy}{$mm}{$customerId}-";
 
         $nextNumber = 1;
         if ($lastOrderId) {
@@ -24,7 +24,7 @@ class GenerateOrderCode
             $nextNumber = $lastNumber + 1;
         }
 
-        $paddedNumber = str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        $paddedNumber = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
         return $baseCode. $paddedNumber;
     }
 }

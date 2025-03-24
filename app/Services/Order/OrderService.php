@@ -2,6 +2,12 @@
 
 namespace App\Services\Order;
 
+use App\Events\Order\OrderAddedNewProductEvent;
+use App\Events\Order\OrderCompletedEvent;
+use App\Events\Order\OrderCreatedEvent;
+use App\Events\Order\OrderProcessedEvent;
+use App\Events\Order\OrderProcessEvent;
+use App\Events\Order\OrderSubmittedEvent;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\ServerErrorException;
 use App\Models\CompletedOrder;
@@ -133,6 +139,9 @@ class OrderService
 
             DB::commit();
 
+            // Event
+            OrderCreatedEvent::dispatch($newOrder);
+
             return [
                 "message" => "Yangi buyurtma muvaffaqiyatli qo'shildi!",
             ];
@@ -157,10 +166,10 @@ class OrderService
             $query->where('user_id', auth()->id());
         }
 
-        $data = $query->firstOrFail();
+        $order = $query->firstOrFail();
 
         return [
-            "data" => $data,
+            "data" => $order,
         ];
     }
 
@@ -177,6 +186,9 @@ class OrderService
 
         $order->status_id = $statusInProgress->id;
         $order->save();
+
+        // Event
+        OrderProcessedEvent::dispatch($order);
 
         return [
             'message' => "Buyurtma tasdiqlandi va hozir jarayonda",
@@ -239,6 +251,13 @@ class OrderService
             $order->increment('total_sale_price', $sumSalePrice);
 
             DB::commit();
+
+            // Event
+            OrderAddedNewProductEvent::dispatch($order, $product, [
+                "price" => (float) $product->sale_price,
+                "amount" => (float) $amount,
+                "sum_sale_price" => (float) $sumSalePrice,
+            ]);
 
             return [
                 'message' => "#$order->id buyurtmaga `$product->name` nomli mahsulot muvaffaqiyatli qo'shildi"
@@ -378,6 +397,10 @@ class OrderService
             $order->save();
 
             DB::commit();
+
+            // Event
+            OrderCompletedEvent::dispatch($order);
+            
             return [
                 'message' => "Buyurtma topshirishga tayyor, hozirgi holati tayyorlandi",
                 'data' => [
@@ -432,6 +455,10 @@ class OrderService
             $customer->decrement('balance', $completedOrder->total_sale_price);
 
             DB::commit();
+
+            // Event
+            OrderSubmittedEvent::dispatch($order);
+            
             return [
                 'message' => "Buyurtma muvaffaqiyatli topshirildi! Mijoz balansini tekshiring",
                 'data' => [
