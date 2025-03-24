@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Telegram\MainChat;
+use App\Models\Telegram\TelegramChat;
 use App\Telegram\Handlers\MainWebhookHandler;
 use DefStudio\Telegraph\Telegraph;
 use Illuminate\Support\Facades\App;
@@ -116,7 +116,7 @@ return [
      */
     'models' => [
         'bot' => DefStudio\Telegraph\Models\TelegraphBot::class,
-        'chat' => MainChat::class,
+        'chat' => TelegramChat::class,
     ],
 
     'storage' => [

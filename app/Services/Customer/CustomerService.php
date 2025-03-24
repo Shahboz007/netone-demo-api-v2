@@ -2,10 +2,10 @@
 
 namespace App\Services\Customer;
 
-use App\Events\CustomerCreatedEvent;
-use App\Events\CustomerDeletedEvent;
-use App\Events\CustomerTelegramAddedEvent;
-use App\Events\CustomerTelegramRemoveEvent;
+use App\Events\Customer\CustomerCreatedEvent;
+use App\Events\Customer\CustomerDeletedEvent;
+use App\Events\Customer\CustomerTelegramAddedEvent;
+use App\Events\Customer\CustomerTelegramRemoveEvent;
 use App\Models\Customer;
 
 class CustomerService
@@ -22,9 +22,6 @@ class CustomerService
 
   public function create(array $data)
   {
-    // Data
-    $telegram = $data["telegram"] ?? null;
-
     // New Customer
     $newCustomer = Customer::create($data);
 
@@ -55,7 +52,7 @@ class CustomerService
 
     // Customer
     $customer = Customer::findOrFail($id);
-    
+
 
     // Check if Phone and Telegram already exist
     if ($phone) {
@@ -66,20 +63,20 @@ class CustomerService
       $telegramExists = Customer::where('telegram', $telegram)->where('id', '<>', $customer->id)->exists();
       if ($telegramExists) abort(422, "Bu telegram allaqachon mavjud!");
     }
-    
+
     // Event
-    if(!$customer->telegram && $telegram){
+    if (!$customer->telegram && $telegram) {
       $customer->telegram = $telegram;
       CustomerTelegramAddedEvent::dispatch($customer);
-    }else if($customer->telegram && !$telegram){
+    } else if ($customer->telegram && !$telegram) {
       CustomerTelegramRemoveEvent::dispatch($customer);
     }
 
     // Update
     $customer->update($data);
 
-    
-    
+
+
     return [
       'message' => "Mijoz muvaffaqiyatli tahrirlandi!",
       'data' => $customer,
