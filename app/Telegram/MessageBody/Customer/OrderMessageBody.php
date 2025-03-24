@@ -24,9 +24,6 @@ class OrderMessageBody
     // Order ID
     $message = "<b>" . $this->order->ord_code . "</b>\n\n";
 
-    // Total Price
-    $val = number_format($this->order->total_sale_price);
-    $message .= "Jami summa:    <b>$val uzs</b>\n";
     // Old Debt
     $message .= "Oldingi qarz:    ...\n";
     // Items Count
@@ -38,6 +35,10 @@ class OrderMessageBody
     // Items
     $message .= $this->orderDetails();
 
+    // Total Price
+    $val = number_format($this->order->total_sale_price);
+    $message .= "Jami summa:    <b>$val uzs</b>\n";
+
     return $message;
   }
 
@@ -46,9 +47,6 @@ class OrderMessageBody
     // Order ID
     $message = "<b>" . $this->order->ord_code . "</b>\n\n";
 
-    // Total Price
-    $val = number_format($this->order->completedOrder->total_sale_price);
-    $message .= "Jami summa:    <b>$val uzs</b>\n";
     // Old Debt
     $val = number_format($this->order->completedOrder->customer_old_balance);
     $message .= "Oldingi qarz:    <b>$val</b>\n";
@@ -60,6 +58,10 @@ class OrderMessageBody
 
     // Items
     $message .= $this->orderDetails();
+
+    // Total Price
+    $val = number_format($this->order->completedOrder->total_sale_price);
+    $message .= "Jami summa:    <b>$val uzs</b>\n";
 
     return $message;
   }
@@ -108,7 +110,7 @@ class OrderMessageBody
     }
 
     $message .= "\n\n";
-    
+
     return $message;
   }
 }
