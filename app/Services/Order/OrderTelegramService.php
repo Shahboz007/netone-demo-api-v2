@@ -17,6 +17,7 @@ class OrderTelegramService
       'orderDetails.product',
     ])
       ->where('customer_id', $customerId)
+      ->orderBy('created_at','desc')
       ->paginate($perPage, ['*'], 'page', $page);
   }
 
