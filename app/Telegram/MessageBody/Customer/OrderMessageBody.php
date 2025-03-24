@@ -22,7 +22,7 @@ class OrderMessageBody
   private function orderMsg(): string
   {
     // Order ID
-    $message = "<b>" . $this->order->ord_code . "</b>\n\n";
+    $message = "Buyurtma:   <b>" . $this->order->ord_code . "</b>\n\n";
 
     // Old Debt
     $message .= "Oldingi qarz:    ...\n";

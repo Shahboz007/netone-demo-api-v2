@@ -4,6 +4,7 @@ namespace App\Services\Order;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Telegram\TelegramChat;
 use App\Telegram\MessageBody\Customer\OrderMessageBody;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,7 @@ class OrderCustomerTelegramService
     // Title
     $status = $this->order->status->name;
     $message = "<b>⏳$status</b>\n\n";
-    
+
     // Order Details
     $message .= OrderMessageBody::makeMessage($this->order);
 
@@ -52,6 +53,31 @@ class OrderCustomerTelegramService
       ->html($message)
       ->send();
   }
+
+  // Added New Product
+  public function sendAddedNewProductMsg(Product $product, array $addData)
+  {
+
+    // Title
+    $message = "<b>➕ yangi mahsulot qo'shildi</b>\n\n";
+
+    // Added Product
+    $amount = number_format($addData['amount']);
+    $price = number_format($addData['price']);
+    $sumSalePrice = number_format($addData['sum_sale_price']);
+    $message .= "{$product->name} \n";
+    $message .= "   <code>$amount {$product->priceAmountType->name}</code>x";
+    $message .= "<code>$price</code> = ";
+    $message .= "$sumSalePrice\n\n";
+
+    // Order Details
+    $message .= OrderMessageBody::makeMessage($this->order);
+
+    $this->chat()
+      ->html($message)
+      ->send();
+  }
+
   // Cancel Order Msg
   public function cancelOrderMsg() {}
   // Completed Order Msg
