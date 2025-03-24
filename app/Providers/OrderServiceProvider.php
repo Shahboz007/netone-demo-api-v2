@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\Order\OrderCreatedEvent;
+use App\Events\Order\OrderProcessedEvent;
 use App\Listeners\Order\OrderCreatedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -22,14 +23,20 @@ class OrderServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Create
+        // Created
         Event::listen(
             OrderCreatedEvent::class,
             OrderCreatedListener::class
         );
 
-        // Process
+        // Processed
+        Event::listen(
+            OrderProcessedEvent::class,
+            OrderCreatedListener::class,
+        );
+        
         // Cancel
+        
         // Completed
     }
 }
