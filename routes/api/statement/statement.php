@@ -24,8 +24,8 @@ Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], funct
     Route::get('/balance', [BalanceController::class, 'index']);
 
     // Rental Property
-    Route::get('/rental-property', [StatementRentalPropertyController::class, 'index']);
+    Route::get('/rental-property', [StatementRentalPropertyController::class, 'index'])->middleware(StatementMiddleware::class);
 
     // Product Profit Margin
-    Route::get("/products-profit-margin", [ProductProfitMarginController::class, 'index']);
+    Route::get("/products-profit-margin", [ProductProfitMarginController::class, 'index'])->middleware(StatementMiddleware::class);
 });
