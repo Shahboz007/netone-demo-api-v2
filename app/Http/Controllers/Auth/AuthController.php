@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthLoginRequest;
 use App\Models\User;
@@ -11,14 +12,23 @@ use Illuminate\Session\CookieSessionHandler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => 'login']);
+    }
+
     public function login(AuthLoginRequest $request): JsonResponse
     {
+        $credentials = $request->validated();
+
         // User
         $user = User::with('roles')
-            ->where('login', $request->validated('login'))
+            ->where('login', $credentials['login'])
             ->where('is_active', true)
             ->first();
 
@@ -32,9 +42,18 @@ class AuthController extends Controller
         // Delete all old access token for the user
         DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
 
-        // Create new Token
-        $accessToken = $user->createToken('auth_token')->plainTextToken;
-        // $refreshToken = 
+        try {
+            // Generate JWT token
+            $accessToken = JWTAuth::fromUser($user);
+        } catch (JWTException $e) {
+            throw new ServerErrorException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        // Generate refresh token
+        $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user);
+
+        // Http or Https secure
+        $isHttps = app()->environment('production');
 
         // Response
         return response()->json([
@@ -45,8 +64,8 @@ class AuthController extends Controller
                 'access_token' => $accessToken,
             ]
         ], 200)
-            ->cookie('access_token', $accessToken, 15, '/', null, true, true)
-            ->cookie('refresh_token', "my_refresh", 60 * 24, '/', null, false, true); // 24h
+            ->cookie('access_token', $accessToken, 15, '/', null, $isHttps, true) // 15minute
+            ->cookie('refresh_token', $refreshToken, 60 * 24, '/', null, $isHttps, true); // 24h
     }
 
     public function logout(Request $request): JsonResponse
