@@ -48,7 +48,7 @@ class AuthController extends Controller
         $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user);
 
         // Http or Https secure
-        $isHttps = app()->environment('production');
+        $isHttps = $this->getCookieIsHttps();
 
         // Response
         return response()->json([
@@ -58,14 +58,53 @@ class AuthController extends Controller
                 'access_token' => $accessToken,
             ]
         ], 200)
-            ->cookie('access_token', $accessToken, 15, '/', null, $isHttps, true) // 15minute
-            ->cookie('refresh_token', $refreshToken, 60 * 24, '/', null, $isHttps, true); // 24h
+            ->cookie('access_token', $accessToken, 15, '/', null, $isHttps, true) // 15minute | Secure cookie HttpOnly
+            ->cookie('refresh_token', $refreshToken, 60 * 24, '/', null, $isHttps, true); // 24h | Secure cookie HttpOnly
     }
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $token = JWTAuth::getToken(); // Retrieve the token
+            if (!$token) {
+                return response()->json(['message' => 'Token not provided'], 400);
+            }
 
-        return response()->json(['message' => 'Logged out successfully']);
+            // Invalidate the token
+            JWTAuth::invalidate($token);
+
+            return response()->json(['message' => 'Logged out successfully'])
+                ->withoutCookie('access_token')
+                ->withoutCookie('refresh_token');
+        } catch (JWTException $e) {
+            throw new ServerErrorException('Could not log out', $e->getCode(), $e);
+        }
+    }
+
+    public function refresh(Request $request): JsonResponse
+    {
+        $refreshToken = $request->cookie('refresh_token');
+
+        if (!$refreshToken) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        try {
+            // Refresh the token
+            $newAccessToken = JWTAuth::setToken($refreshToken)->refresh();
+        } catch (JWTException $e) {
+            throw new ServerErrorException('Invalid credentials', $e->getCode(), $e);
+        }
+
+        return response()->json([
+            'access_token' => $newAccessToken
+        ], 200)
+            ->cookie('access_token', $newAccessToken, 15, '/', null, $this->getCookieIsHttps(), true); // Secure cookie HttpOnly
+    }
+
+    // Http or Https secure
+    private function getCookieIsHttps(): bool
+    {
+        return app()->environment('production');
     }
 }
