@@ -17,11 +17,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => 'login']);
-    }
-
     public function login(AuthLoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
@@ -58,9 +53,8 @@ class AuthController extends Controller
         // Response
         return response()->json([
             "message" => "Xush kelibsiz!",
-            "access_token" => $accessToken,
             "data" => [
-                'user_id' => $user,
+                'user_id' => $user->id,
                 'access_token' => $accessToken,
             ]
         ], 200)
