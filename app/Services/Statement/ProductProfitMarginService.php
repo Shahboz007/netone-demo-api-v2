@@ -30,7 +30,7 @@ class ProductProfitMarginService
 
 
     foreach ($data as $item) {
-      $item->profit_margin = (float) $item->total_profit;
+      $item->total_profit = (float) $item->total_profit;
     }
 
     return [
