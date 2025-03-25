@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Statement\BalanceController;
+use App\Http\Controllers\Statement\ProductProfitMarginController;
 use App\Http\Controllers\Statement\ProfitAndLostController;
 use App\Http\Controllers\Statement\ReconciliationCustomerController;
 use App\Http\Controllers\Statement\ReconciliationSupplierController;
@@ -23,5 +24,8 @@ Route::group(['prefix' => 'statements', 'middleware' => ['auth:sanctum']], funct
     Route::get('/balance', [BalanceController::class, 'index']);
 
     // Rental Property
-    Route::get('/rental-property', [StatementRentalPropertyController::class, 'index']);
+    Route::get('/rental-property', [StatementRentalPropertyController::class, 'index'])->middleware(StatementMiddleware::class);
+
+    // Product Profit Margin
+    Route::get("/products-profit-margin", [ProductProfitMarginController::class, 'index'])->middleware(StatementMiddleware::class);
 });
