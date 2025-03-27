@@ -22,9 +22,16 @@ class PolkaService
       'data' => $data
     ];
   }
-  public function findOne(int $id)
+  public function findOne(int $id, bool $isTree)
   {
-    $data = Polka::findOrFail($id);
+    $query = Polka::query();
+
+    if ($isTree) {
+      $query->with('children')
+        ->where('parent_id', null);
+    }
+
+    $data = $query->findOrFail($id);
 
     return [
       'data' => $data

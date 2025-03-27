@@ -44,16 +44,21 @@ class PolkaController extends Controller
         return response()->json([
             'message' => $result['message'],
             'data' => PolkaResource::make($result['data'])
-        ],201);
+        ], 201);
     }
 
 
-    public function show(string $polkaId)
+    public function show(Request $request, string $polkaId)
     {
         // Gate
         Gate::authorize("view", Polka::class);
 
-        $result = $this->polkaService->findOne((int) $polkaId);
+        // Validation
+        $validated = $request->validate([
+            'is_tree' => 'nullable|boolean',
+        ]);
+
+        $result = $this->polkaService->findOne((int) $polkaId, $validated['is_tree'] ?? false);
 
         return response()->json([
             'data' => PolkaResource::make($result['data']),
