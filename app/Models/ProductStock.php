@@ -14,7 +14,7 @@ class ProductStock extends Model
 
     protected $fillable = [
         'product_id',
-        'name',
+        'polka_id',
         'amount_type_id',
         'amount',
     ];
@@ -22,6 +22,11 @@ class ProductStock extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function polka(): BelongsTo
+    {
+        return $this->belongsTo(Polka::class, 'polka_id');
     }
 
     public function amountType(): BelongsTo
