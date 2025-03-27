@@ -32,9 +32,17 @@ class UpdatePolkaRequest extends FormRequest
             ],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            "name.unique" => "Bu nomli polka allaqachon mavjud",
+            "parent_id.exists" => "Polkani noto'g'ri tanladingiz",
+        ];
+    }
     private function getDescendants(string|null $polkaId): array
     {
-        if(!$polkaId) return [];
+        if (!$polkaId) return [];
 
         $descendants = [];
         $this->findChildrenPolkas($polkaId, $descendants);
@@ -48,13 +56,5 @@ class UpdatePolkaRequest extends FormRequest
             $descendants[] = $childId;
             $this->findChildrenPolkas($childId, $descendants);
         }
-    }
-
-    public function messages(): array
-    {
-        return [
-            "name.unique" => "Bu nomli polka allaqachon mavjud",
-            "parent_id.exists" => "Polkani noto'g'ri tanladingiz",
-        ];
     }
 }
