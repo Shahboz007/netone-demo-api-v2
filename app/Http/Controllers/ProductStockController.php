@@ -16,7 +16,7 @@ class ProductStockController extends Controller
         // Gate
         Gate::authorize('viewAny', ProductStock::class);
 
-        $data = ProductStock::with('product', 'amountType')->get();
+        $data = ProductStock::with('polka', 'product', 'amountType')->get();
 
         return response()->json([
             "data" => ProductStockResource::collection($data),
@@ -38,13 +38,15 @@ class ProductStockController extends Controller
     }
 
 
-    public function show(ProductStock $productStock)
+    public function show(string $id)
     {
         // Gate
         Gate::authorize('view', ProductStock::class);
 
+        $data = ProductStock::with('polka', 'product', 'amountType')->findOrFail($id);
+
         return response()->json([
-            "data" => ProductStockResource::make($productStock),
+            "data" => ProductStockResource::make($data),
         ]);
     }
 

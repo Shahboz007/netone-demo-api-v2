@@ -26,7 +26,7 @@ class ProductStock extends Model
 
     public function polka(): BelongsTo
     {
-        return $this->belongsTo(Polka::class, 'polka_id');
+        return $this->belongsTo(Polka::class, foreignKey: 'polka_id');
     }
 
     public function amountType(): BelongsTo

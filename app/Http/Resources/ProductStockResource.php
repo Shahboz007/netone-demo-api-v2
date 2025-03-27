@@ -16,7 +16,7 @@ class ProductStockResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'polka' => PolkaResource::make($this->polka),
             'product' => ProductResource::make($this->product),
             'amount_type' => $this->amountType,
             'amount' => (float) $this->amount,
