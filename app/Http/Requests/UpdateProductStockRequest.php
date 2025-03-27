@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProductStockRequest extends FormRequest
 {
@@ -22,7 +23,7 @@ class UpdateProductStockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:1|max:255',
+            'polka_id' => 'nullable|numeric|exists:polkas,id',
         ];
     }
 }

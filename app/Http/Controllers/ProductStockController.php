@@ -54,12 +54,6 @@ class ProductStockController extends Controller
         // Gate
         Gate::authorize('update', ProductStock::class);
 
-        // Check if Name already exists
-        if ($request->validated('name')) {
-            $nameExist = ProductStock::where('name', $request->validated('name'))->where('id', '<>', $productStock->id)->exists();
-            if ($nameExist) abort(422, 'Mahsulot zahira polka nomi allaqachon mavjud');
-        }
-
         $productStock->update($request->validated());
 
         return response()->json([

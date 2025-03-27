@@ -23,7 +23,7 @@ class StoreProductStockRequest extends FormRequest
     {
         return [
             'product_id' => 'required|numeric|exists:products,id',
-            'name' => 'required|string|min:1|max:255|unique:product_stocks,name',
+            'polka_id' => 'required|numeric|exists:polkas,id',
             'amount_type_id' => 'required|numeric|exists:amount_types,id',
             'amount' => 'required|numeric|min:0'
         ];
