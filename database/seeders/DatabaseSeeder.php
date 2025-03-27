@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             // WalletSeeder::class,
             // OrderSeeder::class,
             // CompletedOrderSeeder::class,
+            PolkaSeeder::class
         ]);
     }
 }
