@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -63,7 +64,7 @@ class User extends Authenticatable
 
     public function wallets(): BelongsToMany
     {
-        return $this->belongsToMany(Wallet::class,'user_wallet')->withPivot('amount')->with('currency');
+        return $this->belongsToMany(Wallet::class, 'user_wallet')->withPivot('amount')->with('currency');
     }
 
     public function receiveProducts(): HasMany
@@ -74,5 +75,10 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function user(): HasMany
+    {
+        return $this->hasMany(User::class, 'user_id');
     }
 }
