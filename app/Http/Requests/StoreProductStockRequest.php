@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ProductStock;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreProductStockRequest extends FormRequest
 {
@@ -27,5 +29,20 @@ class StoreProductStockRequest extends FormRequest
             'amount_type_id' => 'required|numeric|exists:amount_types,id',
             'amount' => 'required|numeric|min:0'
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $product_id = $this->input('product_id');
+            $polka_id = $this->input('polka_id');
+
+            if (ProductStock::where('product_id', $product_id)
+                ->where('polka_id', $polka_id)
+                ->exists()
+            ) {
+                $validator->errors()->add('product_id', 'Bu product va polka juftligi allaqachon mavjud.');
+            }
+        });
     }
 }
