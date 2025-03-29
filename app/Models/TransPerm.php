@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransPerm extends Model
 {
-    /** @use HasFactory<\Database\Factories\TransPermFactory> */
-    use HasFactory;
 
     protected $fillable = [
         'name',
