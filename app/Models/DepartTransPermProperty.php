@@ -17,7 +17,7 @@ class DepartTransPermProperty extends Pivot
 
     public function details():HasMany
     {
-        return $this->hasMany(DepartTransPermPropertyDetails::class, 'depart_trans_perm_property_id');
+        return $this->hasMany(DepartTransPermPropertyDetails::class, 'property_id');
     }
 
 

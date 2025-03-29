@@ -10,13 +10,13 @@ class DepartTransPermPropertyDetails extends Model
     //
 
     protected $fillable = [
-        'depart_trans_perm_property_id',
+        'property_id',
         'depart_id'
     ];
 
     public function departTransPermProperty():BelongsTo
     {
-        return $this->belongsTo(DepartTransPermProperty::class, 'depart_trans_perm_property_id');
+        return $this->belongsTo(DepartTransPermProperty::class, 'property_id');
     }
 
     public function depart():BelongsTo
