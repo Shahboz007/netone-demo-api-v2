@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\TransPerm;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -21,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AmountSettingsSeeder::class,
             CurrencySeeder::class,
             ExchangeRateSeeder::class,
+            TransPerm::class,
 
             // Optional
             // ProductSeeder::class,
